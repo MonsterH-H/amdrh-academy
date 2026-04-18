@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "Académie AMDRH — Formation Handball",
   description: "Plateforme e-learning de l'Académie AMDRH, partenaire académique officiel de la FRMHB. Formation pour arbitres, entraîneurs et joueurs de handball.",
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.svg",
   },
 };
 

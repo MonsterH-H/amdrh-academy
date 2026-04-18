@@ -126,6 +126,27 @@ export const REGIONS_MAROC = [
   "Dakhla-Oued Ed Dahab",
 ];
 
+export const LESSON_TYPE_LABELS: Record<string, string> = {
+  VIDEO: "Vidéo",
+  PDF: "PDF",
+  TEXTE: "Texte",
+  INTERACTIF: "Interactif",
+};
+
+export const LESSON_TYPE_ICONS: Record<string, string> = {
+  VIDEO: "🎬",
+  PDF: "📄",
+  TEXTE: "📝",
+  INTERACTIF: "🎯",
+};
+
+export const LESSON_TYPE_COLORS: Record<string, string> = {
+  VIDEO: "bg-purple-100 text-purple-700",
+  PDF: "bg-red-100 text-red-700",
+  TEXTE: "bg-emerald-100 text-emerald-700",
+  INTERACTIF: "bg-amber-100 text-amber-700",
+};
+
 export const COURSE_STATUS_LABELS: Record<string, string> = {
   BROUILLON: "Brouillon",
   EN_REVISION: "En révision",

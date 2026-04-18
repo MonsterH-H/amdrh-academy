@@ -80,3 +80,15 @@ export const userUpdateSchema = z.object({
 });
 
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+
+export const profileUpdateSchema = z.object({
+  userId: z.string().min(1, "L'identifiant utilisateur est requis"),
+  prenom: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  telephone: z.string().optional().default(""),
+  club: z.string().optional().default(""),
+  region: z.string().optional().default(""),
+  bio: z.string().optional().default(""),
+});
+
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;

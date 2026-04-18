@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useAppStore } from "@/store/app";
 import {
   LayoutDashboard,
@@ -17,6 +18,12 @@ import {
   CircleDot,
   Menu,
   X,
+  Star,
+  HelpCircle,
+  Settings,
+  CheckCheck,
+  ChevronRight as ChevronRightIcon,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
@@ -26,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const mainNavItems = [
   { view: "dashboard" as const, label: "Tableau de bord", icon: LayoutDashboard },
@@ -33,6 +41,7 @@ const mainNavItems = [
   { view: "learning-paths" as const, label: "Parcours Formation", icon: GraduationCap },
   { view: "messages" as const, label: "Messagerie", icon: MessageSquare },
   { view: "certificates" as const, label: "Certificats", icon: Award },
+  { view: "badges" as const, label: "Badges", icon: Star },
 ];
 
 const adminNavItems = [
@@ -50,6 +59,43 @@ const bottomNavItems = [
 
 function getInitials(nom: string, prenom: string) {
   return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
+}
+
+const notificationTypeIcons: Record<string, typeof Bell> = {
+  COURS: BookOpen,
+  CERTIFICAT: Award,
+  MESSAGE: MessageSquare,
+  QUIZ: HelpCircle,
+  BADGE: Star,
+  SYSTEME: Settings,
+};
+
+const notificationTypeColors: Record<string, string> = {
+  COURS: "bg-blue-100 text-blue-600",
+  CERTIFICAT: "bg-amber-100 text-amber-600",
+  MESSAGE: "bg-green-100 text-green-600",
+  QUIZ: "bg-purple-100 text-purple-600",
+  BADGE: "bg-pink-100 text-pink-600",
+  SYSTEME: "bg-gray-100 text-gray-600",
+};
+
+function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffMs = now - then;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffH = Math.floor(diffMin / 60);
+  const diffD = Math.floor(diffH / 24);
+
+  if (diffSec < 60) return "à l'instant";
+  if (diffMin < 60) return `il y a ${diffMin} min`;
+  if (diffH < 24) return `il y a ${diffH}h`;
+  if (diffD < 7) return `il y a ${diffD}j`;
+  return new Date(dateStr).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 export function Sidebar() {
@@ -266,18 +312,82 @@ export function MobileBottomNav() {
 
 export function TopBar() {
   const { user, currentView, navigate, unreadCount, setUnreadCount, sidebarCollapsed } = useAppStore();
-
-  if (!user) return null;
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifMarkingAll, setNotifMarkingAll] = useState(false);
+  const [recentNotifs, setRecentNotifs] = useState<Array<{
+    id: string;
+    title: string;
+    message: string;
+    type: string;
+    createdAt: string;
+    isRead: boolean;
+  }>>([]);
 
   const fetchUnreadCount = async () => {
     try {
-      const res = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=true`);
+      const res = await fetch(`/api/notifications?userId=${user!.id}&unreadOnly=true`);
       const data = await res.json();
       setUnreadCount(data.unreadCount || 0);
     } catch {
       // silently fail
     }
   };
+
+  const fetchRecentNotifications = async () => {
+    if (!user) return;
+    setNotifLoading(true);
+    try {
+      const res = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=true`);
+      const data = await res.json();
+      const notifs = (data.notifications || []).slice(0, 5);
+      setRecentNotifs(notifs.map((n: Record<string, unknown>) => ({
+        id: n.id as string,
+        title: n.title as string,
+        message: n.message as string,
+        type: n.type as string,
+        createdAt: n.createdAt as string,
+        isRead: n.isRead as boolean,
+      })));
+      setUnreadCount(data.unreadCount || 0);
+    } catch {
+      // silently fail
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  const handlePopoverOpenChange = (open: boolean) => {
+    setNotifOpen(open);
+    if (open) {
+      fetchRecentNotifications();
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    if (!user || notifMarkingAll) return;
+    setNotifMarkingAll(true);
+    try {
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markAll: true, userId: user.id }),
+      });
+      setUnreadCount(0);
+      setRecentNotifs([]);
+    } catch {
+      // silently fail
+    } finally {
+      setNotifMarkingAll(false);
+    }
+  };
+
+  const handleSeeAll = () => {
+    setNotifOpen(false);
+    navigate("notifications");
+  };
+
+  if (!user) return null;
 
   return (
     <header
@@ -293,20 +403,122 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative rounded-lg"
-          onClick={() => navigate("notifications")}
-        >
-          <Bell className="w-5 h-5 text-muted-foreground" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center px-1">
-              {unreadCount}
-            </span>
-          )}
-        </Button>
+        {/* Notifications Popover */}
+        <Popover open={notifOpen} onOpenChange={handlePopoverOpenChange}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative rounded-lg">
+              <Bell className="w-5 h-5 text-muted-foreground" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="end"
+            sideOffset={8}
+            className="w-80 sm:w-96 p-0 rounded-lg shadow-lg border-border/60"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+                {unreadCount > 0 && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground hover:text-foreground h-7 px-2 rounded-lg"
+                  onClick={handleMarkAllRead}
+                  disabled={notifMarkingAll}
+                >
+                  {notifMarkingAll ? (
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  ) : (
+                    <CheckCheck className="w-3 h-3 mr-1" />
+                  )}
+                  Tout marquer comme lu
+                </Button>
+              )}
+            </div>
+
+            <Separator className="mx-4" />
+
+            {/* Notifications list */}
+            <div className="max-h-80 overflow-y-auto">
+              {notifLoading ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-2">
+                  <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                  <p className="text-xs text-muted-foreground">Chargement...</p>
+                </div>
+              ) : recentNotifs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 px-4">
+                  <div className="w-12 h-12 rounded-full bg-muted/60 flex items-center justify-center mb-3">
+                    <Bell className="w-5 h-5 text-muted-foreground/60" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Aucune notification</p>
+                  <p className="text-xs text-muted-foreground mt-1">Vous êtes à jour !</p>
+                </div>
+              ) : (
+                <div className="py-1">
+                  {recentNotifs.map((notif) => {
+                    const Icon = notificationTypeIcons[notif.type] || Bell;
+                    const colorClass = notificationTypeColors[notif.type] || "bg-gray-100 text-gray-600";
+                    return (
+                      <button
+                        key={notif.id}
+                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+                        onClick={() => {
+                          setNotifOpen(false);
+                          navigate("notifications");
+                        }}
+                      >
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5",
+                          colorClass
+                        )}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {notif.title}
+                            </p>
+                            <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                            {notif.message}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/70 mt-1">
+                            {timeAgo(notif.createdAt)}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <Separator className="mx-4" />
+            <div className="px-4 py-2.5">
+              <button
+                onClick={handleSeeAll}
+                className="w-full flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors py-1 rounded-md hover:bg-primary/5"
+              >
+                Voir tout
+                <ChevronRightIcon className="w-3 h-3" />
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
 
         {/* Quick profile */}
         <Avatar className="w-8 h-8 cursor-pointer" onClick={() => navigate("profile")}>
