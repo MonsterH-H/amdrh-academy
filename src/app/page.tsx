@@ -17,7 +17,13 @@ import { CertificatesPage, BadgesPage } from "@/components/amdrh/certificates-ba
 import { MessagesPage, ConversationPage } from "@/components/amdrh/messages";
 import { NotificationsPage } from "@/components/amdrh/notifications";
 import { AdminUsersPage, AdminUserDetailPage } from "@/components/amdrh/admin-users";
+import { AdminCertificatesPage } from "@/components/amdrh/admin-certificates";
+import { AdminCoursesPage } from "@/components/amdrh/admin-courses";
+import { AdminNotificationsPage } from "@/components/amdrh/admin-notifications";
 import { AdminSyncPage } from "@/components/amdrh/admin-sync";
+import { AdminLearningPathsPage } from "@/components/amdrh/admin-learning-paths";
+import { AdminAnalyticsPage } from "@/components/amdrh/admin-analytics";
+import { AdminQuizzesPage } from "@/components/amdrh/admin-quizzes";
 import { CourseCreatePage } from "@/components/amdrh/course-create";
 import { ProfilePage } from "@/components/amdrh/profile";
 import { cn } from "@/lib/utils";
@@ -70,7 +76,13 @@ function AppContent() {
       case "notifications": return <NotificationsPage />;
       case "admin-users": return <AdminUsersPage />;
       case "admin-user-detail": return <AdminUserDetailPage />;
+      case "admin-courses": return <AdminCoursesPage />;
+      case "admin-notifications": return <AdminNotificationsPage />;
       case "admin-sync": return <AdminSyncPage />;
+      case "admin-learning-paths": return <AdminLearningPathsPage />;
+      case "admin-analytics": return <AdminAnalyticsPage />;
+      case "admin-certificates": return <AdminCertificatesPage />;
+      case "admin-quizzes": return <AdminQuizzesPage />;
       case "course-create": return <CourseCreatePage />;
       case "profile": return <ProfilePage />;
       default: return <DashboardPage />;

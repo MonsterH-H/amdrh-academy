@@ -24,6 +24,9 @@ import {
   CheckCheck,
   ChevronRight as ChevronRightIcon,
   Loader2,
+  ClipboardList,
+  BarChart3,
+  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
@@ -45,7 +48,13 @@ const mainNavItems = [
 ];
 
 const adminNavItems = [
-  { view: "admin-users" as const, label: "Gestion Utilisateurs", icon: Users },
+  { view: "admin-courses" as const, label: "Gestion Cours", icon: BookOpen },
+  { view: "admin-quizzes" as const, label: "Gestion Quiz", icon: ClipboardList },
+  { view: "admin-learning-paths" as const, label: "Parcours Formation", icon: GraduationCap },
+  { view: "admin-certificates" as const, label: "Certificats & Badges", icon: Award },
+  { view: "admin-notifications" as const, label: "Notifications", icon: Send },
+  { view: "admin-analytics" as const, label: "Analyses", icon: BarChart3 },
+  { view: "admin-users" as const, label: "Utilisateurs", icon: Users },
   { view: "admin-sync" as const, label: "Sync Fédération", icon: RefreshCw },
 ];
 
@@ -549,6 +558,11 @@ function getViewTitle(view: string): string {
     "admin-users": "Gestion des utilisateurs",
     "admin-user-detail": "Détail utilisateur",
     "admin-sync": "Synchronisation Fédération",
+    "admin-certificates": "Certificats & Badges",
+    "admin-learning-paths": "Gestion des parcours",
+    "admin-courses": "Gestion des cours",
+    "admin-notifications": "Gestion des notifications",
+    "admin-analytics": "Analytique",
     profile: "Mon profil",
   };
   return titles[view] || view;

@@ -168,3 +168,35 @@ export const COURSE_STATUS_LABELS: Record<string, string> = {
   PUBLIE: "Publié",
   ARCHIVE: "Archivé",
 };
+
+export const QUESTION_TYPE_LABELS: Record<string, string> = {
+  QCM_SIMPLE: "Choix multiple",
+  QCM_MULTIPLE: "Choix multiples",
+  VRAI_FAUX: "Vrai / Faux",
+};
+
+export const QUESTION_TYPE_COLORS: Record<string, string> = {
+  QCM_SIMPLE: "bg-primary/10 text-primary",
+  QCM_MULTIPLE: "bg-amber-100 text-amber-700",
+  VRAI_FAUX: "bg-emerald-100 text-emerald-700",
+};
+
+export const COURSE_STATUS_COLORS: Record<string, string> = {
+  BROUILLON: "bg-gray-100 text-gray-700",
+  EN_REVISION: "bg-amber-100 text-amber-700",
+  VALIDE: "bg-blue-100 text-blue-700",
+  PUBLIE: "bg-green-100 text-green-700",
+  ARCHIVE: "bg-red-100 text-red-700",
+};
+
+export const LEARNING_PATH_MODE_LABELS: Record<string, string> = {
+  SEQUENTIEL: "Séquentiel",
+  FLEXIBLE: "Flexible",
+  HYBRIDE: "Hybride",
+};
+
+export const LEARNING_PATH_MODE_COLORS: Record<string, string> = {
+  SEQUENTIEL: "bg-blue-100 text-blue-700",
+  FLEXIBLE: "bg-emerald-100 text-emerald-700",
+  HYBRIDE: "bg-purple-100 text-purple-700",
+};

@@ -18,6 +18,12 @@ export type AppView =
   | "notifications"
   | "admin-users"
   | "admin-user-detail"
+  | "admin-courses"
+  | "admin-quizzes"
+  | "admin-learning-paths"
+  | "admin-certificates"
+  | "admin-notifications"
+  | "admin-analytics"
   | "admin-sync"
   | "course-create"
   | "profile";

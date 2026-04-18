@@ -9,10 +9,20 @@ export async function GET(req: NextRequest) {
     const difficulty = searchParams.get("difficulty");
     const search = searchParams.get("search");
     const userId = searchParams.get("userId");
+    const status = searchParams.get("status");
+    const admin = searchParams.get("admin") === "true";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
 
-    const where: Record<string, unknown> = { status: "PUBLIE" };
+    const where: Record<string, unknown> = {};
+
+    // Admin mode: return all courses (any status)
+    if (!admin) {
+      where.status = "PUBLIE";
+    } else if (status && status !== "ALL") {
+      where.status = status;
+    }
+
     if (category && category !== "ALL") where.category = category;
     if (difficulty && difficulty !== "ALL") where.difficulty = difficulty;
     if (search) {
@@ -30,7 +40,12 @@ export async function GET(req: NextRequest) {
           enrollments: userId
             ? { where: { userId }, select: { id: true, progress: true, status: true } }
             : false,
-          _count: { select: { enrollments: true } },
+          _count: {
+            select: {
+              enrollments: true,
+              sections: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
@@ -38,6 +53,23 @@ export async function GET(req: NextRequest) {
       }),
       db.course.count({ where }),
     ]);
+
+    // For admin mode, also return aggregated stats
+    let stats = null;
+    if (admin) {
+      const [totalCount, publishedCount, draftCount, archivedCount] = await Promise.all([
+        db.course.count(),
+        db.course.count({ where: { status: "PUBLIE" } }),
+        db.course.count({ where: { status: "BROUILLON" } }),
+        db.course.count({ where: { status: "ARCHIVE" } }),
+      ]);
+      stats = {
+        total: totalCount,
+        published: publishedCount,
+        drafts: draftCount,
+        archived: archivedCount,
+      };
+    }
 
     return NextResponse.json({
       courses,
@@ -47,6 +79,7 @@ export async function GET(req: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+      ...(stats && { stats }),
     });
   } catch (error) {
     console.error("Courses list error:", error);

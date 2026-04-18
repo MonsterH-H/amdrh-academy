@@ -28,3 +28,107 @@ Stage Summary:
 - Production DB seeded with realistic Moroccan handball data
 - All pages follow Swiss institutional design (clean, minimal, #FAFAFA background)
 - Zero mock data, all data from PostgreSQL Neon
+
+---
+Task ID: 2-a
+Agent: full-stack-developer (subagent)
+Task: Admin Course Management Module
+
+Work Log:
+- Updated /api/courses GET to support admin=true param (returns all statuses, includes section/quiz stats)
+- Added PATCH to /api/courses/[id] (update title, description, category, difficulty, status, etc.)
+- Added DELETE to /api/courses/[id] (cascade delete sections, lessons, quiz)
+- Created admin-courses.tsx with full CRUD: stats cards, filters, course list, detail/edit/delete dialogs, status management
+- Updated page.tsx with admin-courses route
+
+Stage Summary:
+- Complete course management: list all courses, edit, change status (BROUILLON→PUBLIE→ARCHIVE), delete
+- Connected to real DB via Prisma
+
+---
+Task ID: 2-b
+Agent: full-stack-developer (subagent)
+Task: Admin Quiz Management Module
+
+Work Log:
+- Created /api/admin/quizzes (GET list + POST create)
+- Created /api/admin/quizzes/[id] (GET detail + PATCH update + DELETE cascade)
+- Created /api/admin/quizzes/[id]/questions (POST add + PATCH update + DELETE remove)
+- Created admin-quizzes.tsx: quiz cards, create/edit dialogs, question management (add/edit/delete/reorder), question types QCM_SIMPLE/QCM_MULTIPLE/VRAI_FAUX
+- Added QUESTION_TYPE_LABELS and QUESTION_TYPE_COLORS to constants.ts
+
+Stage Summary:
+- Complete quiz management with question CRUD
+- Interactive correct-answer toggling, dynamic option management
+
+---
+Task ID: 2-c
+Agent: full-stack-developer (subagent)
+Task: Admin Learning Path Management Module
+
+Work Log:
+- Created /api/admin/learning-paths (GET list + POST create with course associations)
+- Created /api/admin/learning-paths/[id] (GET with enrolled users + PATCH + DELETE)
+- Created admin-learning-paths.tsx: path list, create/edit dialogs, enrolled users view, role filter, pagination
+- Updated layout.tsx sidebar and page.tsx
+
+Stage Summary:
+- Complete learning path management with course selection, ordering, required flags
+
+---
+Task ID: 2-d
+Agent: full-stack-developer (subagent)
+Task: Admin Certificates & Badges Management Module
+
+Work Log:
+- Created /api/admin/certificates (GET list + POST manual create with auto code generation)
+- Created /api/admin/badges (GET list + POST create)
+- Created /api/admin/badges/[id] (GET holders + PATCH update + DELETE)
+- Created /api/admin/badges/award (POST award badge to user with notification)
+- Created admin-certificates.tsx with tabs: Certificats (list/create/manual issue) + Badges (CRUD + award)
+
+Stage Summary:
+- Full certificate and badge management
+- Badge awarding with deduplication and user notifications
+
+---
+Task ID: 2-e
+Agent: full-stack-developer (subagent)
+Task: Admin Notification Management Module
+
+Work Log:
+- Created /api/admin/notifications (GET stats+history + POST broadcast/targeted)
+- Created admin-notifications.tsx: create form with audience selector (all/roles/specific), preview, history list
+
+Stage Summary:
+- Admin can send notifications to all users, by role, or specific user
+- Stats with read rate and type breakdown
+
+---
+Task ID: 2-f
+Agent: full-stack-developer (subagent)
+Task: Admin Analytics Dashboard
+
+Work Log:
+- Created admin-analytics.tsx: 6 overview cards, 5 recharts charts (RadialBar, Bar, Line, Pie, Horizontal Bar), top courses table, recent activity tabs, export button
+
+Stage Summary:
+- Comprehensive analytics dashboard connected to /api/stats endpoint
+
+---
+Task ID: 3-6
+Agent: Main Agent
+Task: Integration - layout, store, constants, verification
+
+Work Log:
+- Updated store/app.ts with 6 new admin views (admin-courses, admin-quizzes, admin-learning-paths, admin-certificates, admin-notifications, admin-analytics)
+- Verified layout.tsx already updated by subagents: 8 admin nav items with icons (ClipboardList, BarChart3, Send)
+- Verified page.tsx already updated with all imports and switch cases
+- Added COURSE_STATUS_COLORS, LEARNING_PATH_MODE_LABELS, LEARNING_PATH_MODE_COLORS to constants.ts
+- ESLint clean: 0 errors
+- Dev server running: GET / 200
+
+Stage Summary:
+- All 8 admin modules fully integrated into the sidebar navigation
+- Admin sidebar: Gestion Cours → Gestion Quiz → Parcours Formation → Certificats & Badges → Notifications → Analyses → Utilisateurs → Sync Fédération
+- Total: 8 admin frontend components + 10 admin API routes + updated constants/layout/store/page
