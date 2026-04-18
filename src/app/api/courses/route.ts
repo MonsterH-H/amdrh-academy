@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { courseCreateSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
   try {
@@ -51,6 +52,115 @@ export async function GET(req: NextRequest) {
     console.error("Courses list error:", error);
     return NextResponse.json(
       { error: "Erreur lors du chargement des cours" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+
+    const parsed = courseCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const {
+      title,
+      description,
+      category,
+      difficulty,
+      duration,
+      isCertifying,
+      passingScore,
+      maxAttempts,
+      instructorId,
+      sections,
+    } = parsed.data;
+
+    // Generate slug from title
+    const slug = title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      + "-" + Date.now().toString(36);
+
+    // Verify instructor exists and has correct role
+    const instructor = await db.user.findUnique({
+      where: { id: instructorId },
+      select: { id: true, role: true },
+    });
+
+    if (!instructor) {
+      return NextResponse.json(
+        { error: "Formateur introuvable" },
+        { status: 404 }
+      );
+    }
+
+    if (instructor.role !== "ADMIN" && instructor.role !== "FORMATEUR") {
+      return NextResponse.json(
+        { error: "Seuls les administrateurs et formateurs peuvent créer des cours" },
+        { status: 403 }
+      );
+    }
+
+    // Create course with sections and lessons in a transaction
+    const course = await db.$transaction(async (tx) => {
+      const createdCourse = await tx.course.create({
+        data: {
+          title,
+          slug,
+          description,
+          category,
+          difficulty,
+          duration,
+          isCertifying,
+          passingScore,
+          maxAttempts,
+          status: "BROUILLON",
+          instructorId,
+          sections: {
+            create: sections.map((section, sectionIdx) => ({
+              title: section.title,
+              order: sectionIdx,
+              lessons: {
+                create: section.lessons.map((lesson, lessonIdx) => ({
+                  title: lesson.title,
+                  type: lesson.type,
+                  content: lesson.content,
+                  duration: lesson.duration,
+                  order: lessonIdx,
+                })),
+              },
+            })),
+          },
+        },
+        include: {
+          instructor: { select: { id: true, nom: true, prenom: true, avatar: true } },
+          sections: {
+            include: {
+              lessons: { orderBy: { order: "asc" } },
+            },
+            orderBy: { order: "asc" },
+          },
+        },
+      });
+
+      return createdCourse;
+    });
+
+    return NextResponse.json({ course }, { status: 201 });
+  } catch (error) {
+    console.error("Course creation error:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la création du cours" },
       { status: 500 }
     );
   }

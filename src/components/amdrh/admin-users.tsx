@@ -2,17 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/app";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Search, Users, ChevronLeft, ChevronRight, ArrowLeft,
-  Eye, UserCog, Shield,
+  Eye, BookOpen, Award, Star, Route, Clock, CheckCircle2,
+  XCircle, UserCog, ToggleLeft, Trophy,
 } from "lucide-react";
-import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
+import { toast } from "@/hooks/use-toast";
+import { ROLE_LABELS, ROLE_COLORS, QUIZ_STATUS_LABELS, QUIZ_STATUS_COLORS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function AdminUsersPage() {
@@ -191,13 +199,17 @@ export function AdminUserDetailPage() {
   const { viewParams, navigate } = useAppStore();
   const userId = viewParams?.id;
   const [userData, setUserData] = useState<Record<string, unknown> | null>(null);
+  const [pathEnrollments, setPathEnrollments] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
     fetch(`/api/users/${userId}`)
       .then((r) => r.json())
-      .then((d) => setUserData(d.user))
+      .then((d) => {
+        setUserData(d.user);
+        setPathEnrollments(d.learningPathEnrollments || []);
+      })
       .finally(() => setLoading(false));
   }, [userId]);
 
@@ -207,7 +219,24 @@ export function AdminUserDetailPage() {
   const enrollments = userData.enrollments as Array<Record<string, unknown>> || [];
   const certificates = userData.certificates as Array<Record<string, unknown>> || [];
   const quizAttempts = userData.quizAttempts as Array<Record<string, unknown>> || [];
-  const counts = userData._count as Record<string, unknown> || {};
+  const counts = userData._count as Record<string, number> || {};
+
+  // Derived stats
+  const passedQuizzes = quizAttempts.filter((q) => q.status === "REUSSI").length;
+
+  const handleToggleActive = () => {
+    toast({
+      title: userData.isActive ? "Désactivation" : "Activation",
+      description: `La ${userData.isActive ? "désactivation" : "activation"} de ${(userData.prenom as string)} ${(userData.nom as string)} nécessite une confirmation administrateur en production.`,
+    });
+  };
+
+  const handleChangeRole = (newRole: string) => {
+    toast({
+      title: "Changement de rôle",
+      description: `Le passage au rôle « ${ROLE_LABELS[newRole]} » pour ${(userData.prenom as string)} ${(userData.nom as string)} nécessite une confirmation administrateur en production.`,
+    });
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -215,87 +244,347 @@ export function AdminUserDetailPage() {
         <ArrowLeft className="w-4 h-4" /> Retour
       </button>
 
-      {/* Profile card */}
+      {/* Profile card with action buttons */}
       <Card className="border-border/60">
         <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <Avatar className="w-16 h-16">
-              <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">
-                {(userData.prenom as string)?.charAt(0)}{(userData.nom as string)?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">{userData.prenom} {userData.nom}</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className={cn("text-[10px]", ROLE_COLORS[(userData.role as string) || "ARBITRE"])}>
-                  {ROLE_LABELS[(userData.role as string) || "ARBITRE"]}
-                </Badge>
-                <Badge variant={userData.isActive ? "default" : "secondary"} className={cn("text-[10px]", userData.isActive ? "bg-green-100 text-green-700" : "")}>
-                  {userData.isActive ? "Actif" : "Inactif"}
-                </Badge>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="w-16 h-16">
+                <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">
+                  {(userData.prenom as string)?.charAt(0)}{(userData.nom as string)?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">{userData.prenom} {userData.nom}</h2>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <Badge variant="secondary" className={cn("text-[10px]", ROLE_COLORS[(userData.role as string) || "ARBITRE"])}>
+                    {ROLE_LABELS[(userData.role as string) || "ARBITRE"]}
+                  </Badge>
+                  <Badge variant={userData.isActive ? "default" : "secondary"} className={cn("text-[10px]", userData.isActive ? "bg-green-100 text-green-700" : "")}>
+                    {userData.isActive ? "Actif" : "Inactif"}
+                  </Badge>
+                </div>
+                <div className="flex gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
+                  <span>{userData.email as string}</span>
+                  {userData.club && <span>• {userData.club as string}</span>}
+                  {userData.region && <span>• {userData.region as string}</span>}
+                </div>
               </div>
-              <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                <span>{userData.email as string}</span>
-                {userData.club && <span>• {userData.club as string}</span>}
-                {userData.region && <span>• {userData.region as string}</span>}
-              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                variant={userData.isActive ? "outline" : "default"}
+                size="sm"
+                className="rounded-lg"
+                onClick={handleToggleActive}
+              >
+                <ToggleLeft className="w-4 h-4 mr-1.5" />
+                {userData.isActive ? "Désactiver" : "Activer"}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="rounded-lg">
+                    <UserCog className="w-4 h-4 mr-1.5" />
+                    Changer le rôle
+                    <ChevronRight className="w-3 h-3 ml-1 rotate-90" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Rôles disponibles</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {Object.entries(ROLE_LABELS).filter(([key]) => key !== userData.role).map(([key, label]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      onClick={() => handleChangeRole(key)}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: "Cours", value: counts.enrollments || 0, icon: UserCog },
-          { label: "Certificats", value: counts.certificates || 0, icon: Shield },
-          { label: "Quiz", value: counts.quizAttempts || 0, icon: Eye },
-          { label: "Badges", value: counts.userBadges || 0, icon: Star },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <Card key={s.label} className="border-border/60">
-              <CardContent className="p-4 text-center">
-                <Icon className="w-5 h-5 text-primary mx-auto mb-2" />
-                <p className="text-xl font-bold">{s.value as number}</p>
-                <p className="text-[10px] text-muted-foreground">{s.label}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Stats grid - responsive: 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="border-border/60">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <BookOpen className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xl font-bold leading-none">{counts.enrollments || 0}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Cours suivis</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <Award className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold leading-none">{counts.certificates || 0}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Certificats</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-500/10">
+              <CheckCircle2 className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold leading-none">{passedQuizzes}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Quiz réussis</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-violet-500/10">
+              <Star className="w-5 h-5 text-violet-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold leading-none">{counts.userBadges || 0}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Badges</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Recent enrollments */}
-      {enrollments.length > 0 && (
-        <Card className="border-border/60">
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-foreground mb-3">Cours suivis</h3>
-            <div className="space-y-2">
-              {enrollments.slice(0, 5).map((e) => {
-                const course = e.course as Record<string, unknown>;
+      {/* Learning Path Enrollments */}
+      <Card className="border-border/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Route className="w-4 h-4 text-primary" />
+            Parcours d&apos;apprentissage
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {pathEnrollments.length === 0 ? (
+            <div className="text-center py-8">
+              <Route className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Aucun parcours suivi</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {pathEnrollments.slice(0, 10).map((pe) => {
+                const path = pe.learningPath as Record<string, unknown>;
+                const isCompleted = pe.status === "termine";
+                const progress = (pe.progress as number) || 0;
                 return (
-                  <div key={e.id as string} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
-                    <div>
-                      <p className="text-sm font-medium">{course.title as string}</p>
-                      <p className="text-[10px] text-muted-foreground">{course.category as string}</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant={e.status === "termine" ? "default" : "secondary"} className={cn("text-[10px]", e.status === "termine" ? "bg-green-100 text-green-700" : "")}>
-                        {e.status === "termine" ? "Terminé" : `${e.progress}%`}
+                  <div key={pe.id as string} className="p-3 rounded-lg border border-border/40 hover:border-border/80 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium truncate">{path.title as string}</p>
+                          {path.isMandatory && (
+                            <Badge variant="secondary" className="text-[9px] bg-red-50 text-red-600 border-red-200">Obligatoire</Badge>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Parcours {ROLE_LABELS[path.targetRole as string] || path.targetRole as string}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={isCompleted ? "default" : "secondary"}
+                        className={cn(
+                          "text-[10px] flex-shrink-0",
+                          isCompleted ? "bg-green-100 text-green-700" : ""
+                        )}
+                      >
+                        {isCompleted ? "Terminé" : "En cours"}
                       </Badge>
+                    </div>
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1">
+                        <span>Progression</span>
+                        <span className="font-medium text-foreground">{Math.round(progress)}%</span>
+                      </div>
+                      <Progress value={progress} className="h-1.5" />
                     </div>
                   </div>
                 );
               })}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Separator className="bg-border/40" />
+
+      {/* Two-column layout: Quiz attempts + Course enrollments on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quiz Attempt History */}
+        <Card className="border-border/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Trophy className="w-4 h-4 text-primary" />
+              Tentatives de quiz
+              <Badge variant="secondary" className="text-[10px] ml-auto">
+                {quizAttempts.length} tentative{quizAttempts.length !== 1 ? "s" : ""}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {quizAttempts.length === 0 ? (
+              <div className="text-center py-8">
+                <Trophy className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Aucune tentative</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {quizAttempts.slice(0, 10).map((qa) => {
+                  const quiz = qa.quiz as Record<string, unknown>;
+                  const score = qa.score as number;
+                  const maxScore = qa.maxScore as number;
+                  const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+                  const isPassed = qa.status === "REUSSI";
+                  const isFailed = qa.status === "ECHOUE";
+                  const submittedAt = qa.submittedAt as string | null;
+                  return (
+                    <div key={qa.id as string} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                          isPassed ? "bg-green-100" : isFailed ? "bg-red-100" : "bg-gray-100"
+                        )}>
+                          {isPassed ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-600" />
+                          ) : isFailed ? (
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          ) : (
+                            <Clock className="w-4 h-4 text-gray-500" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{quiz.title as string}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {submittedAt ? new Date(submittedAt).toLocaleDateString("fr-FR") : "En cours"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={cn(
+                          "text-sm font-semibold",
+                          isPassed ? "text-green-700" : isFailed ? "text-red-700" : "text-muted-foreground"
+                        )}>
+                          {percentage}%
+                        </span>
+                        <Badge
+                          variant="secondary"
+                          className={cn("text-[9px]", QUIZ_STATUS_COLORS[(qa.status as string)] || "")}
+                        >
+                          {QUIZ_STATUS_LABELS[(qa.status as string)] || qa.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Course Enrollments */}
+        <Card className="border-border/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BookOpen className="w-4 h-4 text-primary" />
+              Cours suivis
+              <Badge variant="secondary" className="text-[10px] ml-auto">
+                {enrollments.length} cours
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {enrollments.length === 0 ? (
+              <div className="text-center py-8">
+                <BookOpen className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Aucun cours suivi</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {enrollments.slice(0, 10).map((e) => {
+                  const course = e.course as Record<string, unknown>;
+                  const progress = (e.progress as number) || 0;
+                  const isCompleted = e.status === "termine";
+                  return (
+                    <div key={e.id as string} className="p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="min-w-0 mr-2">
+                          <p className="text-sm font-medium truncate">{course.title as string}</p>
+                          <p className="text-[10px] text-muted-foreground">{course.category as string}</p>
+                        </div>
+                        <Badge
+                          variant={isCompleted ? "default" : "secondary"}
+                          className={cn(
+                            "text-[10px] flex-shrink-0",
+                            isCompleted ? "bg-green-100 text-green-700" : ""
+                          )}
+                        >
+                          {isCompleted ? "Terminé" : `${Math.round(progress)}%`}
+                        </Badge>
+                      </div>
+                      {!isCompleted && (
+                        <Progress value={progress} className="h-1" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Certificates section */}
+      {certificates.length > 0 && (
+        <>
+          <Separator className="bg-border/40" />
+          <Card className="border-border/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Award className="w-4 h-4 text-emerald-600" />
+                Certificats obtenus
+                <Badge variant="secondary" className="text-[10px] ml-auto">
+                  {certificates.length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-72 overflow-y-auto">
+                {certificates.slice(0, 10).map((cert) => (
+                  <div key={cert.id as string} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <Award className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{cert.courseTitle as string}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {cert.code as string} • {new Date(cert.issuedAt as string).toLocaleDateString("fr-FR")}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground flex-shrink-0">
+                      {cert.score as number}/{cert.maxScore as number}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
 }
-
-import { Star } from "lucide-react";
 
 function AdminUsersSkeleton() {
   return <div className="space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-10 w-64" /><Skeleton className="h-96 rounded-xl" /></div>;

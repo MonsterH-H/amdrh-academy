@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, SlidersHorizontal, BookOpen, Clock, Users, ChevronLeft, ChevronRight } from "lucide-react";
-import { CATEGORY_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from "@/lib/constants";
+import { Search, SlidersHorizontal, BookOpen, Clock, Users, ChevronLeft, ChevronRight, Gavel, Dumbbell, Trophy, Building2, Award, Plus } from "lucide-react";
+import { CATEGORY_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, CATEGORY_GRADIENTS, CATEGORY_ICON_COLORS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const categories = [
@@ -20,6 +20,13 @@ const difficulties = [
   { value: "ALL", label: "Tous niveaux" },
   ...Object.entries(DIFFICULTY_LABELS).map(([k, v]) => ({ value: k, label: v })),
 ];
+
+const CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
+  ARBITRAGE: Gavel,
+  ENTRAINEMENT: Dumbbell,
+  JOUEURS: Trophy,
+  ADMINISTRATION: Building2,
+};
 
 export function CourseCatalogPage() {
   const { user, navigate } = useAppStore();
@@ -63,9 +70,21 @@ export function CourseCatalogPage() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Catalogue des cours</h2>
-        <p className="text-muted-foreground mt-1">Explorez notre catalogue de formations</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Catalogue des cours</h2>
+          <p className="text-muted-foreground mt-1">Explorez notre catalogue de formations</p>
+        </div>
+        {user && (user.role === "ADMIN" || user.role === "FORMATEUR") && (
+          <Button
+            onClick={() => navigate("course-create")}
+            className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Créer un cours
+          </Button>
+        )}
       </div>
 
       {/* Search & Filters */}
@@ -146,6 +165,10 @@ export function CourseCatalogPage() {
               const enrollments = course.enrollments as Array<Record<string, unknown>> | false;
               const userEnrollment = Array.isArray(enrollments) && enrollments.length > 0 ? enrollments[0] : null;
               const instructor = course.instructor as Record<string, unknown> | null;
+              const courseCategory = (course.category as string) || "ARBITRAGE";
+              const CategoryIcon = CATEGORY_ICON_MAP[courseCategory] || BookOpen;
+              const iconColor = CATEGORY_ICON_COLORS[courseCategory] || "text-blue-400";
+              const gradient = CATEGORY_GRADIENTS[courseCategory] || "from-blue-500/15 to-blue-600/20";
 
               return (
                 <Card
@@ -154,8 +177,8 @@ export function CourseCatalogPage() {
                   onClick={() => navigate("course-detail", { id: course.id as string })}
                 >
                   <CardContent className="p-0">
-                    <div className="relative w-full h-40 bg-gradient-to-br from-blue-500/10 to-blue-600/20 flex items-center justify-center overflow-hidden">
-                      <BookOpen className="w-10 h-10 text-blue-400/60 group-hover:scale-110 transition-transform duration-300" />
+                    <div className={cn("relative w-full h-40 bg-gradient-to-br flex items-center justify-center overflow-hidden", gradient)}>
+                      <CategoryIcon className={cn("w-10 h-10 group-hover:scale-110 transition-transform duration-300", iconColor, "opacity-60")} />
                       {userEnrollment && (
                         <div className="absolute top-3 right-3">
                           <Badge className="bg-green-500 text-white text-[10px]">
@@ -163,8 +186,15 @@ export function CourseCatalogPage() {
                           </Badge>
                         </div>
                       )}
+                      {(course.isCertifying as boolean) && (
+                        <div className={cn("absolute right-3", userEnrollment ? "top-11" : "top-3")}>
+                          <Badge className="bg-amber-500/90 text-white text-[10px] flex items-center gap-1">
+                            <Award className="w-3 h-3" /> Certifiant
+                          </Badge>
+                        </div>
+                      )}
                       <Badge variant="secondary" className="absolute top-3 left-3 text-[10px]">
-                        {CATEGORY_LABELS[(course.category as string) || "ARBITRAGE"]}
+                        {CATEGORY_LABELS[courseCategory]}
                       </Badge>
                     </div>
                     <div className="p-4">

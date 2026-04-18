@@ -36,6 +36,18 @@ export const registerStep2Schema = z.object({
 
 export type RegisterStep2Input = z.infer<typeof registerStep2Schema>;
 
+const lessonSchema = z.object({
+  title: z.string().min(1, "Le titre de la leçon est requis"),
+  type: z.enum(["VIDEO", "PDF", "TEXTE", "INTERACTIF"]),
+  content: z.string().default(""),
+  duration: z.number().min(1, "La durée doit être d'au moins 1 minute"),
+});
+
+const sectionSchema = z.object({
+  title: z.string().min(1, "Le titre de la section est requis"),
+  lessons: z.array(lessonSchema).min(0).default([]),
+});
+
 export const courseCreateSchema = z.object({
   title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
   description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
@@ -45,9 +57,13 @@ export const courseCreateSchema = z.object({
   isCertifying: z.boolean().default(false),
   passingScore: z.number().min(50).max(100).default(70),
   maxAttempts: z.number().min(1).max(10).default(3),
+  instructorId: z.string().min(1, "L'identifiant du formateur est requis"),
+  sections: z.array(sectionSchema).default([]),
 });
 
 export type CourseCreateInput = z.infer<typeof courseCreateSchema>;
+export type LessonInput = z.infer<typeof lessonSchema>;
+export type SectionInput = z.infer<typeof sectionSchema>;
 
 export const quizSubmitSchema = z.object({
   attemptId: z.string(),

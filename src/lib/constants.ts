@@ -51,6 +51,20 @@ export const CATEGORY_ICONS: Record<string, string> = {
   ADMINISTRATION: "🟪",
 };
 
+export const CATEGORY_GRADIENTS: Record<string, string> = {
+  ARBITRAGE: "from-blue-500/15 to-blue-600/20",
+  ENTRAINEMENT: "from-emerald-500/15 to-emerald-600/20",
+  JOUEURS: "from-amber-500/15 to-amber-600/20",
+  ADMINISTRATION: "from-violet-500/15 to-violet-600/20",
+};
+
+export const CATEGORY_ICON_COLORS: Record<string, string> = {
+  ARBITRAGE: "text-blue-400",
+  ENTRAINEMENT: "text-emerald-400",
+  JOUEURS: "text-amber-400",
+  ADMINISTRATION: "text-violet-400",
+};
+
 export const DIFFICULTY_LABELS: Record<string, string> = {
   DEBUTANT: "Débutant",
   INTERMEDIAIRE: "Intermédiaire",

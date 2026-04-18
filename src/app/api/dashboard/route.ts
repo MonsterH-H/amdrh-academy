@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 });
     }
 
-    if (role === "ADMIN" || role === "FORMATEUR") {
+    if (role === "ADMIN") {
       const [
         totalUsers,
         totalCourses,
@@ -92,6 +92,111 @@ export async function GET(req: NextRequest) {
           completed: c.enrollments.length,
         })),
         popularCourses,
+      });
+    }
+
+    // Formateur dashboard
+    if (role === "FORMATEUR") {
+      const myCourses = await db.course.findMany({
+        where: { instructorId: userId },
+        include: {
+          _count: { select: { enrollments: true } },
+          enrollments: {
+            select: {
+              id: true,
+              progress: true,
+              status: true,
+              createdAt: true,
+              user: { select: { id: true, prenom: true, nom: true, avatar: true, role: true } },
+            },
+            orderBy: { lastAccessAt: "desc" },
+            take: 20,
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      // Flatten all enrollments across all myCourses for recent learners
+      const allEnrollments = myCourses.flatMap((c) =>
+        c.enrollments.map((e) => ({
+          ...e,
+          courseTitle: c.title,
+          courseId: c.id,
+        }))
+      );
+      const recentLearners = allEnrollments
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 8);
+
+      // Calculate stats
+      const totalEnrollments = myCourses.reduce((sum, c) => sum + c._count.enrollments, 0);
+      const allProgressValues = myCourses.flatMap((c) => c.enrollments.map((e) => e.progress));
+      const avgCompletion = allProgressValues.length > 0
+        ? Math.round(allProgressValues.reduce((s, p) => s + p, 0) / allProgressValues.length)
+        : 0;
+
+      // Get passed quiz count for courses created by this formateur
+      const myCourseIds = myCourses.map((c) => c.id);
+      const passedQuizzes = myCourseIds.length > 0
+        ? await db.quizAttempt.count({
+            where: {
+              quiz: { courseId: { in: myCourseIds } },
+              status: "REUSSI",
+            },
+          })
+        : 0;
+
+      // Avg score per course
+      const courseStatsMap = await Promise.all(
+        myCourseIds.map(async (courseId) => {
+          const attempts = await db.quizAttempt.findMany({
+            where: {
+              quiz: { courseId },
+              status: "REUSSI",
+            },
+            select: { score: true, maxScore: true },
+          });
+          const cAvgScore = attempts.length > 0
+            ? Math.round(
+                attempts.reduce((acc, a) => acc + (a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0), 0) /
+                  attempts.length
+              )
+            : 0;
+          const courseEnrollments = myCourses.find((c) => c.id === courseId)?.enrollments || [];
+          const completionRate = courseEnrollments.length > 0
+            ? Math.round(courseEnrollments.reduce((s, e) => s + e.progress, 0) / courseEnrollments.length)
+            : 0;
+          return { courseId, avgScore: cAvgScore, completionRate };
+        })
+      );
+
+      const scoredCourses = courseStatsMap.filter((c) => c.avgScore > 0);
+      const avgScore = scoredCourses.length > 0
+        ? Math.round(scoredCourses.reduce((s, c) => s + c.avgScore, 0) / scoredCourses.length)
+        : 0;
+
+      return NextResponse.json({
+        type: "formateur",
+        stats: {
+          totalCourses: myCourses.length,
+          totalEnrollments,
+          avgCompletion,
+          passedQuizzes,
+          avgScore,
+        },
+        myCourses: myCourses.map((c) => ({
+          id: c.id,
+          title: c.title,
+          category: c.category,
+          difficulty: c.difficulty,
+          duration: c.duration,
+          status: c.status,
+          isCertifying: c.isCertifying,
+          enrollmentCount: c._count.enrollments,
+          avgScore: courseStatsMap.find((cs) => cs.courseId === c.id)?.avgScore || 0,
+          completionRate: courseStatsMap.find((cs) => cs.courseId === c.id)?.completionRate || 0,
+        })),
+        recentLearners,
       });
     }
 

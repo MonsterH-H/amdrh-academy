@@ -16,6 +16,7 @@ import { MessagesPage, ConversationPage } from "@/components/amdrh/messages";
 import { NotificationsPage } from "@/components/amdrh/notifications";
 import { AdminUsersPage, AdminUserDetailPage } from "@/components/amdrh/admin-users";
 import { AdminSyncPage } from "@/components/amdrh/admin-sync";
+import { CourseCreatePage } from "@/components/amdrh/course-create";
 import { ProfilePage } from "@/components/amdrh/profile";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,7 @@ function AppContent() {
       case "admin-users": return <AdminUsersPage />;
       case "admin-user-detail": return <AdminUserDetailPage />;
       case "admin-sync": return <AdminSyncPage />;
+      case "course-create": return <CourseCreatePage />;
       case "profile": return <ProfilePage />;
       default: return <DashboardPage />;
     }

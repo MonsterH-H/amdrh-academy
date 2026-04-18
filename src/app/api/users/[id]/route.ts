@@ -54,7 +54,17 @@ export async function GET(
       return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    // Fetch learning path enrollments separately (no direct User relation in schema)
+    const learningPathEnrollments = await db.learningPathEnrollment.findMany({
+      where: { userId: id },
+      include: {
+        learningPath: { select: { title: true, description: true, targetRole: true, isMandatory: true } },
+      },
+      orderBy: { startedAt: "desc" },
+      take: 20,
+    });
+
+    return NextResponse.json({ user, learningPathEnrollments });
   } catch (error) {
     console.error("User detail error:", error);
     return NextResponse.json({ error: "Erreur" }, { status: 500 });

@@ -17,6 +17,7 @@ export type AppView =
   | "admin-users"
   | "admin-user-detail"
   | "admin-sync"
+  | "course-create"
   | "profile";
 
 interface User {
