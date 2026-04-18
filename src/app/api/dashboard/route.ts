@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
               id: true,
               progress: true,
               status: true,
-              createdAt: true,
+              startedAt: true,
               user: { select: { id: true, prenom: true, nom: true, avatar: true, role: true } },
             },
             orderBy: { lastAccessAt: "desc" },
@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
         }))
       );
       const recentLearners = allEnrollments
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
         .slice(0, 8);
 
       // Calculate stats

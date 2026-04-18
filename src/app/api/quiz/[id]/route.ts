@@ -86,7 +86,7 @@ export async function POST(
     }
 
     let totalScore = 0;
-    const answerResults = [];
+    const answerResults: Array<{ questionId: string; isCorrect: boolean; pointsEarned: number; correctAnswer: number[] }> = [];
 
     for (const question of quiz.questions) {
       const userAnswer = answers?.find((a: { questionId: string }) => a.questionId === question.id);

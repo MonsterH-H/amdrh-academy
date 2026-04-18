@@ -162,7 +162,7 @@ export function ConversationPage() {
   if (loading) return <MessagesSkeleton />;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] animate-fadeIn">
+    <div className="flex flex-col h-[calc(100vh-11rem)] sm:h-[calc(100vh-10rem)] animate-fadeIn">
       <button onClick={() => navigate("messages")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Retour aux conversations
       </button>
@@ -197,15 +197,15 @@ export function ConversationPage() {
           </div>
         </ScrollArea>
 
-        <div className="border-t border-border/40 p-4">
+        <div className="border-t border-border/40 p-3 sm:p-4">
           <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2 max-w-2xl mx-auto">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Écrire un message..."
-              className="rounded-lg"
+              className="rounded-lg min-h-[44px]"
             />
-            <Button type="submit" size="icon" className="rounded-lg flex-shrink-0" disabled={!newMessage.trim()}>
+            <Button type="submit" size="icon" className="rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px]" disabled={!newMessage.trim()}>
               <Send className="w-4 h-4" />
             </Button>
           </form>

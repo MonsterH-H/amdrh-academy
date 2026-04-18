@@ -103,13 +103,13 @@ export function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-xs font-semibold">
+          <Badge className="mb-4 sm:mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-xs font-semibold">
             <Star className="w-3 h-3 mr-1.5 fill-current" />
             Partenaire Académique Officiel FRMHB
           </Badge>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-foreground leading-tight tracking-tight mb-4 sm:mb-6">
             Formation d&apos;Excellence
             <br />
             <span className="text-primary">au Handball Marocain</span>
@@ -133,8 +133,8 @@ export function LandingPage() {
       {/* Stats */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-sm border border-border/60 p-8">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-border/60 p-6 sm:p-8">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-3xl sm:text-4xl font-extrabold text-primary">{stat.value}</p>
@@ -147,9 +147,9 @@ export function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <Badge variant="secondary" className="mb-4 text-xs font-semibold">Pourquoi AMDRH Academy</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Une formation complète et certifiante
@@ -179,9 +179,9 @@ export function LandingPage() {
       </section>
 
       {/* Roles */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Un parcours pour chaque profil
             </h2>
@@ -211,14 +211,14 @@ export function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Ils témoignent
             </h2>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((t) => (
               <div key={t.name} className="bg-white rounded-xl border border-border/60 p-6">
                 <div className="flex items-center gap-1 mb-4">
@@ -238,8 +238,8 @@ export function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center bg-primary rounded-2xl p-10 sm:p-16 text-white">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center bg-primary rounded-2xl p-8 sm:p-12 lg:p-16 text-white">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Prêt à commencer votre formation ?
           </h2>
@@ -259,9 +259,9 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/60 bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-border/60 bg-white py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="grid sm:grid-cols-3 gap-8 mb-8">
+          <div className="grid sm:grid-cols-3 gap-8 mb-8 overflow-x-auto">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">

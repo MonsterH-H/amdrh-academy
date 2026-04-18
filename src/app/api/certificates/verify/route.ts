@@ -21,9 +21,6 @@ export async function GET(req: NextRequest) {
         user: {
           select: { id: true, nom: true, prenom: true },
         },
-        course: {
-          select: { id: true, title: true },
-        },
       },
     });
 
@@ -61,7 +58,7 @@ export async function GET(req: NextRequest) {
           code: certificate.code,
           type: certificate.type,
           status: certificate.status,
-          courseTitle: certificate.courseTitle || certificate.course?.title || "",
+          courseTitle: certificate.courseTitle || "",
           userName: certificate.userName || (certificate.user ? `${certificate.user.prenom} ${certificate.user.nom}` : ""),
           score: certificate.score,
           maxScore: certificate.maxScore,
@@ -77,7 +74,7 @@ export async function GET(req: NextRequest) {
         code: certificate.code,
         type: certificate.type,
         status: certificate.status,
-        courseTitle: certificate.courseTitle || certificate.course?.title || "",
+        courseTitle: certificate.courseTitle || "",
         userName: certificate.userName || (certificate.user ? `${certificate.user.prenom} ${certificate.user.nom}` : ""),
         score: certificate.score,
         maxScore: certificate.maxScore,

@@ -70,15 +70,15 @@ export function CourseCatalogPage() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Catalogue des cours</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Catalogue des cours</h2>
           <p className="text-muted-foreground mt-1">Explorez notre catalogue de formations</p>
         </div>
         {user && (user.role === "ADMIN" || user.role === "FORMATEUR") && (
           <Button
             onClick={() => navigate("course-create")}
-            className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0"
+            className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0 w-full sm:w-auto"
             size="sm"
           >
             <Plus className="w-4 h-4 mr-1.5" />
@@ -222,7 +222,7 @@ export function CourseCatalogPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
+            <div className="flex items-center justify-center gap-1 sm:gap-2 pt-4 overflow-x-auto">
               <Button
                 variant="outline" size="sm" disabled={page <= 1}
                 onClick={() => setPage(page - 1)} className="rounded-lg"

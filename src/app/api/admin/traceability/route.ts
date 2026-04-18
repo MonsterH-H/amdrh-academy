@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
             select: { id: true, title: true, type: true, duration: true },
           },
         },
-        orderBy: { viewedAt: "desc" },
+        orderBy: { viewedAt: "desc" as const },
       },
     };
 

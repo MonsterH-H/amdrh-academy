@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
+import type { AppView } from "@/store/app";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -280,7 +281,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-3 left-3 z-50 bg-white shadow-sm border border-border/50 rounded-lg"
+            className="lg:hidden fixed top-2.5 sm:top-3 left-3 z-50 bg-white shadow-sm border border-border/50 rounded-lg"
           >
             <Menu className="w-5 h-5" />
           </Button>
@@ -301,7 +302,7 @@ export function MobileBottomNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border/60 z-50 pb-safe">
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="flex items-center justify-around px-1 py-1">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.view;
@@ -309,7 +310,7 @@ export function MobileBottomNav() {
             <button
               key={item.view}
               onClick={() => navigate(item.view)}
-              className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-all duration-200"
+              className="flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] px-2 rounded-lg transition-all duration-200"
             >
               <div className="relative">
                 <Icon
@@ -420,12 +421,12 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 lg:left-auto h-16 bg-white/80 backdrop-blur-xl border-b border-border/40 z-30 flex items-center px-4 gap-4 transition-all duration-300",
+        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-border/40 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
         sidebarCollapsed ? "lg:left-[72px]" : "lg:left-[280px]"
       )}
     >
       <div className="flex-1 min-w-0">
-        <h2 className="text-lg font-semibold text-foreground truncate pl-10 lg:pl-0">
+        <h2 className="text-base sm:text-lg font-semibold text-foreground truncate pl-10 lg:pl-0">
           {getViewTitle(currentView)}
         </h2>
       </div>
@@ -446,7 +447,7 @@ export function TopBar() {
           <PopoverContent
             align="end"
             sideOffset={8}
-            className="w-80 sm:w-96 p-0 rounded-lg shadow-lg border-border/60"
+            className="w-80 max-w-[calc(100vw-2rem)] sm:w-96 p-0 rounded-lg shadow-lg border-border/60"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 pt-4 pb-2">

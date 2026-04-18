@@ -816,7 +816,7 @@ export function CourseDetailPage() {
             <Badge variant="secondary" className={cn(DIFFICULTY_COLORS[(course.difficulty as string) || "DEBUTANT"])}>
               {DIFFICULTY_LABELS[(course.difficulty as string) || "DEBUTANT"]}
             </Badge>
-            {course.isCertifying && (
+            {course.isCertifying as boolean && (
               <Badge className="bg-amber-100 text-amber-700 text-[10px]">
                 <Award className="w-3 h-3 mr-1" /> Certifiant
               </Badge>
@@ -874,20 +874,22 @@ export function CourseDetailPage() {
 
       {/* Content */}
       <Tabs defaultValue="contenu" className="w-full">
-        <TabsList className="bg-white rounded-lg border border-border/60">
-          <TabsTrigger value="contenu" className="text-sm rounded-md">Contenu</TabsTrigger>
-          <TabsTrigger value="ressources" className="text-sm rounded-md">
-            Ressources {resources.length > 0 && `(${resources.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="infos" className="text-sm rounded-md">Informations</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="bg-white rounded-lg border border-border/60 inline-flex min-w-max">
+            <TabsTrigger value="contenu" className="text-sm rounded-md">Contenu</TabsTrigger>
+            <TabsTrigger value="ressources" className="text-sm rounded-md">
+              Ressources {resources.length > 0 && `(${resources.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="infos" className="text-sm rounded-md">Informations</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="contenu" className="mt-6">
           {/* Lesson Content Viewer */}
           {activeLesson && (
             <Card className="border-primary/20 shadow-sm mb-6 overflow-hidden">
               {/* Viewer Header */}
-              <div className="px-5 py-4 bg-gradient-to-r from-primary/5 to-transparent flex items-start justify-between gap-4">
+              <div className="px-3 sm:px-5 py-3 sm:py-4 bg-gradient-to-r from-primary/5 to-transparent flex items-start justify-between gap-3 sm:gap-4">
                 <div className="min-w-0 flex-1">
                   <button
                     onClick={handleCloseLesson}
@@ -933,7 +935,7 @@ export function CourseDetailPage() {
               <Separator />
 
               {/* Viewer Content */}
-              <div className="p-5">
+              <div className="p-3 sm:p-5">
                 {activeLesson.type === "TEXTE" && activeLesson.content ? (
                   <TextReaderWithTracking
                     content={activeLesson.content}
@@ -962,7 +964,7 @@ export function CourseDetailPage() {
               <Separator />
 
               {/* Viewer Footer - Actions and Navigation */}
-              <div className="px-5 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="px-3 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 {/* Mark as Complete */}
                 {!isLessonCompleted && (
                   <div className="flex flex-col gap-1">

@@ -51,7 +51,7 @@ export function DashboardPage() {
   return <LearnerDashboard data={data} user={user} />;
 }
 
-function LearnerDashboard({ data, user }: { data: Record<string, unknown>; user: { id: string; role: string } }) {
+function LearnerDashboard({ data, user }: { data: Record<string, unknown>; user: { id: string; role: string; prenom?: string } }) {
   const { navigate } = useAppStore();
 
   const stats = data.stats as { coursesEnCours: number; coursesTermines: number; certificatesCount: number; avgScore: number };
@@ -70,7 +70,7 @@ function LearnerDashboard({ data, user }: { data: Record<string, unknown>; user:
       {/* Welcome */}
       <div>
         <h2 className="text-2xl font-bold text-foreground">
-          Bonjour, {user.prenom} 👋
+          Bonjour, {user.prenom || "there"} 👋
         </h2>
         <p className="text-muted-foreground mt-1">
           Continuez votre apprentissage avec {ROLE_LABELS[user.role] || "votre parcours"}
@@ -163,9 +163,9 @@ function LearnerDashboard({ data, user }: { data: Record<string, unknown>; user:
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {course.duration as number} min
                   </p>
-                  {(course as Record<string, unknown>)._count && (
+                  {!!(course as Record<string, unknown>)._count && (
                     <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <Users className="w-3 h-3" /> {(course._count as Record<string, unknown>).enrollments as number} inscrits
+                      <Users className="w-3 h-3" /> {String((course._count as Record<string, unknown>).enrollments || 0)} inscrits
                     </p>
                   )}
                 </CardContent>
@@ -200,9 +200,9 @@ function FormateurDashboard({ data, user }: { data: Record<string, unknown>; use
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Welcome */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">
             Bonjour, {user.prenom} 👋
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -211,7 +211,7 @@ function FormateurDashboard({ data, user }: { data: Record<string, unknown>; use
         </div>
         <Button
           onClick={() => navigate("course-create")}
-          className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0"
+          className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0 w-full sm:w-auto"
           size="sm"
         >
           <Plus className="w-4 h-4 mr-1.5" />
@@ -404,14 +404,14 @@ function AdminDashboard({ data }: { data: Record<string, unknown>; user: { id: s
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Tableau de bord Admin</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Tableau de bord Admin</h2>
           <p className="text-muted-foreground mt-1">Vue d&apos;ensemble de la plateforme</p>
         </div>
         <Button
           onClick={() => navigate("course-create")}
-          className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0"
+          className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0 w-full sm:w-auto"
           size="sm"
         >
           <Plus className="w-4 h-4 mr-1.5" />
@@ -438,12 +438,12 @@ function AdminDashboard({ data }: { data: Record<string, unknown>; user: { id: s
 
       {/* Completion Rate */}
       <Card className="border-border/60">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" /> Taux de complétion global
           </h3>
-          <div className="flex items-center gap-6">
-            <div className="w-36 h-36 shrink-0">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <div className="w-32 h-32 sm:w-36 sm:h-36 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart cx="50%" cy="50%" innerRadius="55%" outerRadius="90%" data={completionData} startAngle={180} endAngle={0} barSize={12}>
                   <RadialBar background={{ fill: "#f1f5f9" }} dataKey="value" cornerRadius={6} />
@@ -465,10 +465,10 @@ function AdminDashboard({ data }: { data: Record<string, unknown>; user: { id: s
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Role Distribution Pie Chart */}
         <Card className="border-border/60">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
               <PieChartIcon className="w-4 h-4 text-primary" /> Répartition des rôles
             </h3>
@@ -490,7 +490,7 @@ function AdminDashboard({ data }: { data: Record<string, unknown>; user: { id: s
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, _name: string, props: { payload: { pct: number } }) => [`${value} utilisateurs (${props.payload.pct}%)`, "Effectif"]}
+                  formatter={(value, _name, props) => [`${value} utilisateurs (${(props as Record<string, unknown>).payload && ((props.payload as Record<string, unknown>).pct || 0)}%)`, "Effectif"]}
                   contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", fontSize: "12px" }}
                 />
                 <Legend
@@ -506,7 +506,7 @@ function AdminDashboard({ data }: { data: Record<string, unknown>; user: { id: s
 
         {/* Weekly Activity Bar Chart */}
         <Card className="border-border/60">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-primary" /> Activité hebdomadaire
             </h3>

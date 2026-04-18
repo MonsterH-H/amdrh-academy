@@ -43,9 +43,6 @@ export async function GET(req: NextRequest) {
           user: {
             select: { id: true, nom: true, prenom: true, email: true, role: true },
           },
-          course: {
-            select: { id: true, title: true },
-          },
         },
         orderBy: { issuedAt: "desc" },
         skip: (page - 1) * limit,

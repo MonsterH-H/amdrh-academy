@@ -745,15 +745,15 @@ function AdminQuizDetailPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Durée</p>
-              <p className="font-medium">{quiz.duration} min</p>
+              <p className="font-medium">{String(quiz.duration)} min</p>
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Score minimum</p>
-              <p className="font-medium">{quiz.passingScore}%</p>
+              <p className="font-medium">{String(quiz.passingScore)}%</p>
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Max tentatives</p>
-              <p className="font-medium">{quiz.maxAttempts}</p>
+              <p className="font-medium">{String(quiz.maxAttempts)}</p>
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Mélanger</p>

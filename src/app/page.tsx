@@ -98,16 +98,16 @@ function AppContent() {
   const isAuthPage = ["landing", "login", "register", "forgot-password", "reset-password"].includes(currentView);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] overflow-x-hidden">
       {!isAuthPage && <Sidebar />}
       {!isAuthPage && <TopBar />}
       <main
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 min-w-0",
           !isAuthPage && sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]"
         )}
       >
-        <div className={cn(!isAuthPage && "pt-16 pb-20 lg:pb-6")}>
+        <div className={cn(!isAuthPage && "pt-14 sm:pt-16 pb-20 lg:pb-6")}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {renderView()}
           </div>

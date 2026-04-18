@@ -211,20 +211,20 @@ export function RegisterPage() {
               <div className="space-y-5 animate-fadeIn">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Votre profil</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     {roles.map((r) => (
                       <button
                         key={r.value}
                         onClick={() => setRole(r.value)}
                         className={cn(
-                          "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200",
+                          "flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200",
                           role === r.value
                             ? "border-primary bg-primary/5 shadow-sm"
                             : "border-border/60 hover:border-border"
                         )}
                       >
-                        <span className="text-2xl">{r.emoji}</span>
-                        <span className="text-xs font-semibold">{r.label}</span>
+                        <span className="text-xl sm:text-2xl">{r.emoji}</span>
+                        <span className="text-[10px] sm:text-xs font-semibold">{r.label}</span>
                       </button>
                     ))}
                   </div>

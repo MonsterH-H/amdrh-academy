@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import { BookOpen, Award, HelpCircle, Star, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+import type { AppView } from "@/store/app";
+
 export function ProfilePage() {
   const { user, setUser, navigate } = useAppStore();
   const { toast } = useToast();
@@ -245,19 +247,19 @@ export function ProfilePage() {
       </Card>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Cours", icon: BookOpen, action: "courses" },
-          { label: "Certificats", icon: Award, action: "certificates" },
-          { label: "Quiz", icon: HelpCircle, action: "courses" },
-          { label: "Badges", icon: Star, action: "badges" },
+          { label: "Cours", icon: BookOpen, action: "courses" as AppView },
+          { label: "Certificats", icon: Award, action: "certificates" as AppView },
+          { label: "Quiz", icon: HelpCircle, action: "courses" as AppView },
+          { label: "Badges", icon: Star, action: "badges" as AppView },
         ].map((s) => {
           const Icon = s.icon;
           return (
             <button
               key={s.label}
               onClick={() => navigate(s.action)}
-              className="bg-white border border-border/60 rounded-xl p-4 text-center hover:shadow-sm transition-all"
+              className="bg-white border border-border/60 rounded-xl p-3 sm:p-4 text-center hover:shadow-sm transition-all"
             >
               <Icon className="w-5 h-5 text-primary mx-auto mb-2" />
               <p className="text-xs font-medium text-foreground">{s.label}</p>

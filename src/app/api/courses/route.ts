@@ -52,9 +52,9 @@ export async function GET(req: NextRequest) {
         : false,
       sections: {
         include: {
-          lessons: { select: { id: true, title: true, type: true, duration: true, order: true }, orderBy: { order: "asc" } },
+          lessons: { select: { id: true, title: true, type: true, duration: true, order: true }, orderBy: { order: "asc" as const } },
         },
-        orderBy: { order: "asc" },
+        orderBy: { order: "asc" as const },
       },
       quiz: { select: { id: true, passingScore: true } },
       _count: {
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // For admin mode, also return aggregated stats
-    let stats = null;
+    let stats: { total: number; published: number; drafts: number; archived: number } | null = null;
     if (admin) {
       const statsWhere: Record<string, unknown> = {};
       // FORMATEUR: stats only for their own courses

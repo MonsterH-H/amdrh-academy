@@ -157,11 +157,11 @@ export function QuizPage() {
             </p>
             <div className="flex justify-center gap-6 mb-6">
               <div>
-                <p className="text-3xl font-bold text-foreground">{result.score}/{result.maxScore}</p>
+                <p className="text-3xl font-bold text-foreground">{String(result.score)}/{String(result.maxScore)}</p>
                 <p className="text-xs text-muted-foreground">Score</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">{result.scorePercentage}%</p>
+                <p className="text-3xl font-bold text-foreground">{String(result.scorePercentage)}%</p>
                 <p className="text-xs text-muted-foreground">Pourcentage</p>
               </div>
             </div>

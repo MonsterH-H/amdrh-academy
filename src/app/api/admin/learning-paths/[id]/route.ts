@@ -34,19 +34,6 @@ export async function GET(
           orderBy: { order: "asc" },
         },
         enrollments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                nom: true,
-                prenom: true,
-                email: true,
-                role: true,
-                avatar: true,
-                isActive: true,
-              },
-            },
-          },
           orderBy: { startedAt: "desc" },
         },
       },

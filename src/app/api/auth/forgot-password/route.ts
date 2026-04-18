@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const user = await db.user.findUnique({
       where: { email: normalizedEmail },
-      select: { id: true, email: true, nom: true, prenom: true },
+      select: { id: true, email: true, nom: true, prenom: true, isActive: true },
     });
 
     // Always return success to prevent email enumeration attacks

@@ -526,7 +526,7 @@ export function AdminUserDetailPage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-xl font-bold text-foreground">{userData.prenom} {userData.nom}</h2>
+                <h2 className="text-xl font-bold text-foreground">{String(userData.prenom)} {String(userData.nom)}</h2>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge variant="secondary" className={cn("text-[10px]", ROLE_COLORS[(userData.role as string) || "ARBITRE"])}>
                     {ROLE_LABELS[(userData.role as string) || "ARBITRE"]}
@@ -534,7 +534,7 @@ export function AdminUserDetailPage() {
                   <Badge variant={userData.isActive ? "default" : "secondary"} className={cn("text-[10px]", userData.isActive ? "bg-green-100 text-green-700" : "")}>
                     {userData.isActive ? "Actif" : "Inactif"}
                   </Badge>
-                  {userData.emailVerified && (
+                  {!!userData.emailVerified && (
                     <Badge variant="secondary" className="text-[10px] bg-blue-100 text-blue-700">
                       <ShieldCheck className="w-3 h-3 mr-1" /> Vérifié
                     </Badge>
@@ -542,10 +542,10 @@ export function AdminUserDetailPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-1 sm:gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                   <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {userData.email as string}</span>
-                  {userData.telephone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {userData.telephone as string}</span>}
-                  {userData.club && <span className="flex items-center gap-1"><CreditCard className="w-3 h-3" /> {userData.club as string}</span>}
-                  {userData.region && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {userData.region as string}</span>}
-                  {userData.licenceNumber && <span className="flex items-center gap-1">Licence: {userData.licenceNumber as string}</span>}
+                  {!!userData.telephone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {userData.telephone as string}</span>}
+                  {!!userData.club && <span className="flex items-center gap-1"><CreditCard className="w-3 h-3" /> {userData.club as string}</span>}
+                  {!!userData.region && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {userData.region as string}</span>}
+                  {!!userData.licenceNumber && <span className="flex items-center gap-1">Licence: {userData.licenceNumber as string}</span>}
                 </div>
               </div>
             </div>
@@ -640,7 +640,7 @@ export function AdminUserDetailPage() {
                 <span className="text-muted-foreground text-xs">Inscrit le</span>
                 <span className="font-medium">{new Date(userData.createdAt as string).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>
               </div>
-              {userData.bio && (
+              {!!userData.bio && (
                 <div className="sm:col-span-2 flex justify-between sm:block">
                   <span className="text-muted-foreground text-xs">Bio</span>
                   <span className="font-medium text-right">{userData.bio as string}</span>
@@ -696,7 +696,7 @@ export function AdminUserDetailPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-medium truncate">{path.title as string}</p>
-                          {path.isMandatory && <Badge variant="secondary" className="text-[9px] bg-red-50 text-red-600 border-red-200">Obligatoire</Badge>}
+                          {!!path.isMandatory && <Badge variant="secondary" className="text-[9px] bg-red-50 text-red-600 border-red-200">Obligatoire</Badge>}
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-0.5">Parcours {ROLE_LABELS[path.targetRole as string] || (path.targetRole as string)}</p>
                       </div>
@@ -755,7 +755,7 @@ export function AdminUserDetailPage() {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span className={cn("text-sm font-semibold", isPassed ? "text-green-700" : isFailed ? "text-red-700" : "text-muted-foreground")}>{percentage}%</span>
                         <Badge variant="secondary" className={cn("text-[9px]", QUIZ_STATUS_COLORS[(qa.status as string)] || "")}>
-                          {QUIZ_STATUS_LABELS[(qa.status as string)] || qa.status}
+                          {QUIZ_STATUS_LABELS[(qa.status as string)] || String(qa.status)}
                         </Badge>
                       </div>
                     </div>

@@ -517,9 +517,9 @@ function ChartsSection({ data }: { data: StatsData }) {
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: number, _name: string, props: { payload: { month: string } }) => [
+                    formatter={(value, _name, props) => [
                       `${value} inscriptions`,
-                      formatMonthFull(props.payload.month),
+                      formatMonthFull((props as any).payload?.month as string),
                     ]}
                     labelFormatter={() => ""}
                   />
@@ -545,9 +545,9 @@ function ChartsSection({ data }: { data: StatsData }) {
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: number, _name: string, props: { payload: { month: string } }) => [
+                    formatter={(value, _name, props) => [
                       `${value} certificats`,
-                      formatMonthFull(props.payload.month),
+                      formatMonthFull((props as any).payload?.month as string),
                     ]}
                     labelFormatter={() => ""}
                   />
@@ -597,8 +597,8 @@ function ChartsSection({ data }: { data: StatsData }) {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number, _name: string, props: { payload: { pct: number } }) => [
-                      `${value} (${props.payload.pct}%)`,
+                    formatter={(value, _name, props) => [
+                      `${value} (${(props as any).payload?.pct}%)`,
                       "Utilisateurs",
                     ]}
                     contentStyle={tooltipStyle}

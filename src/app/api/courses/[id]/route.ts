@@ -35,7 +35,7 @@ export async function GET(
       return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
     }
 
-    let enrollment = null;
+    let enrollment: Awaited<ReturnType<typeof db.enrollment.findUnique>> | null = null;
     if (userId) {
       enrollment = await db.enrollment.findUnique({
         where: { userId_courseId: { userId, courseId: id } },

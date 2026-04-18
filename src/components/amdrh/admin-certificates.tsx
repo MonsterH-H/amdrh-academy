@@ -1270,7 +1270,7 @@ function BadgesTab() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">{user.prenom} {user.nom}</p>
+                          <p className="text-sm font-medium">{String(user.prenom)} {String(user.nom)}</p>
                           <p className="text-[10px] text-muted-foreground">{user.email as string}</p>
                         </div>
                         <span className="text-[10px] text-muted-foreground">

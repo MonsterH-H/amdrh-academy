@@ -98,13 +98,15 @@ export function NotificationsPage() {
       </div>
 
       <Tabs value={activeType} onValueChange={setActiveType}>
-        <TabsList className="bg-white border border-border/60 rounded-lg">
-          <TabsTrigger value="ALL" className="text-xs rounded-md">Toutes</TabsTrigger>
-          <TabsTrigger value="COURS" className="text-xs rounded-md">Cours</TabsTrigger>
-          <TabsTrigger value="QUIZ" className="text-xs rounded-md">Quiz</TabsTrigger>
-          <TabsTrigger value="CERTIFICAT" className="text-xs rounded-md">Certificats</TabsTrigger>
-          <TabsTrigger value="BADGE" className="text-xs rounded-md">Badges</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="bg-white border border-border/60 rounded-lg inline-flex min-w-max">
+            <TabsTrigger value="ALL" className="text-xs rounded-md">Toutes</TabsTrigger>
+            <TabsTrigger value="COURS" className="text-xs rounded-md">Cours</TabsTrigger>
+            <TabsTrigger value="QUIZ" className="text-xs rounded-md">Quiz</TabsTrigger>
+            <TabsTrigger value="CERTIFICAT" className="text-xs rounded-md">Certificats</TabsTrigger>
+            <TabsTrigger value="BADGE" className="text-xs rounded-md">Badges</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value={activeType} className="mt-4">
           {notifications.length === 0 ? (

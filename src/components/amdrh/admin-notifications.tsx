@@ -717,10 +717,10 @@ function NotificationCreateForm({ onCreated }: { onCreated: () => void }) {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-foreground truncate">
-                        {selectedUser.prenom} {selectedUser.nom}
+                        {String(selectedUser.prenom)} {String(selectedUser.nom)}
                       </p>
                       <p className="text-[10px] text-muted-foreground truncate">
-                        {selectedUser.email}
+                        {String(selectedUser.email)}
                       </p>
                     </div>
                     <button
@@ -752,7 +752,7 @@ function NotificationCreateForm({ onCreated }: { onCreated: () => void }) {
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-foreground truncate">
-                            {u.prenom} {u.nom}
+                            {String(u.prenom)} {String(u.nom)}
                           </p>
                           <p className="text-[10px] text-muted-foreground truncate">
                             {u.email as string}
