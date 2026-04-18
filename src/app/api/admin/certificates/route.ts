@@ -98,7 +98,14 @@ export async function POST(req: NextRequest) {
   if (!auth.authorized) return auth.response;
   try {
     const body = await req.json();
-    const { userId, courseId, score, maxScore, expiryDate } = body;
+    const {
+      userId,
+      courseId,
+      score,
+      maxScore,
+      expiryDate,
+      type,
+    } = body;
 
     if (!userId || !courseId || score === undefined || maxScore === undefined) {
       return NextResponse.json(
@@ -106,6 +113,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Validate type if provided
+    const validTypes = ["ATTESTATION", "CERTIFICAT_COMPLETION", "DIPLOME", "CERTIFICAT"];
+    const certType = type && validTypes.includes(type) ? type : "CERTIFICAT";
 
     // Fetch user and course
     const [user, course] = await Promise.all([
@@ -120,19 +131,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
     }
 
-    // Generate certificate code: AMDRH-2026-XXXXX
+    // Generate sequential certificate code: AMDRH-YYYY-XXXXX
     const year = new Date().getFullYear();
     const count = await db.certificate.count();
-    const seq = String(count + 1).padStart(5, "0");
-    const code = `AMDRH-${year}-${seq}`;
+    let certCode = `AMDRH-${year}-${String(count + 1).padStart(5, "0")}`;
 
-    // Check uniqueness
-    const existing = await db.certificate.findUnique({ where: { code } });
-    const finalCode = existing ? `AMDRH-${year}-${String(count + 2).padStart(5, "0")}` : code;
+    // Ensure uniqueness with retry loop
+    let existing = await db.certificate.findUnique({ where: { code: certCode } });
+    let retry = 2;
+    while (existing && retry < 100) {
+      certCode = `AMDRH-${year}-${String(count + retry).padStart(5, "0")}`;
+      existing = await db.certificate.findUnique({ where: { code: certCode } });
+      retry++;
+    }
 
     const certificate = await db.certificate.create({
       data: {
-        code: finalCode,
+        code: certCode,
+        type: certType,
+        status: "ACTIVE",
         userId,
         courseId,
         courseTitle: course.title,
@@ -141,16 +158,23 @@ export async function POST(req: NextRequest) {
         score,
         maxScore,
         expiresAt: expiryDate ? new Date(expiryDate) : null,
+        qrCodeUrl: `/verify/${certCode}`,
       },
     });
 
     // Create notification
+    const typeLabels: Record<string, string> = {
+      ATTESTATION: "attestation de réussite",
+      CERTIFICAT_COMPLETION: "certificat de complétion",
+      DIPLOME: "diplôme",
+      CERTIFICAT: "certificat",
+    };
     await db.notification.create({
       data: {
         userId,
         type: "CERTIFICAT",
-        title: "Nouveau certificat délivré",
-        message: `Vous avez reçu un certificat pour le cours "${course.title}". Code : ${finalCode}`,
+        title: `Nouveau ${typeLabels[certType] || "certificat"} délivré`,
+        message: `Vous avez reçu un(e) ${typeLabels[certType] || "certificat"} pour le cours "${course.title}". Code : ${certCode}`,
       },
     });
 

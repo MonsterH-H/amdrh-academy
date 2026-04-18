@@ -26,7 +26,9 @@ export type AppView =
   | "admin-analytics"
   | "admin-sync"
   | "admin-resources"
+  | "admin-traceability"
   | "course-create"
+  | "learner-traceability"
   | "profile";
 
 interface User {

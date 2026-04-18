@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useAppStore } from "@/store/app";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,19 +10,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Slider } from "@/components/ui/slider";
 import {
   ArrowLeft, BookOpen, Clock, Users, Award,
   CheckCircle2, Lock, PlayCircle, Loader2,
   X, ChevronLeft, ChevronRight, Video, FileText,
   MousePointerClick, GraduationCap, Download, FolderOpen,
+  Pause, Play, Eye, Check, Activity,
 } from "lucide-react";
 import {
   CATEGORY_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS,
-  LESSON_TYPE_LABELS, LESSON_TYPE_ICONS, LESSON_TYPE_COLORS,
+  LESSON_TYPE_LABELS, LESSON_TYPE_COLORS, LESSON_TYPE_ICONS,
   RESOURCE_TYPE_LABELS, RESOURCE_TYPE_COLORS, RESOURCE_TYPE_ICONS,
   RESOURCE_CATEGORY_LABELS, RESOURCE_CATEGORY_COLORS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+
+// ─── Types ────────────────────────────────────────
 
 interface LessonData {
   id: string;
@@ -32,6 +37,19 @@ interface LessonData {
   duration: number;
   order: number;
   sectionId: string;
+}
+
+interface LessonProgressEntry {
+  id: string;
+  lessonId: string;
+  completed: boolean;
+  timeSpent: number;
+  watchPercentage: number;
+  scrollPercentage: number;
+  completionTrigger: string;
+  lastPosition: number;
+  viewedAt: string;
+  completedAt: string | null;
 }
 
 interface ResourceData {
@@ -47,16 +65,35 @@ interface ResourceData {
   createdAt: string;
 }
 
+// ─── Helpers ──────────────────────────────────────
+
+function formatTime(seconds: number): string {
+  if (!seconds || seconds <= 0) return "0min";
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return `${hours}h ${mins}min`;
+  return `${mins}min`;
+}
+
+function getCompletionTriggerLabel(trigger: string): string {
+  switch (trigger) {
+    case "auto_video": return "Auto vidéo";
+    case "auto_scroll": return "Auto lecture";
+    case "auto_time": return "Auto temps";
+    case "manual": return "Manuel";
+    default: return trigger;
+  }
+}
+
+// ─── Sub-components ───────────────────────────────
+
 function LessonTypeIcon({ type }: { type: string }) {
   switch (type) {
-    case "VIDEO":
-      return <Video className="w-4 h-4" />;
-    case "PDF":
-      return <FileText className="w-4 h-4" />;
-    case "INTERACTIF":
-      return <MousePointerClick className="w-4 h-4" />;
-    default:
-      return <BookOpen className="w-4 h-4" />;
+    case "VIDEO": return <Video className="w-4 h-4" />;
+    case "PDF": return <FileText className="w-4 h-4" />;
+    case "INTERACTIF": return <MousePointerClick className="w-4 h-4" />;
+    default: return <BookOpen className="w-4 h-4" />;
   }
 }
 
@@ -121,9 +158,431 @@ function LessonTypePlaceholder({ type }: { type: string }) {
   }
 }
 
+// ─── Video Simulator ──────────────────────────────
+
+function VideoSimulator({
+  lessonId,
+  courseId,
+  initialWatchPercentage,
+  lessonDuration,
+  isCompleted,
+  onComplete,
+  isEnrolled,
+}: {
+  lessonId: string;
+  courseId: string;
+  initialWatchPercentage: number;
+  lessonDuration: number;
+  isCompleted: boolean;
+  onComplete: () => void;
+  isEnrolled: boolean;
+}) {
+  const { user } = useAppStore();
+  const [watchPercentage, setWatchPercentage] = useState(initialWatchPercentage);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sliderValue, setSliderValue] = useState(initialWatchPercentage);
+  const [activitySaved, setActivitySaved] = useState(false);
+  const [sessionTime, setSessionTime] = useState(0);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const completedRef = useRef(isCompleted);
+
+  const totalSeconds = lessonDuration * 60;
+  const watchedSeconds = Math.round((watchPercentage / 100) * totalSeconds);
+
+  // Send progress heartbeat
+  const sendProgress = useCallback(async (wp: number, ts: number) => {
+    if (!user || !isEnrolled || completedRef.current) return;
+    try {
+      const res = await fetch(`/api/courses/${courseId}/progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          lessonId,
+          watchPercentage: wp,
+          timeSpent: ts,
+          lastPosition: Math.round((wp / 100) * totalSeconds),
+        }),
+      });
+      const data = await res.json();
+      if (data.autoCompleted) {
+        completedRef.current = true;
+        setIsPlaying(false);
+        onComplete();
+        toast({
+          title: "Leçon complétée automatiquement !",
+          description: `Vidéo regardée à ${Math.round(wp)}%`,
+        });
+      }
+      if (ts > 0) {
+        setActivitySaved(true);
+        setTimeout(() => setActivitySaved(false), 2000);
+      }
+    } catch {
+      // silently fail
+    }
+  }, [user, courseId, lessonId, totalSeconds, onComplete, isEnrolled]);
+
+  // Play/Pause simulation
+  useEffect(() => {
+    if (isPlaying) {
+      heartbeatRef.current = setInterval(() => {
+        setWatchPercentage((prev) => {
+          const next = Math.min(prev + 2, 100);
+          setSliderValue(next);
+          sendProgress(next, 5);
+          return next;
+        });
+      }, 5000);
+
+      timerRef.current = setInterval(() => {
+        setSessionTime((prev) => prev + 5);
+      }, 5000);
+    } else {
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+
+    return () => {
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPlaying, sendProgress]);
+
+  // Session time tracking (every 15 seconds)
+  useEffect(() => {
+    if (!isEnrolled || completedRef.current || !isPlaying) return;
+    const sessionInterval = setInterval(() => {
+      // Already handled in heartbeat above
+    }, 15000);
+    return () => clearInterval(sessionInterval);
+  }, [isEnrolled, isPlaying]);
+
+  // When slider changes manually
+  const handleSliderChange = (value: number[]) => {
+    const newPct = value[0];
+    setSliderValue(newPct);
+    setWatchPercentage(newPct);
+  };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      // Final save
+      if (sessionTime > 0 && user && isEnrolled && !completedRef.current) {
+        sendProgress(watchPercentage, sessionTime);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      {/* Simulated Video Player */}
+      <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10 flex flex-col items-center gap-4 text-white">
+          <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
+            onClick={() => {
+              if (!isCompleted) setIsPlaying(!isPlaying);
+            }}
+          >
+            {isCompleted ? (
+              <Check className="w-8 h-8 text-green-400" />
+            ) : isPlaying ? (
+              <Pause className="w-8 h-8" />
+            ) : (
+              <Play className="w-8 h-8 ml-1" />
+            )}
+          </div>
+          <p className="text-sm text-white/80">
+            {isCompleted ? "Leçon terminée" : isPlaying ? "Lecture en cours..." : "Cliquez pour simuler la lecture"}
+          </p>
+        </div>
+
+        {/* Progress bar overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-1000"
+              style={{ width: `${watchPercentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Video Controls */}
+      <div className="bg-muted/40 rounded-lg p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-lg"
+              disabled={isCompleted}
+              onClick={() => setIsPlaying(!isPlaying)}
+            >
+              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            </Button>
+            <div className="text-xs text-muted-foreground font-mono">
+              {Math.floor(watchedSeconds / 60)}:{String(watchedSeconds % 60).padStart(2, "0")} / {lessonDuration}:00
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {activitySaved && (
+              <span className="text-[10px] text-green-600 flex items-center gap-1 animate-fadeIn">
+                <Activity className="w-3 h-3" />
+                Activité enregistrée
+              </span>
+            )}
+            {sessionTime > 0 && (
+              <span className="text-[10px] text-muted-foreground">
+                Session: {formatTime(sessionTime)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Manual Slider */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground font-medium">
+              Marquer {sliderValue}% comme regardé
+            </label>
+            <span className="text-xs font-mono text-muted-foreground">{Math.round(sliderValue)}%</span>
+          </div>
+          <Slider
+            value={[sliderValue]}
+            max={100}
+            step={1}
+            disabled={isCompleted}
+            onValueChange={handleSliderChange}
+            className="w-full"
+          />
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>0%</span>
+            <span className="text-amber-600 font-medium">Auto-complétion à 90%</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        {/* Completion Info */}
+        {isCompleted && (
+          <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg px-3 py-2">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Leçon complétée</span>
+          </div>
+        )}
+        {!isCompleted && (
+          <p className="text-[10px] text-muted-foreground">
+            Complétion automatique à 90% de visionnage
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Text Reader with Scroll Tracking ─────────────
+
+function TextReaderWithTracking({
+  content,
+  lessonId,
+  courseId,
+  initialScrollPercentage,
+  isCompleted,
+  onComplete,
+  isEnrolled,
+}: {
+  content: string;
+  lessonId: string;
+  courseId: string;
+  initialScrollPercentage: number;
+  isCompleted: boolean;
+  onComplete: () => void;
+  isEnrolled: boolean;
+}) {
+  const { user } = useAppStore();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [scrollPercentage, setScrollPercentage] = useState(initialScrollPercentage);
+  const [sessionTime, setSessionTime] = useState(0);
+  const [locallyCompleted, setLocallyCompleted] = useState(isCompleted);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const completedRef = useRef(isCompleted);
+
+  const sendProgress = useCallback(async (sp: number, ts: number) => {
+    if (!user || !isEnrolled || completedRef.current) return;
+    try {
+      const res = await fetch(`/api/courses/${courseId}/progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          lessonId,
+          scrollPercentage: sp,
+          timeSpent: ts,
+        }),
+      });
+      const data = await res.json();
+      if (data.autoCompleted) {
+        completedRef.current = true;
+        setLocallyCompleted(true);
+        onComplete();
+        toast({
+          title: "Leçon complétée automatiquement !",
+          description: `Texte lu à ${Math.round(sp)}%`,
+        });
+      }
+    } catch {
+      // silently fail
+    }
+  }, [user, courseId, lessonId, onComplete, isEnrolled]);
+
+  // Track scroll position using IntersectionObserver
+  useEffect(() => {
+    if (!contentRef.current || locallyCompleted || !isEnrolled) return;
+
+    const content = contentRef.current;
+    const paragraphs = content.querySelectorAll("p");
+
+    if (paragraphs.length === 0) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        // Calculate scroll percentage based on visible paragraphs
+        const totalParagraphs = paragraphs.length;
+        let visibleCount = 0;
+        for (const p of paragraphs) {
+          const rect = p.getBoundingClientRect();
+          const contentRect = content.getBoundingClientRect();
+          if (rect.top < contentRect.bottom && rect.bottom > contentRect.top) {
+            visibleCount++;
+          }
+        }
+        // Use a more robust calculation: bottom of scroll / scrollable height
+        const scrollHeight = content.scrollHeight - content.clientHeight;
+        if (scrollHeight > 0) {
+          const pct = Math.min(Math.round((content.scrollTop / scrollHeight) * 100), 100);
+          setScrollPercentage(pct);
+        }
+      },
+      {
+        root: content,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      }
+    );
+
+    for (const p of paragraphs) {
+      observerRef.current.observe(p);
+    }
+
+    // Also listen to scroll events on the container
+    const handleScroll = () => {
+      const scrollHeight = content.scrollHeight - content.clientHeight;
+      if (scrollHeight > 0) {
+        const pct = Math.min(Math.round((content.scrollTop / scrollHeight) * 100), 100);
+        setScrollPercentage(pct);
+      }
+    };
+
+    content.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+      content.removeEventListener("scroll", handleScroll);
+    };
+  }, [isCompleted, isEnrolled]);
+
+  // Heartbeat every 10 seconds
+  useEffect(() => {
+    if (!isEnrolled || locallyCompleted) return;
+
+    heartbeatRef.current = setInterval(() => {
+      sendProgress(scrollPercentage, 10);
+    }, 10000);
+
+    timerRef.current = setInterval(() => {
+      setSessionTime((prev) => prev + 10);
+    }, 10000);
+
+    return () => {
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isEnrolled, scrollPercentage, sendProgress]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (sessionTime > 0 && user && isEnrolled && !completedRef.current) {
+        sendProgress(scrollPercentage, sessionTime);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="space-y-3">
+      <div
+        ref={contentRef}
+        className="max-h-[400px] overflow-y-auto pr-2 scroll-smooth"
+        style={{ scrollbarWidth: "thin" }}
+      >
+        <div className="prose prose-sm max-w-none">
+          {content.split("\n").map((paragraph, idx) => {
+            if (!paragraph.trim()) return <div key={idx} className="h-3" />;
+            return (
+              <p key={idx} className="text-sm text-foreground/90 leading-relaxed mb-3">
+                {paragraph}
+              </p>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Reading Progress Indicator */}
+      <div className="flex items-center gap-3 bg-muted/40 rounded-lg px-3 py-2.5">
+        <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-muted-foreground">
+              {locallyCompleted
+                ? `Lecture terminée (${Math.round(scrollPercentage)}%)`
+                : `Lecture: ${Math.round(scrollPercentage)}% — Continuez à faire défiler pour compléter`}
+            </span>
+            {sessionTime > 0 && (
+              <span className="text-[10px] text-muted-foreground">{formatTime(sessionTime)}</span>
+            )}
+          </div>
+          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all duration-300",
+                scrollPercentage >= 95 ? "bg-green-500" : "bg-primary"
+              )}
+              style={{ width: `${scrollPercentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {!locallyCompleted && (
+        <p className="text-[10px] text-muted-foreground text-center">
+          Complétion automatique à 95% de lecture
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────
+
 export function CourseDetailPage() {
   const { user, viewParams, navigate } = useAppStore();
   const courseId = viewParams?.id;
+  const initialLessonId = viewParams?.lessonId || null;
+
   const [course, setCourse] = useState<Record<string, unknown> | null>(null);
   const [enrollment, setEnrollment] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -132,6 +591,7 @@ export function CourseDetailPage() {
   const [markingComplete, setMarkingComplete] = useState(false);
   const [resources, setResources] = useState<ResourceData[]>([]);
   const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [lessonProgressMap, setLessonProgressMap] = useState<Record<string, LessonProgressEntry>>({});
 
   useEffect(() => {
     if (!courseId || !user) return;
@@ -141,6 +601,20 @@ export function CourseDetailPage() {
         const data = await res.json();
         setCourse(data.course);
         setEnrollment(data.enrollment);
+
+        // Build lesson progress map from enrollment
+        if (data.enrollment?.lessonProgress) {
+          const map: Record<string, LessonProgressEntry> = {};
+          for (const lp of data.enrollment.lessonProgress as unknown as LessonProgressEntry[]) {
+            map[lp.lessonId] = lp;
+          }
+          setLessonProgressMap(map);
+        }
+
+        // Set initial lesson from params
+        if (initialLessonId) {
+          setActiveLessonId(initialLessonId);
+        }
       } catch {
         // silently fail
       } finally {
@@ -148,7 +622,7 @@ export function CourseDetailPage() {
       }
     };
     fetchCourse();
-  }, [courseId, user]);
+  }, [courseId, user, initialLessonId]);
 
   // Fetch resources for this course
   useEffect(() => {
@@ -203,13 +677,17 @@ export function CourseDetailPage() {
   const prevLesson = activeLessonIndex > 0 ? allLessons[activeLessonIndex - 1] : null;
   const nextLesson = activeLessonIndex < allLessons.length - 1 ? allLessons[activeLessonIndex + 1] : null;
 
-  // Find which section the active lesson belongs to (must be before early returns)
+  // Find which section the active lesson belongs to
   const activeSection = useMemo(() => {
     if (!activeLesson || !course) return null;
     const sections = course.sections as Array<Record<string, unknown>>;
     if (!sections) return null;
     return sections.find((s) => s.id === activeLesson.sectionId) as Record<string, unknown> | undefined;
   }, [activeLesson, course]);
+
+  // Get lesson progress data for active lesson
+  const activeLessonProgress = activeLessonId ? lessonProgressMap[activeLessonId] : null;
+  const isLessonCompleted = activeLessonProgress?.completed || false;
 
   const handleEnroll = async () => {
     if (!user || !courseId) return;
@@ -231,6 +709,25 @@ export function CourseDetailPage() {
     }
   };
 
+  const refreshCourseData = useCallback(async () => {
+    if (!user || !courseId) return;
+    try {
+      const res = await fetch(`/api/courses/${courseId}?userId=${user.id}`);
+      const data = await res.json();
+      setCourse(data.course);
+      setEnrollment(data.enrollment);
+      if (data.enrollment?.lessonProgress) {
+        const map: Record<string, LessonProgressEntry> = {};
+        for (const lp of data.enrollment.lessonProgress as unknown as LessonProgressEntry[]) {
+          map[lp.lessonId] = lp;
+        }
+        setLessonProgressMap(map);
+      }
+    } catch {
+      // silently fail
+    }
+  }, [user, courseId]);
+
   const handleMarkComplete = async (lessonId: string) => {
     if (!user || !courseId) return;
     setMarkingComplete(true);
@@ -238,19 +735,27 @@ export function CourseDetailPage() {
       await fetch(`/api/courses/${courseId}/progress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, lessonId, completed: true }),
+        body: JSON.stringify({ userId: user.id, lessonId, completed: true, completionTrigger: "manual" }),
       });
-      // Refresh course data
-      const res = await fetch(`/api/courses/${courseId}?userId=${user.id}`);
-      const data = await res.json();
-      setCourse(data.course);
-      setEnrollment(data.enrollment);
+      toast({
+        title: "Leçon marquée comme terminée",
+        description: "Votre progression a été mise à jour.",
+      });
+      await refreshCourseData();
     } catch {
-      // silently fail
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la progression.",
+        variant: "destructive",
+      });
     } finally {
       setMarkingComplete(false);
     }
   };
+
+  const handleAutoComplete = useCallback(() => {
+    refreshCourseData();
+  }, [refreshCourseData]);
 
   const handleLessonClick = (lessonId: string) => {
     if (!isEnrolled) return;
@@ -286,16 +791,15 @@ export function CourseDetailPage() {
   const sections = course.sections as Array<Record<string, unknown>>;
   const instructor = course.instructor as Record<string, unknown> | null;
   const quiz = course.quiz as Record<string, unknown> | null;
-  const lessonProgress = enrollment
-    ? (enrollment.lessonProgress as Array<Record<string, unknown>>)
-    : [];
   const isEnrolled = !!enrollment;
 
   const getLessonCompleted = (lessonId: string) => {
-    return lessonProgress?.some((lp) => lp.lessonId === lessonId && lp.completed) || false;
+    return lessonProgressMap[lessonId]?.completed || false;
   };
 
-  const isLessonCompleted = activeLesson ? getLessonCompleted(activeLesson.id) : false;
+  const getLessonProgressData = (lessonId: string) => {
+    return lessonProgressMap[lessonId] || null;
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -407,8 +911,11 @@ export function CourseDetailPage() {
                       </span>
                     )}
                     {isLessonCompleted && (
-                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-[11px]">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> Complétée
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-[11px] gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        {activeLessonProgress?.completionTrigger
+                          ? `Complétée (${getCompletionTriggerLabel(activeLessonProgress.completionTrigger)})`
+                          : "Complétée"}
                       </Badge>
                     )}
                   </div>
@@ -428,20 +935,25 @@ export function CourseDetailPage() {
               {/* Viewer Content */}
               <div className="p-5">
                 {activeLesson.type === "TEXTE" && activeLesson.content ? (
-                  <div className="prose prose-sm max-w-none">
-                    <ScrollArea className="max-h-[400px]">
-                      <div className="pr-4 pb-2">
-                        {activeLesson.content.split("\n").map((paragraph, idx) => {
-                          if (!paragraph.trim()) return <div key={idx} className="h-3" />;
-                          return (
-                            <p key={idx} className="text-sm text-foreground/90 leading-relaxed mb-3">
-                              {paragraph}
-                            </p>
-                          );
-                        })}
-                      </div>
-                    </ScrollArea>
-                  </div>
+                  <TextReaderWithTracking
+                    content={activeLesson.content}
+                    lessonId={activeLesson.id}
+                    courseId={courseId!}
+                    initialScrollPercentage={activeLessonProgress?.scrollPercentage || 0}
+                    isCompleted={isLessonCompleted}
+                    onComplete={handleAutoComplete}
+                    isEnrolled={isEnrolled}
+                  />
+                ) : activeLesson.type === "VIDEO" ? (
+                  <VideoSimulator
+                    lessonId={activeLesson.id}
+                    courseId={courseId!}
+                    initialWatchPercentage={activeLessonProgress?.watchPercentage || 0}
+                    lessonDuration={activeLesson.duration || 10}
+                    isCompleted={isLessonCompleted}
+                    onComplete={handleAutoComplete}
+                    isEnrolled={isEnrolled}
+                  />
                 ) : (
                   <LessonTypePlaceholder type={activeLesson.type} />
                 )}
@@ -453,23 +965,48 @@ export function CourseDetailPage() {
               <div className="px-5 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 {/* Mark as Complete */}
                 {!isLessonCompleted && (
-                  <Button
-                    onClick={() => handleMarkComplete(activeLesson.id)}
-                    disabled={markingComplete}
-                    className="rounded-lg text-sm bg-green-600 hover:bg-green-700"
-                  >
-                    {markingComplete ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                  <div className="flex flex-col gap-1">
+                    <Button
+                      onClick={() => handleMarkComplete(activeLesson.id)}
+                      disabled={markingComplete}
+                      className="rounded-lg text-sm bg-green-600 hover:bg-green-700"
+                    >
+                      {markingComplete ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                      )}
+                      Marquer comme terminée
+                    </Button>
+                    {(activeLesson.type === "VIDEO") && (
+                      <p className="text-[10px] text-muted-foreground">
+                        Ou complétion automatique à 90% de visionnage
+                      </p>
                     )}
-                    Marquer comme terminée
-                  </Button>
+                    {(activeLesson.type === "TEXTE") && (
+                      <p className="text-[10px] text-muted-foreground">
+                        Ou complétion automatique à 95% de lecture
+                      </p>
+                    )}
+                  </div>
                 )}
                 {isLessonCompleted && (
-                  <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Leçon terminée
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Leçon terminée
+                    </div>
+                    {activeLessonProgress?.completionTrigger && activeLessonProgress.completionTrigger !== "manual" && (
+                      <p className="text-[10px] text-muted-foreground ml-6">
+                        ✓ Complétée automatiquement (
+                        {activeLessonProgress.completionTrigger === "auto_video"
+                          ? `vidéo regardée à ${Math.round(activeLessonProgress.watchPercentage)}%`
+                          : activeLessonProgress.completionTrigger === "auto_scroll"
+                            ? `texte lu à ${Math.round(activeLessonProgress.scrollPercentage)}%`
+                            : getCompletionTriggerLabel(activeLessonProgress.completionTrigger)}
+                        )
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -517,15 +1054,22 @@ export function CourseDetailPage() {
                       {sIdx + 1}. {section.title as string}
                     </h3>
                     <div className="space-y-1">
-                      {lessons?.map((lesson: Record<string, unknown>, lIdx: number) => {
-                        const completed = getLessonCompleted(lesson.id as string);
-                        const isActive = activeLessonId === lesson.id;
+                      {lessons?.map((lesson: Record<string, unknown>) => {
+                        const lessonIdStr = lesson.id as string;
+                        const completed = getLessonCompleted(lessonIdStr);
+                        const isActive = activeLessonId === lessonIdStr;
                         const lessonType = lesson.type as string;
+                        const lp = getLessonProgressData(lessonIdStr);
+                        const hasProgress = lp && (lp.watchPercentage > 0 || lp.scrollPercentage > 0);
+                        const progressPct = lessonType === "VIDEO"
+                          ? (lp?.watchPercentage || 0)
+                          : (lp?.scrollPercentage || 0);
+
                         return (
                           <button
-                            key={lesson.id as string}
+                            key={lessonIdStr}
                             disabled={!isEnrolled}
-                            onClick={() => handleLessonClick(lesson.id as string)}
+                            onClick={() => handleLessonClick(lessonIdStr)}
                             className={cn(
                               "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200",
                               isEnrolled
@@ -536,7 +1080,24 @@ export function CourseDetailPage() {
                             )}
                           >
                             {completed ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                              <div className="flex-shrink-0">
+                                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                {lp?.completionTrigger && lp.completionTrigger !== "manual" && (
+                                  <span className="text-[8px] text-green-600 block text-center mt-0.5">
+                                    {getCompletionTriggerLabel(lp.completionTrigger)}
+                                  </span>
+                                )}
+                              </div>
+                            ) : hasProgress ? (
+                              <div className="flex-shrink-0 relative">
+                                <PlayCircle className="w-5 h-5 text-amber-500" />
+                                <div className="absolute -bottom-1 left-0 right-0 h-1 bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-amber-400 rounded-full"
+                                    style={{ width: `${progressPct}%` }}
+                                  />
+                                </div>
+                              </div>
                             ) : isEnrolled ? (
                               <PlayCircle className="w-5 h-5 text-primary flex-shrink-0" />
                             ) : (
@@ -553,6 +1114,11 @@ export function CourseDetailPage() {
                                   {LESSON_TYPE_LABELS[lessonType] || lessonType}
                                 </Badge>
                                 <span className="text-[10px] text-muted-foreground">{lesson.duration as number} min</span>
+                                {lp && lp.timeSpent > 0 && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    · {formatTime(lp.timeSpent)}
+                                  </span>
+                                )}
                               </div>
                             </div>
                             {isEnrolled && (

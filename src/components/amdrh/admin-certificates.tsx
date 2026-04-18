@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAppStore } from "@/store/app";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -30,10 +31,13 @@ import {
   Search, ChevronLeft, ChevronRight, Award, Star, Plus, Loader2,
   Calendar, FileCheck, Clock, Users, Eye, MoreHorizontal, Pencil,
   Trash2, Gift, ShieldCheck, AlertCircle, X, ExternalLink,
+  Download, Copy, Ban, Undo2, CheckCircle, ClipboardCheck,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import {
-  BADGE_LEVEL_LABELS, BADGE_LEVEL_COLORS, ROLE_LABELS,
+  BADGE_LEVEL_LABELS, BADGE_LEVEL_COLORS,
+  CERTIFICATE_TYPE_LABELS, CERTIFICATE_TYPE_COLORS,
+  CERTIFICATE_STATUS_LABELS, CERTIFICATE_STATUS_COLORS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +48,8 @@ import { cn } from "@/lib/utils";
 interface CertificateItem {
   id: string;
   code: string;
+  type: string;
+  status: string;
   userId: string;
   courseId: string;
   courseTitle: string;
@@ -52,7 +58,10 @@ interface CertificateItem {
   maxScore: number;
   issuedAt: string;
   expiresAt: string | null;
+  revokedAt: string | null;
+  revokeReason: string | null;
   qrCodeUrl: string | null;
+  pdfUrl: string | null;
   user: { id: string; nom: string; prenom: string; email: string; role: string } | null;
   course: { id: string; title: string } | null;
 }
@@ -113,6 +122,7 @@ export function AdminCertificatesPage() {
 // ───────────────────────────────────────────────────────────
 
 function CertificatesTab() {
+  const { user } = useAppStore();
   const [certificates, setCertificates] = useState<CertificateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -122,16 +132,21 @@ function CertificatesTab() {
   const [stats, setStats] = useState<CertStats | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [revokeOpen, setRevokeOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [selectedCert, setSelectedCert] = useState<CertificateItem | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
   const fetchCertificates = useCallback(async () => {
     try {
-      const params = new URLSearchParams({ page: String(page), limit: "15" });
-      if (search) params.set("search", search);
-      if (dateFrom) params.set("dateFrom", dateFrom);
-      if (dateTo) params.set("dateTo", dateTo);
+      const params = new URLSearchParams({
+        page: String(page), limit: "15",
+        ...(search && { search }),
+        ...(dateFrom && { dateFrom }),
+        ...(dateTo && { dateTo }),
+      });
       const res = await fetch(`/api/admin/certificates?${params}`);
       const data = await res.json();
       setCertificates(data.certificates || []);
@@ -167,10 +182,7 @@ function CertificatesTab() {
     setDateTo("");
     setPage(1);
     setLoading(true);
-    // The useCallback will use the new values on next render
-    setTimeout(() => {
-      window.location.reload();
-    }, 50);
+    setTimeout(() => window.location.reload(), 50);
   };
 
   const formatDate = (d: string) =>
@@ -178,6 +190,11 @@ function CertificatesTab() {
 
   const isExpired = (expiresAt: string | null) =>
     expiresAt ? new Date(expiresAt) < new Date() : false;
+
+  const refresh = () => {
+    setLoading(true);
+    fetchCertificates();
+  };
 
   if (loading) return <CertificatesSkeleton />;
 
@@ -236,13 +253,19 @@ function CertificatesTab() {
         </div>
       </div>
 
-      {/* Create button */}
-      <div className="flex items-center justify-between">
+      {/* Buttons */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <p className="text-sm text-muted-foreground">{total} certificat{total > 1 ? "s" : ""}</p>
-        <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 rounded-lg text-sm">
-          <Plus className="w-4 h-4 mr-1.5" />
-          Créer un certificat
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setBulkOpen(true)} variant="outline" className="rounded-lg text-sm border-border/60">
+            <ClipboardCheck className="w-4 h-4 mr-1.5" />
+            Délivrer en masse
+          </Button>
+          <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 rounded-lg text-sm">
+            <Plus className="w-4 h-4 mr-1.5" />
+            Créer un certificat
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -262,15 +285,17 @@ function CertificatesTab() {
                     <th className="text-left py-3 px-4 font-medium">Code</th>
                     <th className="text-left py-3 px-4 font-medium">Utilisateur</th>
                     <th className="text-left py-3 px-4 font-medium hidden sm:table-cell">Cours</th>
+                    <th className="text-left py-3 px-4 font-medium hidden md:table-cell">Type</th>
                     <th className="text-left py-3 px-4 font-medium hidden md:table-cell">Score</th>
-                    <th className="text-left py-3 px-4 font-medium hidden lg:table-cell">Délivré le</th>
                     <th className="text-left py-3 px-4 font-medium hidden lg:table-cell">Statut</th>
+                    <th className="text-left py-3 px-4 font-medium hidden lg:table-cell">Délivré le</th>
                     <th className="text-right py-3 px-4 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {certificates.map((c) => {
                     const expired = isExpired(c.expiresAt);
+                    const isRevoked = c.status === "REVOKED";
                     return (
                       <tr key={c.id} className="border-t border-border/30 hover:bg-muted/30 transition-colors">
                         <td className="py-3 px-4">
@@ -295,15 +320,27 @@ function CertificatesTab() {
                           <p className="text-sm text-muted-foreground truncate max-w-[180px]">{c.courseTitle}</p>
                         </td>
                         <td className="py-3 px-4 hidden md:table-cell">
+                          <Badge variant="secondary" className={cn("text-[9px]", CERTIFICATE_TYPE_COLORS[c.type] || "bg-gray-100 text-gray-700")}>
+                            {CERTIFICATE_TYPE_LABELS[c.type] || c.type}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 hidden md:table-cell">
                           <span className={cn(
                             "text-sm font-semibold",
                             c.maxScore > 0 && (c.score / c.maxScore) >= 0.7 ? "text-green-700" : "text-amber-700"
                           )}>
                             {c.score}/{c.maxScore}
                           </span>
-                          <span className="text-[10px] text-muted-foreground ml-1">
-                            ({c.maxScore > 0 ? Math.round((c.score / c.maxScore) * 100) : 0}%)
-                          </span>
+                        </td>
+                        <td className="py-3 px-4 hidden lg:table-cell">
+                          <Badge variant="secondary" className={cn("text-[9px]",
+                            isRevoked ? CERTIFICATE_STATUS_COLORS.REVOKED :
+                            expired ? "bg-red-50 text-red-600" :
+                            c.expiresAt ? "bg-green-50 text-green-700" :
+                            CERTIFICATE_STATUS_COLORS.ACTIVE
+                          )}>
+                            {isRevoked ? "Révoqué" : expired ? "Expiré" : c.expiresAt ? "Valide" : "Sans expiration"}
+                          </Badge>
                         </td>
                         <td className="py-3 px-4 hidden lg:table-cell">
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -311,24 +348,37 @@ function CertificatesTab() {
                             {formatDate(c.issuedAt)}
                           </div>
                         </td>
-                        <td className="py-3 px-4 hidden lg:table-cell">
-                          {expired ? (
-                            <Badge variant="secondary" className="text-[10px] bg-red-50 text-red-600 border-red-200">Expiré</Badge>
-                          ) : c.expiresAt ? (
-                            <Badge variant="secondary" className="text-[10px] bg-green-50 text-green-700 border-green-200">Valide</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">Sans expiration</Badge>
-                          )}
-                        </td>
                         <td className="py-3 px-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 rounded-lg"
-                            onClick={() => { setSelectedCert(c); setDetailOpen(true); }}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => { setSelectedCert(c); setDetailOpen(true); }}>
+                                <Eye className="w-4 h-4 mr-2" /> Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => window.open(`/api/certificates/${c.id}/pdf?userId=${c.userId}`, "_blank")}>
+                                <Download className="w-4 h-4 mr-2" /> Télécharger PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { setSelectedCert(c); setVerifyOpen(true); }}>
+                                <CheckCircle className="w-4 h-4 mr-2" /> Vérifier
+                              </DropdownMenuItem>
+                              {!isRevoked && (
+                                <DropdownMenuItem onClick={() => { setSelectedCert(c); setRevokeOpen(true); }} className="text-red-600 focus:text-red-600">
+                                  <Ban className="w-4 h-4 mr-2" /> Révoquer
+                                </DropdownMenuItem>
+                              )}
+                              {isRevoked && (
+                                <DropdownMenuItem onClick={() => handleReactivate(c)}>
+                                  <Undo2 className="w-4 h-4 mr-2" /> Réactiver
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </td>
                       </tr>
                     );
@@ -353,7 +403,7 @@ function CertificatesTab() {
       )}
 
       {/* Create Certificate Dialog */}
-      <CreateCertificateDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={() => { setPage(1); setLoading(true); fetchCertificates(); }} />
+      <CreateCertificateDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={() => { setPage(1); refresh(); }} />
 
       {/* Certificate Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
@@ -365,11 +415,14 @@ function CertificatesTab() {
                   <Award className="w-5 h-5 text-primary" />
                   Détails du certificat
                 </DialogTitle>
-                <DialogDescription>Informations du certificat</DialogDescription>
+                <DialogDescription>Informations complètes du certificat</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <p className="font-mono text-lg font-bold text-primary">{selectedCert.code}</p>
+                  <Badge variant="secondary" className={cn("text-[9px] mt-2", CERTIFICATE_TYPE_COLORS[selectedCert.type] || "")}>
+                    {CERTIFICATE_TYPE_LABELS[selectedCert.type] || selectedCert.type}
+                  </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
@@ -388,6 +441,12 @@ function CertificatesTab() {
                     </p>
                   </div>
                   <div>
+                    <p className="text-xs text-muted-foreground">Statut</p>
+                    <Badge variant="secondary" className={cn("text-[9px]", CERTIFICATE_STATUS_COLORS[selectedCert.status] || "")}>
+                      {CERTIFICATE_STATUS_LABELS[selectedCert.status] || selectedCert.status}
+                    </Badge>
+                  </div>
+                  <div>
                     <p className="text-xs text-muted-foreground">Délivré le</p>
                     <p className="font-medium">{formatDate(selectedCert.issuedAt)}</p>
                   </div>
@@ -401,13 +460,446 @@ function CertificatesTab() {
                     </div>
                   )}
                 </div>
+                {selectedCert.revokeReason && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-xs font-medium text-red-700">Raison de révocation</p>
+                    <p className="text-xs text-red-600 mt-1">{selectedCert.revokeReason}</p>
+                  </div>
+                )}
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => window.open(`/api/certificates/${selectedCert.id}/pdf?userId=${selectedCert.userId}`, "_blank")} className="flex-1 rounded-lg text-xs">
+                    <Download className="w-3.5 h-3.5 mr-1" /> Télécharger PDF
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => { setDetailOpen(false); setVerifyOpen(true); }} className="flex-1 rounded-lg text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 mr-1" /> Vérifier
+                  </Button>
+                </div>
               </div>
             </>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Verification Dialog */}
+      <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
+        <DialogContent className="max-w-sm">
+          {selectedCert && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  Vérification du certificat
+                </DialogTitle>
+                <DialogDescription>Informations de vérification</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <p className="font-mono text-sm font-bold text-foreground mb-2">{selectedCert.code}</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <input type="text" readOnly value={selectedCert.code} className="sr-only" id={`verify-code-${selectedCert.id}`} />
+                    <Button
+                      variant="outline" size="sm" className="h-7 text-[10px] rounded-md"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedCert.code);
+                        toast({ title: "Copié", description: "Le code a été copié." });
+                      }}
+                    >
+                      <Copy className="w-3 h-3 mr-1" /> Copier le code
+                    </Button>
+                  </div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Lien de vérification</p>
+                  <p className="text-xs text-primary font-mono break-all">
+                    https://academie.amdrh.ma/verify/{selectedCert.code}
+                  </p>
+                  <Button
+                    variant="ghost" size="sm" className="h-6 text-[10px] mt-1 rounded-md"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://academie.amdrh.ma/verify/${selectedCert.code}`);
+                      toast({ title: "Copié", description: "Le lien a été copié." });
+                    }}
+                  >
+                    <Copy className="w-3 h-3 mr-1" /> Copier le lien
+                  </Button>
+                </div>
+                <div className="border border-dashed border-border/60 rounded-lg p-6 text-center bg-muted/20">
+                  <div className="w-16 h-16 bg-muted/60 rounded-lg mx-auto flex items-center justify-center mb-2">
+                    <ExternalLink className="w-6 h-6 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">QR Code</p>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Revoke Dialog */}
+      <RevokeDialog
+        open={revokeOpen}
+        onOpenChange={setRevokeOpen}
+        cert={selectedCert}
+        onRevoked={() => { setRevokeOpen(false); refresh(); }}
+      />
+
+      {/* Bulk Issue Dialog */}
+      <BulkIssueDialog open={bulkOpen} onOpenChange={setBulkOpen} onIssued={refresh} />
     </div>
   );
+}
+
+// ───────────────────────────────────────────────────────────
+// Revoke Certificate Dialog
+// ───────────────────────────────────────────────────────────
+
+function RevokeDialog({
+  open, onOpenChange, cert, onRevoked,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  cert: CertificateItem | null;
+  onRevoked: () => void;
+}) {
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open) setReason("");
+  }, [open]);
+
+  const handleRevoke = async () => {
+    if (!cert) return;
+    if (!reason.trim()) {
+      setError("La raison de révocation est requise");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/certificates/${cert.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "REVOKED", revokeReason: reason }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erreur lors de la révocation");
+        return;
+      }
+      toast({ title: "Certificat révoqué", description: `Le certificat ${cert.code} a été révoqué.` });
+      onOpenChange(false);
+      onRevoked();
+    } catch {
+      setError("Erreur serveur");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-red-600">
+            <Ban className="w-5 h-5" />
+            Révoquer le certificat
+          </DialogTitle>
+          <DialogDescription>Cette action est irréversible.</DialogDescription>
+        </DialogHeader>
+        {cert && (
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <Award className="w-5 h-5 text-red-500" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">{cert.code}</p>
+                  <p className="text-xs text-muted-foreground">{cert.userName} — {cert.courseTitle}</p>
+                </div>
+              </div>
+            </div>
+            {error && (
+              <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-lg font-medium">{error}</div>
+            )}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Raison de la révocation *</Label>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Décrivez la raison de la révocation..."
+                rows={3}
+                className="rounded-lg"
+              />
+            </div>
+            <DialogFooter className="gap-2 pt-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-lg">Annuler</Button>
+              <Button onClick={handleRevoke} disabled={loading} className="rounded-lg bg-red-600 hover:bg-red-700">
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Ban className="w-4 h-4 mr-2" />}
+                Révoquer
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ───────────────────────────────────────────────────────────
+// Bulk Issue Dialog
+// ───────────────────────────────────────────────────────────
+
+function BulkIssueDialog({
+  open, onOpenChange, onIssued,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onIssued: () => void;
+}) {
+  const [courses, setCourses] = useState<Array<{ id: string; title: string }>>([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [eligibleUsers, setEligibleUsers] = useState<Array<{ id: string; prenom: string; nom: string; email: string; checked: boolean }>>([]);
+  const [certType, setCertType] = useState("CERTIFICAT");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      fetch("/api/courses?limit=200")
+        .then((r) => r.json())
+        .then((d) => setCourses(d.courses || []))
+        .catch(() => {});
+      setSelectedCourse("");
+      setEligibleUsers([]);
+      setCertType("CERTIFICAT");
+      setError("");
+    }
+  }, [open]);
+
+  const handleCourseSelect = async (courseId: string) => {
+    setSelectedCourse(courseId);
+    setLoading(true);
+    setError("");
+    try {
+      // Fetch enrollments for this course that are completed
+      const res = await fetch(`/api/admin/traceability?courseId=${courseId}&status=termine&limit=100`);
+      const data = await res.json();
+      const enrollments = data.enrollments || [];
+
+      // Filter eligible: completed + passed quiz + no existing certificate
+      const eligible = enrollments.filter(
+        (e: Record<string, unknown>) => !e.certificateId && (e.quizStatus === "REUSSI" || (e as { quizStatus?: string }).quizStatus === "REUSSI")
+      );
+
+      // If no passed quiz filter, just use completed without cert
+      const users = (eligible.length > 0 ? eligible : enrollments.filter((e: Record<string, unknown>) => !e.certificateId)).map(
+        (e: Record<string, unknown>) => ({
+          id: e.userId as string,
+          prenom: (e.userName as string)?.split(" ")[0] || "",
+          nom: (e.userName as string)?.split(" ").slice(1).join(" ") || "",
+          email: e.userEmail as string,
+          checked: true,
+        })
+      );
+      setEligibleUsers(users);
+    } catch {
+      setError("Impossible de charger les utilisateurs éligibles");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleUser = (userId: string) => {
+    setEligibleUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, checked: !u.checked } : u))
+    );
+  };
+
+  const toggleAll = () => {
+    const allChecked = eligibleUsers.every((u) => u.checked);
+    setEligibleUsers((prev) => prev.map((u) => ({ ...u, checked: !allChecked })));
+  };
+
+  const handleBulkIssue = async () => {
+    const selected = eligibleUsers.filter((u) => u.checked);
+    if (selected.length === 0) {
+      setError("Sélectionnez au moins un utilisateur");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/certificates/bulk-issue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseId: selectedCourse,
+          userIds: selected.map((u) => u.id),
+          type: certType,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erreur lors de la délivrance");
+        return;
+      }
+      const data = await res.json();
+      toast({
+        title: "Certificats délivrés",
+        description: `${data.summary.succeeded} certificat(s) créé(s), ${data.summary.failed} échoué(s).`,
+      });
+      onOpenChange(false);
+      onIssued();
+    } catch {
+      setError("Erreur serveur");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectedCount = eligibleUsers.filter((u) => u.checked).length;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ClipboardCheck className="w-5 h-5 text-primary" />
+            Délivrer en masse
+          </DialogTitle>
+          <DialogDescription>Sélectionnez un cours et les utilisateurs éligibles</DialogDescription>
+        </DialogHeader>
+
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-lg font-medium">{error}</div>
+        )}
+
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Cours *</Label>
+            <Select value={selectedCourse} onValueChange={handleCourseSelect}>
+              <SelectTrigger className="h-10 rounded-lg">
+                <SelectValue placeholder="Sélectionner un cours" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {courses.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground ml-2">Chargement...</span>
+            </div>
+          ) : eligibleUsers.length > 0 ? (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Type de certificat</Label>
+                <Select value={certType} onValueChange={setCertType}>
+                  <SelectTrigger className="h-10 rounded-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ATTESTATION">
+                      <span className="flex items-center gap-2">
+                        <span className={cn("w-2.5 h-2.5 rounded-full bg-emerald-400")} />
+                        Attestation de réussite
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="CERTIFICAT_COMPLETION">
+                      <span className="flex items-center gap-2">
+                        <span className={cn("w-2.5 h-2.5 rounded-full bg-blue-400")} />
+                        Certificat de complétion
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="DIPLOME">
+                      <span className="flex items-center gap-2">
+                        <span className={cn("w-2.5 h-2.5 rounded-full bg-amber-400")} />
+                        Diplôme
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium">
+                  Utilisateurs éligibles ({eligibleUsers.length})
+                </Label>
+                <Button variant="ghost" size="sm" onClick={toggleAll} className="h-7 text-[10px] rounded-md">
+                  {eligibleUsers.every((u) => u.checked) ? "Tout décocher" : "Tout cocher"}
+                </Button>
+              </div>
+
+              <div className="space-y-1 max-h-60 overflow-y-auto border border-border/40 rounded-lg p-2">
+                {eligibleUsers.map((u) => (
+                  <label
+                    key={u.id}
+                    className="flex items-center gap-2.5 p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+                  >
+                    <Checkbox checked={u.checked} onCheckedChange={() => toggleUser(u.id)} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium">{u.prenom} {u.nom}</p>
+                      <p className="text-[10px] text-muted-foreground">{u.email}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </>
+          ) : selectedCourse ? (
+            <div className="text-center py-8">
+              <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Aucun utilisateur éligible pour ce cours</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Les utilisateurs doivent avoir complété le cours et réussi le quiz</p>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">Sélectionnez un cours pour voir les utilisateurs éligibles</p>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2 pt-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-lg">Annuler</Button>
+          <Button
+            onClick={handleBulkIssue}
+            disabled={submitting || eligibleUsers.length === 0 || selectedCount === 0}
+            className="rounded-lg"
+          >
+            {submitting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Award className="w-4 h-4 mr-2" />
+            )}
+            Délivrer ({selectedCount})
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Helper for reactivate
+async function handleReactivate(cert: CertificateItem) {
+  try {
+    const res = await fetch(`/api/admin/certificates/${cert.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "ACTIVE" }),
+    });
+    if (res.ok) {
+      toast({ title: "Certificat réactivé", description: `Le certificat ${cert.code} a été réactivé.` });
+    } else {
+      toast({ title: "Erreur", description: "Impossible de réactiver", variant: "destructive" });
+    }
+  } catch {
+    toast({ title: "Erreur serveur", variant: "destructive" });
+  }
 }
 
 // ───────────────────────────────────────────────────────────
@@ -422,6 +914,7 @@ function CreateCertificateDialog({ open, onOpenChange, onCreated }: { open: bool
   const [form, setForm] = useState({
     userId: "",
     courseId: "",
+    type: "CERTIFICAT",
     score: "",
     maxScore: "100",
     expiryDate: "",
@@ -429,11 +922,11 @@ function CreateCertificateDialog({ open, onOpenChange, onCreated }: { open: bool
 
   useEffect(() => {
     if (open) {
-      // Fetch users and courses
       Promise.all([
         fetch("/api/users?limit=200").then((r) => r.json()).then((d) => setUsers(d.users || [])).catch(() => {}),
         fetch("/api/courses?limit=200").then((r) => r.json()).then((d) => setCourses(d.courses || [])).catch(() => {}),
       ]);
+      setForm({ userId: "", courseId: "", type: "CERTIFICAT", score: "", maxScore: "100", expiryDate: "" });
     }
   }, [open]);
 
@@ -451,6 +944,7 @@ function CreateCertificateDialog({ open, onOpenChange, onCreated }: { open: bool
         body: JSON.stringify({
           userId: form.userId,
           courseId: form.courseId,
+          type: form.type,
           score: parseInt(form.score),
           maxScore: parseInt(form.maxScore),
           expiryDate: form.expiryDate || null,
@@ -467,7 +961,6 @@ function CreateCertificateDialog({ open, onOpenChange, onCreated }: { open: bool
         description: `Certificat ${data.certificate.code} a été délivré avec succès.`,
       });
       onOpenChange(false);
-      setForm({ userId: "", courseId: "", score: "", maxScore: "100", expiryDate: "" });
       onCreated();
     } catch {
       setError("Erreur serveur");
@@ -492,6 +985,38 @@ function CreateCertificateDialog({ open, onOpenChange, onCreated }: { open: bool
         )}
 
         <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Type de certificat</Label>
+            <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+              <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ATTESTATION">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                    Attestation de réussite
+                  </span>
+                </SelectItem>
+                <SelectItem value="CERTIFICAT_COMPLETION">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+                    Certificat de complétion
+                  </span>
+                </SelectItem>
+                <SelectItem value="DIPLOME">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                    Diplôme
+                  </span>
+                </SelectItem>
+                <SelectItem value="CERTIFICAT">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+                    Certificat
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">Utilisateur *</Label>
             <Select value={form.userId} onValueChange={(v) => setForm({ ...form, userId: v })}>
@@ -620,7 +1145,6 @@ function BadgesTab() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <p className="text-sm text-muted-foreground">{badges.length} badge{badges.length > 1 ? "s" : ""}</p>
         <div className="flex gap-2">
@@ -635,7 +1159,6 @@ function BadgesTab() {
         </div>
       </div>
 
-      {/* Badges Grid */}
       {badges.length === 0 ? (
         <div className="text-center py-20">
           <Star className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
@@ -703,18 +1226,14 @@ function BadgesTab() {
         </div>
       )}
 
-      {/* Create Badge Dialog */}
       <CreateBadgeDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={fetchBadges} />
 
-      {/* Edit Badge Dialog */}
       {selectedBadge && (
         <EditBadgeDialog open={editOpen} onOpenChange={setEditOpen} badge={selectedBadge} onUpdated={fetchBadges} />
       )}
 
-      {/* Award Badge Dialog */}
       <AwardBadgeDialog open={awardOpen} onOpenChange={setAwardOpen} badges={badges} />
 
-      {/* Badge Users Dialog */}
       <Dialog open={badgeUsersOpen} onOpenChange={setBadgeUsersOpen}>
         <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           {selectedBadge && (
@@ -767,7 +1286,6 @@ function BadgesTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -797,11 +1315,7 @@ function CreateBadgeDialog({ open, onOpenChange, onCreated }: { open: boolean; o
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    level: "BRONZE",
-    icon: "🏆",
-    criteria: "",
+    name: "", description: "", level: "BRONZE", icon: "🏆", criteria: "",
   });
 
   const handleSubmit = async () => {
@@ -915,19 +1429,13 @@ function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: { open: boole
   });
 
   useEffect(() => {
-    setForm({
-      name: badge.name,
-      description: badge.description,
-      level: badge.level,
-      icon: badge.icon,
-      criteria: badge.criteria,
-    });
+    setForm({ name: badge.name, description: badge.description, level: badge.level, icon: badge.icon, criteria: badge.criteria });
   }, [badge]);
 
   const handleSubmit = async () => {
     setError("");
-    if (!form.name || !form.description || !form.level) {
-      setError("Nom, description et niveau sont requis");
+    if (!form.name || !form.description) {
+      setError("Nom et description sont requis");
       return;
     }
     setLoading(true);
@@ -942,7 +1450,7 @@ function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: { open: boole
         setError(data.error || "Erreur lors de la modification");
         return;
       }
-      toast({ title: "Badge modifié", description: `"${form.name}" a été mis à jour.` });
+      toast({ title: "Badge modifié", description: `"${form.name}" a été modifié.` });
       onOpenChange(false);
       onUpdated();
     } catch {
@@ -980,7 +1488,7 @@ function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: { open: boole
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Niveau *</Label>
+              <Label className="text-xs font-medium">Niveau</Label>
               <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
                 <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -996,12 +1504,12 @@ function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: { open: boole
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Icône (emoji)</Label>
+              <Label className="text-xs font-medium">Icône</Label>
               <Input className="h-10 rounded-lg text-center text-xl" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} maxLength={2} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Critères d&apos;obtention</Label>
+            <Label className="text-xs font-medium">Critères</Label>
             <Textarea className="rounded-lg" value={form.criteria} onChange={(e) => setForm({ ...form, criteria: e.target.value })} rows={2} />
           </div>
         </div>
@@ -1009,7 +1517,7 @@ function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: { open: boole
         <DialogFooter className="gap-2 pt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-lg">Annuler</Button>
           <Button onClick={handleSubmit} disabled={loading} className="rounded-lg">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Pencil className="w-4 h-4 mr-2" />}
+            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Enregistrer
           </Button>
         </DialogFooter>
@@ -1025,20 +1533,20 @@ function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: { open: boole
 function AwardBadgeDialog({ open, onOpenChange, badges }: { open: boolean; onOpenChange: (v: boolean) => void; badges: BadgeItem[] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [users, setUsers] = useState<Array<{ id: string; nom: string; prenom: string; email: string; role: string }>>([]);
-  const [form, setForm] = useState({ userId: "", badgeId: "" });
+  const [users, setUsers] = useState<Array<{ id: string; nom: string; prenom: string; email: string }>>([]);
+  const [form, setForm] = useState({ badgeId: "", userId: "" });
 
   useEffect(() => {
     if (open) {
       fetch("/api/users?limit=200").then((r) => r.json()).then((d) => setUsers(d.users || [])).catch(() => {});
-      setForm({ userId: "", badgeId: "" });
+      setForm({ badgeId: "", userId: "" });
     }
   }, [open]);
 
   const handleSubmit = async () => {
     setError("");
-    if (!form.userId || !form.badgeId) {
-      setError("Utilisateur et badge sont requis");
+    if (!form.badgeId || !form.userId) {
+      setError("Badge et utilisateur sont requis");
       return;
     }
     setLoading(true);
@@ -1053,9 +1561,7 @@ function AwardBadgeDialog({ open, onOpenChange, badges }: { open: boolean; onOpe
         setError(data.error || "Erreur lors de l&apos;attribution");
         return;
       }
-      const badgeName = badges.find((b) => b.id === form.badgeId)?.name || "Badge";
-      const userName = users.find((u) => u.id === form.userId) ? `${users.find((u) => u.id === form.userId)?.prenom} ${users.find((u) => u.id === form.userId)?.nom}` : "Utilisateur";
-      toast({ title: "Badge attribué", description: `"${badgeName}" a été attribué à ${userName}.` });
+      toast({ title: "Badge attribué", description: "Le badge a été attribué avec succès." });
       onOpenChange(false);
     } catch {
       setError("Erreur serveur");
@@ -1081,22 +1587,6 @@ function AwardBadgeDialog({ open, onOpenChange, badges }: { open: boolean; onOpe
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Utilisateur *</Label>
-            <Select value={form.userId} onValueChange={(v) => setForm({ ...form, userId: v })}>
-              <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Sélectionner un utilisateur" /></SelectTrigger>
-              <SelectContent className="max-h-60">
-                {users.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    <span className="flex items-center gap-2">
-                      {u.prenom} {u.nom}
-                      <Badge variant="secondary" className="text-[9px] ml-1">{ROLE_LABELS[u.role] || u.role}</Badge>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
             <Label className="text-xs font-medium">Badge *</Label>
             <Select value={form.badgeId} onValueChange={(v) => setForm({ ...form, badgeId: v })}>
               <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Sélectionner un badge" /></SelectTrigger>
@@ -1106,9 +1596,19 @@ function AwardBadgeDialog({ open, onOpenChange, badges }: { open: boolean; onOpe
                     <span className="flex items-center gap-2">
                       <span>{b.icon}</span>
                       {b.name}
-                      <Badge variant="secondary" className="text-[9px]">{BADGE_LEVEL_LABELS[b.level]}</Badge>
                     </span>
                   </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Utilisateur *</Label>
+            <Select value={form.userId} onValueChange={(v) => setForm({ ...form, userId: v })}>
+              <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Sélectionner un utilisateur" /></SelectTrigger>
+              <SelectContent className="max-h-60">
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>{u.prenom} {u.nom} ({u.email})</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -1133,30 +1633,26 @@ function AwardBadgeDialog({ open, onOpenChange, badges }: { open: boolean; onOpe
 
 function CertificatesSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="border-border/60"><CardContent className="p-4"><Skeleton className="h-16 w-full rounded-lg" /></CardContent></Card>
-        ))}
+        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
       </div>
-      <div className="flex gap-3"><Skeleton className="h-10 w-64 rounded-lg" /><Skeleton className="h-10 w-72 rounded-lg" /></div>
-      <Card className="border-border/60">
-        <CardContent className="p-4 space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
-        </CardContent>
-      </Card>
+      <div className="flex gap-3">
+        <Skeleton className="h-10 w-64 rounded-lg" />
+        <Skeleton className="h-10 w-36 rounded-lg" />
+      </div>
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
+      </div>
     </div>
   );
 }
 
 function BadgesSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="flex justify-end"><Skeleton className="h-10 w-40 rounded-lg" /></div>
+    <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={i} className="border-border/60"><CardContent className="p-5"><Skeleton className="h-28 w-full rounded-lg" /></CardContent></Card>
-        ))}
+        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />)}
       </div>
     </div>
   );

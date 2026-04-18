@@ -218,3 +218,160 @@ Stage Summary:
 - Real CSV export in analytics dashboard
 - Quiz passing score now comes from quiz configuration in DB
 - Platform is production-ready for the cahier de charges specifications
+
+---
+Task ID: 7-8
+Agent: full-stack-developer
+Task: Learner Progress Traceability + Enhanced Course Detail with Content Tracking
+
+Work Log:
+- Updated /api/courses/[id]/progress/route.ts: Added GET endpoint for detailed progress (lesson progress with all tracking fields, quiz attempts, total time spent) and enhanced POST to support watchPercentage, scrollPercentage, timeSpent (incremental), completionTrigger fields with auto-completion logic (VIDEO at 90%, TEXTE at 95%)
+- Updated /api/courses/route.ts GET: Added `enrolled=true` parameter to filter to user-enrolled courses only, enhanced enrollment include with startedAt/completedAt/lastAccessAt, added sections with lessons and quiz to include for enrolled view
+- Created /src/components/amdrh/learner-traceability.tsx: Full learner progress page with 4 overview stat cards (Cours en cours, Cours terminés, Temps total, Certificats), detailed course progress cards showing lesson breakdown with status/progress/type badges, expandable lesson list (first 3 + expand), timeline of recent activity, certificates grid, pagination (5 per page), loading/error/empty states
+- Enhanced /src/components/amdrh/course-detail.tsx:
+  - Added VideoSimulator component with play/pause controls, progress slider, heartbeat every 5s, auto-completion at 90% watch, session time tracking, "Activité enregistrée" indicator
+  - Added TextReaderWithTracking component with scroll position tracking via IntersectionObserver + scroll events, heartbeat every 10s, auto-completion at 95% scroll, reading progress bar indicator
+  - Enhanced lesson status indicators in course outline: green check with completion trigger label (Auto vidéo, Auto lecture, Manuel), amber progress bar for in-progress lessons with watch/scroll percentage
+  - Enhanced "mark as complete" button with auto-completion info text and completed status showing trigger method
+  - Added lessonProgressMap state and refreshCourseData for real-time progress updates
+  - Added initial lesson opening via viewParams.lessonId
+- Updated store/app.ts: Added "learner-traceability" to AppView type
+- Updated layout.tsx: Added "Ma progression" nav item with TrendingUp icon, added view title
+- Updated page.tsx: Imported LearnerTraceabilityPage, added switch case
+- ESLint: 0 errors, 0 warnings
+- Dev server: GET / 200
+
+Stage Summary:
+- Complete learner progress traceability page with real-time data from API
+- Enhanced course detail with video simulation (play/pause/progress slider/auto-complete at 90%)
+- Text reading tracking with IntersectionObserver scroll detection (auto-complete at 95%)
+- Session time tracking with heartbeats (5s for video, 10s for text)
+- Lesson status indicators show completion trigger method in course outline
+- All data from real API calls (no mock data)
+- Swiss institutional design maintained throughout
+
+---
+Task ID: 2
+Agent: full-stack-developer
+Task: Enhanced Progress Tracking APIs
+
+Work Log:
+- Verified Prisma schema already has all new LessonProgress fields (timeSpent, watchPercentage, scrollPercentage, completionTrigger, completedAt)
+- Confirmed DB schema is in sync with Prisma schema via `db push`
+- Enhanced POST /api/courses/[id]/progress with:
+  - New request fields: timeSpent (cumulative), watchPercentage, scrollPercentage, completionTrigger
+  - Auto-completion logic: video 90% watch → auto_video, text 95% scroll → auto_scroll, 80% expected time → auto_time
+  - Cumulative timeSpent (adds to existing value, never replaces)
+  - completedAt auto-set on first completion transition
+  - Response includes autoCompleted and autoTrigger flags
+- Added GET /api/courses/[id]/progress?userId=xxx with:
+  - Returns enrollment info, all lessons with per-lesson progress details
+  - Aggregated totalTimeSpent, completedLessons, totalLessons
+- Created /api/admin/traceability/route.ts:
+  - ADMIN-only, supports search (name/email/course), courseId, status filters
+  - Paginated enrollment list with full lesson progress per enrollment
+  - Includes quizAttempts count, quizBestScore, hasCertificate flag
+  - Global stats: totalEnrollments, completedEnrollments, inProgress, averageCompletionPercent, averageTimeSpent
+- Created /api/admin/traceability/export/route.ts:
+  - ADMIN-only CSV export with UTF-8 BOM for Excel compatibility
+  - Filters: courseId, role, dateFrom, dateTo
+  - Columns: Nom, Prénom, Email, Rôle, Cours, Progression %, Leçons terminées, Leçons totales, Temps passé (min), Score quiz, Certificat, Date inscription, Date complétion
+  - Proper CSV escaping for semicolons and quotes
+- ESLint clean: 0 errors
+- Dev server running: GET / 200
+
+Stage Summary:
+- Enhanced progress tracking with auto-completion logic (video watch %, text scroll %, time-based)
+- Detailed enrollment progress API with per-lesson breakdown
+- Admin traceability API with search, filters, pagination, and aggregated stats
+- CSV export endpoint for compliance reporting
+- All data from real PostgreSQL database, zero mock data
+
+---
+Task ID: 3-4
+Agent: full-stack-developer
+Task: Certificate System Enhancement — PDF generation, verification, revoke/reactivate
+
+Work Log:
+- Updated POST /api/admin/certificates to support `type` parameter (ATTESTATION, CERTIFICAT_COMPLETION, DIPLOME, CERTIFICAT)
+- Enhanced sequential certificate code generation with robust uniqueness retry loop (AMDRH-YYYY-XXXXX)
+- Created /api/admin/certificates/[id]/route.ts with:
+  - GET: single certificate detail with user and course relations
+  - PATCH: revoke (status=REVOKED, sets revokedAt + revokeReason), suspend (SUSPENDED), reactivate (ACTIVE, clears revokedAt/revokeReason)
+  - DELETE: revoke + permanently delete certificate with user notification
+- Created /api/certificates/[id]/pdf/route.ts:
+  - GET: generates professional HTML certificate with Swiss institutional design
+  - AMDRH branding with logo area, official colors (blue #1D4ED8, gold #F59E0B)
+  - Dynamic title based on certificate type (Attestation / Certificat / Diplôme)
+  - Displays: recipient name, licence number, course title, score, percentage, mention, dates, certificate code
+  - Signature placeholders (Président AMDRH, Directeur Pédagogique, QR verification area)
+  - Revoked watermark overlay when status is REVOKED
+  - Print button for Ctrl+P PDF save
+  - Returns text/html with proper Content-Disposition header
+- Created /api/certificates/verify/route.ts:
+  - Public endpoint (no auth required)
+  - GET: validates certificate by code
+  - Returns valid/invalid status, full certificate data (code, type, status, courseTitle, userName, score, dates)
+  - Handles: not found, revoked, suspended, expired cases with appropriate error messages
+- Fixed /api/quiz/[id]/route.ts auto-certificate generation:
+  - Replaced random string code with sequential numbering (AMDRH-YYYY-XXXXX) with uniqueness retry
+  - Added user fetch to properly fill userName (prenom + nom) and userLicence
+  - Added type and status fields to certificate creation
+  - ESLint clean: 0 errors
+  - Dev server running: GET / 200
+
+Stage Summary:
+- Certificate type system: ATTESTATION, CERTIFICAT_COMPLETION, DIPLOME, CERTIFICAT
+- Certificate lifecycle: ACTIVE → REVOKED/SUSPENDED → ACTIVE (reversible)
+- Professional HTML certificate generation with print-to-PDF support
+- Public certificate verification API (no auth, by code)
+- Sequential certificate code generation everywhere (admin create + quiz auto-issue)
+- All endpoints connected to real PostgreSQL database with proper error handling
+
+---
+Task ID: 5-6
+Agent: full-stack-developer
+Task: Admin Traceability Dashboard and Enhanced Certificate UI
+
+Work Log:
+- Added CERTIFICATE_TYPE_LABELS, CERTIFICATE_TYPE_COLORS, CERTIFICATE_STATUS_LABELS, CERTIFICATE_STATUS_COLORS, ENROLLMENT_STATUS_LABELS, ENROLLMENT_STATUS_COLORS, COMPLETION_TRIGGER_LABELS to constants.ts
+- Rewrote /api/admin/traceability/route.ts: Comprehensive admin traceability with search (name/email), courseId filter, status filter, pagination (10 per page), includeDetails flag for lesson breakdown per enrollment, stats (totalEnrolled, totalCompleted, avgCompletionRate, avgTimePerCourse), best quiz scores per user+course, certificate status per user+course, total lesson counts per course
+- Rewrote /api/admin/traceability/export/route.ts: CSV export with UTF-8 BOM, filters (search, courseId, status), columns: Apprenant, Email, Rôle, Cours, Catégorie, Statut, Progression, Leçons, Durée, Dernier accès
+- Rewrote /api/admin/certificates/[id]/route.ts: GET single cert, PATCH revoke/reactivate/suspend with notifications
+- Created /api/admin/certificates/bulk-issue/route.ts: POST bulk issue with deduplication check, auto quiz score lookup, sequential code generation, user notifications
+- Rewrote /api/certificates/[id]/pdf/route.ts: HTML certificate with dynamic type title, scores, dates, verification code, responsive print layout
+- Created admin-traceability.tsx: Full admin traceability dashboard with 4 stat cards (Inscriptions en cours/terminées, Temps moyen, Taux complétion), filters bar (search, course select, status select), enrollment table with avatar/name/email, course+category badge, progress bar, completed lessons, time spent, quiz score, certificate status badge, enrollment status badge, last access (timeAgo), expandable detail row with per-lesson breakdown table (Leçon, Type badge, Statut, Temps, Vidéo %, Scroll %, Complétion trigger, Date), pagination, CSV export button, loading/empty/skeleton states
+- Rewrote admin-certificates.tsx: Enhanced certificates tab with Type badge column (Attestation emerald, Certificat blue, Diplôme amber), Status badge (Actif green, Révoqué red, Expiré), Actions dropdown per certificate (View details, Download PDF, Verify, Revoke, Reactivate), Revoke dialog with reason textarea and confirmation, Bulk Issue dialog with course selector, eligible users list (completed + passed quiz + no cert), checkbox selection, certificate type selector, Verification dialog with code copy and link copy, Create Certificate dialog enhanced with type selector (Attestation/Certificat/Diplôme), Certificate detail dialog enhanced with type/status info, revoke reason display, PDF download + verify buttons
+- Rewrote certificates-badges.tsx: Enhanced learner CertificatesPage with per-certificate type icon/gradient (emerald for Attestation, blue for Certificat, amber for Diplôme), Type badge + Status badge (Valide green, Révoqué red with reason, Expiré amber), PDF download button per card, Verification link with copy, Certificate detail dialog with full info grid, verification link, copy code/link buttons, PDF download button, revocation info display
+- Updated store/app.ts: Added "admin-traceability" to AppView type
+- Updated layout.tsx: Added Activity icon import, "Traçabilité" nav item to ADMIN sidebar (between Analyses and Utilisateurs), added view title
+- Updated page.tsx: Imported AdminTraceabilityPage, added switch case
+- ESLint: 0 errors
+- Dev server: GET / 200
+
+Stage Summary:
+- Comprehensive admin traceability dashboard with real-time enrollment data, per-lesson audit trail, expandable detail rows
+- Admin certificates management fully enhanced: type system (Attestation/Certificat/Diplôme), revoke/reactivate workflow, bulk issue with eligibility filtering, verification dialog
+- Learner certificates enhanced: type-specific styling, status badges, PDF download, verification links, detailed info dialog
+- 4 new/updated API routes (traceability, traceability/export, certificates/[id], bulk-issue, certificates/pdf)
+- All data from real PostgreSQL database, zero mock data
+
+---
+Task ID: 9
+Agent: Main Agent
+Task: Final Integration & Verification — Attestations, Diplomas, Content Tracking, Traceability
+
+Work Log:
+- Updated Prisma schema: Added CertificateStatus enum (ACTIVE/REVOKED/SUSPENDED), enhanced Certificate model with type/status/revokedAt/revokeReason/pdfUrl, enhanced LessonProgress with timeSpent/watchPercentage/scrollPercentage/completionTrigger/completedAt
+- Pushed schema to Neon PostgreSQL DB successfully
+- Ran 4 parallel subagents: progress tracking APIs, certificate PDF/verification APIs, admin traceability+certificate UI, learner traceability+course tracking UI
+- Verified all integration: store/app.ts (admin-traceability + learner-traceability), page.tsx (imports + switch cases), layout.tsx (sidebar + view titles + icons)
+- Verified all new API routes: /api/courses/[id]/progress (GET+POST enhanced), /api/admin/traceability, /api/admin/traceability/export, /api/admin/certificates/[id], /api/admin/certificates/bulk-issue, /api/certificates/[id]/pdf, /api/certificates/verify
+- Verified constants.ts has all new labels: CERTIFICATE_TYPE/COLORS, CERTIFICATE_STATUS/COLORS, ENROLLMENT_STATUS/COLORS, COMPLETION_TRIGGER_LABELS
+- ESLint: 0 errors | Dev server: Running
+
+Stage Summary:
+- **Certificate Management**: 3 types (Attestation, Certificat, Diplôme), lifecycle (ACTIVE→REVOKED/SUSPENDED→ACTIVE), bulk issuance, sequential codes (AMDRH-YYYY-XXXXX), HTML certificate template, public verification API
+- **Content Tracking**: Video watch % (auto-complete at 90%), text scroll % (auto-complete at 95%), time-based auto-completion (80%), cumulative time, session heartbeats
+- **Traceability**: Admin dashboard with per-learner progress + per-lesson audit trail + expandable details + CSV export; Learner "Ma progression" page with course cards + timeline + stats
+- Total: 4 new components + 7 new/updated APIs + schema updates + full integration

@@ -94,6 +94,12 @@ enum ResourceType {
   AUTRE
 }
 
+enum CertificateStatus {
+  ACTIVE
+  REVOKED
+  SUSPENDED
+}
+
 enum ResourceCategory {
   SUPPORT_COURS
   RESSOURCE_ANNEXE
@@ -230,14 +236,19 @@ model Enrollment {
 }
 
 model LessonProgress {
-  id          String     @id @default(cuid())
-  enrollmentId String
-  enrollment  Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  lessonId    String
-  lesson      Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  completed   Boolean    @default(false)
-  lastPosition Int       @default(0) // pour vidéo, position en secondes
-  viewedAt    DateTime   @default(now())
+  id              String     @id @default(cuid())
+  enrollmentId    String
+  enrollment      Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lessonId        String
+  lesson          Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed       Boolean    @default(false)
+  lastPosition    Int        @default(0) // pour vidéo, position en secondes
+  timeSpent       Int        @default(0) // temps total passé en secondes
+  watchPercentage Float      @default(0) // pourcentage de la vidéo regardée (0-100)
+  scrollPercentage Float     @default(0) // pourcentage de scroll pour texte/PDF (0-100)
+  completionTrigger String   @default("manual") // manual, auto_video, auto_scroll, auto_time
+  viewedAt        DateTime   @default(now())
+  completedAt     DateTime?
 
   @@unique([enrollmentId, lessonId])
   @@index([enrollmentId])
@@ -318,23 +329,29 @@ model QuizAnswer {
 // ============================================
 
 model Certificate {
-  id              String    @id @default(cuid())
-  code            String    @unique // AMDRH-2026-XXXXX
+  id              String           @id @default(cuid())
+  code            String           @unique // AMDRH-2026-XXXXX
+  type            String           @default("CERTIFICAT") // ATTESTATION, CERTIFICAT_COMPLETION, DIPLOME
+  status          CertificateStatus @default(ACTIVE)
   userId          String
-  user            User      @relation(fields: [userId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
   courseId        String
   courseTitle     String
   userName        String
   userLicence     String?
   score           Int
   maxScore        Int
-  issuedAt        DateTime  @default(now())
+  issuedAt        DateTime         @default(now())
   expiresAt       DateTime?
+  revokedAt       DateTime?
+  revokeReason    String?
   qrCodeUrl       String?
-  verifiedBy      String?   // ID du validateur AMDRH
+  verifiedBy      String?          // ID du validateur AMDRH
+  pdfUrl          String?
 
   @@index([userId])
   @@index([code])
+  @@index([status])
 }
 
 model Badge {

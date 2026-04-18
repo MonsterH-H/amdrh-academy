@@ -250,3 +250,57 @@ export const RESOURCE_CATEGORY_COLORS: Record<string, string> = {
   MEDIA_COURS: "bg-purple-100 text-purple-700",
   AUTRE: "bg-gray-100 text-gray-700",
 };
+
+// ────────────────────────────────────────────
+// Certificate types
+// ────────────────────────────────────────────
+
+export const CERTIFICATE_TYPE_LABELS: Record<string, string> = {
+  ATTESTATION: "Attestation",
+  CERTIFICAT_COMPLETION: "Certificat",
+  CERTIFICAT: "Certificat",
+  DIPLOME: "Diplôme",
+};
+
+export const CERTIFICATE_TYPE_COLORS: Record<string, string> = {
+  ATTESTATION: "bg-emerald-100 text-emerald-700",
+  CERTIFICAT_COMPLETION: "bg-blue-100 text-blue-700",
+  CERTIFICAT: "bg-blue-100 text-blue-700",
+  DIPLOME: "bg-amber-100 text-amber-700",
+};
+
+export const CERTIFICATE_STATUS_LABELS: Record<string, string> = {
+  ACTIVE: "Actif",
+  REVOKED: "Révoqué",
+  SUSPENDED: "Suspendu",
+};
+
+export const CERTIFICATE_STATUS_COLORS: Record<string, string> = {
+  ACTIVE: "bg-green-100 text-green-700",
+  REVOKED: "bg-red-100 text-red-700",
+  SUSPENDED: "bg-amber-100 text-amber-700",
+};
+
+// ────────────────────────────────────────────
+// Enrollment status
+// ────────────────────────────────────────────
+
+export const ENROLLMENT_STATUS_LABELS: Record<string, string> = {
+  en_cours: "En cours",
+  termine: "Terminé",
+  abandonne: "Abandonné",
+};
+
+export const ENROLLMENT_STATUS_COLORS: Record<string, string> = {
+  en_cours: "bg-blue-100 text-blue-700",
+  termine: "bg-green-100 text-green-700",
+  abandonne: "bg-red-100 text-red-700",
+};
+
+// Completion trigger labels
+export const COMPLETION_TRIGGER_LABELS: Record<string, string> = {
+  manual: "Manuel",
+  auto_video: "Auto vidéo",
+  auto_scroll: "Auto lecture",
+  auto_time: "Auto temps",
+};

@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const userId = searchParams.get("userId");
     const status = searchParams.get("status");
     const admin = searchParams.get("admin") === "true";
+    const enrolledOnly = searchParams.get("enrolled") === "true";
     const userRole = searchParams.get("role") || "";
     const instructorId = searchParams.get("instructorId") || "";
     const page = parseInt(searchParams.get("page") || "1");
@@ -39,21 +40,35 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    // If enrolledOnly, filter to only courses the user is enrolled in
+    if (enrolledOnly && userId) {
+      where.enrollments = { some: { userId } };
+    }
+
+    const includeOptions = {
+      instructor: { select: { id: true, nom: true, prenom: true, avatar: true } },
+      enrollments: userId
+        ? { where: { userId }, select: { id: true, progress: true, status: true, startedAt: true, completedAt: true, lastAccessAt: true } }
+        : false,
+      sections: {
+        include: {
+          lessons: { select: { id: true, title: true, type: true, duration: true, order: true }, orderBy: { order: "asc" } },
+        },
+        orderBy: { order: "asc" },
+      },
+      quiz: { select: { id: true, passingScore: true } },
+      _count: {
+        select: {
+          enrollments: true,
+          sections: true,
+        },
+      },
+    };
+
     const [courses, total] = await Promise.all([
       db.course.findMany({
         where,
-        include: {
-          instructor: { select: { id: true, nom: true, prenom: true, avatar: true } },
-          enrollments: userId
-            ? { where: { userId }, select: { id: true, progress: true, status: true } }
-            : false,
-          _count: {
-            select: {
-              enrollments: true,
-              sections: true,
-            },
-          },
-        },
+        include: includeOptions,
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,

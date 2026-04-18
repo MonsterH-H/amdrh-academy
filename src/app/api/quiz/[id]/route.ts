@@ -146,17 +146,35 @@ export async function POST(
       });
 
       if (!existingCert) {
-        const certYear = new Date().getFullYear();
-        const certCode = `AMDRH-${certYear}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+        // Generate sequential certificate code: AMDRH-YYYY-XXXXX
+        const year = new Date().getFullYear();
+        const count = await db.certificate.count();
+        let certCode = `AMDRH-${year}-${String(count + 1).padStart(5, "0")}`;
+
+        // Ensure uniqueness with retry loop
+        let existing = await db.certificate.findUnique({ where: { code: certCode } });
+        let retry = 2;
+        while (existing && retry < 100) {
+          certCode = `AMDRH-${year}-${String(count + retry).padStart(5, "0")}`;
+          existing = await db.certificate.findUnique({ where: { code: certCode } });
+          retry++;
+        }
+
+        // Fetch user to get proper name and licence
+        const user = await db.user.findUnique({ where: { id: userId } });
+
         await db.certificate.create({
           data: {
             code: certCode,
+            type: "CERTIFICAT",
+            status: "ACTIVE",
             userId,
             courseId: quiz.course.id,
             courseTitle: quiz.course.title,
             score: totalScore,
             maxScore: quiz.questions.reduce((acc, q) => acc + q.points, 0),
-            userName: "",
+            userName: user ? `${user.prenom} ${user.nom}` : "",
+            userLicence: user?.licenceNumber || null,
             qrCodeUrl: `/verify/${certCode}`,
           },
         });
@@ -165,8 +183,8 @@ export async function POST(
           data: {
             userId,
             type: "CERTIFICAT",
-            title: "🎉 Félicitations ! Certificat obtenu",
-            message: `Vous avez obtenu votre certificat pour le cours "${quiz.course.title}".`,
+            title: "Félicitations ! Certificat obtenu",
+            message: `Vous avez obtenu votre certificat pour le cours "${quiz.course.title}". Code : ${certCode}`,
           },
         });
       }

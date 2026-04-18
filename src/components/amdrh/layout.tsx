@@ -28,6 +28,8 @@ import {
   BarChart3,
   Send,
   FolderOpen,
+  TrendingUp,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
@@ -42,6 +44,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 const mainNavItems = [
   { view: "dashboard" as const, label: "Tableau de bord", icon: LayoutDashboard },
   { view: "courses" as const, label: "Catalogue Cours", icon: BookOpen },
+  { view: "learner-traceability" as const, label: "Ma progression", icon: TrendingUp },
   { view: "learning-paths" as const, label: "Parcours Formation", icon: GraduationCap },
   { view: "messages" as const, label: "Messagerie", icon: MessageSquare },
   { view: "notifications" as const, label: "Notifications", icon: Bell },
@@ -62,6 +65,7 @@ const adminNavItems: Record<string, Array<{ view: AppView; label: string; icon: 
     { view: "admin-certificates", label: "Certificats & Badges", icon: Award },
     { view: "admin-notifications", label: "Notifications", icon: Send },
     { view: "admin-analytics", label: "Analyses", icon: BarChart3 },
+    { view: "admin-traceability", label: "Traçabilité", icon: Activity },
     { view: "admin-users", label: "Utilisateurs", icon: Users },
     { view: "admin-sync", label: "Sync Fédération", icon: RefreshCw },
   ],
@@ -563,6 +567,7 @@ function getViewTitle(view: string): string {
     dashboard: "Tableau de bord",
     courses: "Catalogue des cours",
     "course-detail": "Détail du cours",
+    "learner-traceability": "Ma progression",
     "learning-paths": "Parcours de formation",
     quiz: "Quiz",
     certificates: "Certificats",
@@ -572,6 +577,7 @@ function getViewTitle(view: string): string {
     notifications: "Notifications",
     "admin-users": "Gestion des utilisateurs",
     "admin-user-detail": "Détail utilisateur",
+    "admin-quizzes": "Gestion des quiz",
     "admin-sync": "Synchronisation Fédération",
     "admin-certificates": "Certificats & Badges",
     "admin-learning-paths": "Gestion des parcours",
@@ -579,6 +585,7 @@ function getViewTitle(view: string): string {
     "admin-notifications": "Gestion des notifications",
     "admin-analytics": "Analytique",
     "admin-resources": "Médiathèque",
+    "admin-traceability": "Traçabilité",
     profile: "Mon profil",
   };
   return titles[view] || view;
