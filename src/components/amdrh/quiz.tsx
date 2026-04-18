@@ -23,6 +23,7 @@ export function QuizPage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [attemptId, setAttemptId] = useState("");
+  const [passingScore, setPassingScore] = useState(70);
   const handleSubmitRef = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function QuizPage() {
         const data = await res.json();
         setQuestions(data.quiz?.questions || []);
         setTimeLeft(data.quiz?.duration ? data.quiz.duration * 60 : 1800);
+        setPassingScore(data.quiz?.passingScore || 70);
         setState("intro");
       } catch {
         setState("intro");
@@ -116,7 +118,7 @@ export function QuizPage() {
             </div>
             <h2 className="text-xl font-bold text-foreground mb-2">Prêt pour le quiz ?</h2>
             <p className="text-sm text-muted-foreground mb-6">
-              {questions.length} questions • {formatTime(timeLeft)} • Score minimum 70%
+              {questions.length} questions • {formatTime(timeLeft)} • Score minimum {passingScore}%
             </p>
             <Button className="rounded-lg h-11 px-8" onClick={() => setState("playing")}>
               Commencer le quiz

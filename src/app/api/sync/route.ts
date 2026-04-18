@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 
 export async function GET() {
   try {
@@ -16,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { type, triggeredBy } = await req.json();
 

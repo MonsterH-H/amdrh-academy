@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { id } = await params;
     const body = await req.json();
@@ -49,6 +52,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { id } = await params;
     const body = await req.json();
@@ -102,6 +107,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { id } = await params;
     const { searchParams } = new URL(req.url);

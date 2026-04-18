@@ -6,23 +6,65 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Award, CheckCircle2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export function CertificatesPage() {
   const { user } = useAppStore();
   const [certificates, setCertificates] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    fetch("/api/certificates?userId=" + user.id)
-      .then((r) => r.json())
-      .then((d) => setCertificates(d.certificates || []))
-      .finally(() => setLoading(false));
+    const fetchCertificates = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("/api/certificates?userId=" + user.id);
+        if (!res.ok) {
+          throw new Error(`Erreur ${res.status}: ${res.statusText}`);
+        }
+        const d = await res.json();
+        if (d.error) {
+          throw new Error(d.error);
+        }
+        setCertificates(d.certificates || []);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Impossible de charger les certificats";
+        setError(message);
+        toast({
+          title: "Erreur",
+          description: message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCertificates();
   }, [user]);
 
   if (loading) return <div className="space-y-4"><Skeleton className="h-8 w-48" />{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}</div>;
+
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fadeIn">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Mes Certificats</h2>
+          <p className="text-muted-foreground mt-1">Certificats reconnus par l&apos;AMDRH et la FRMHB</p>
+        </div>
+        <div className="text-center py-20">
+          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <h3 className="font-semibold text-foreground mb-2">Erreur de chargement</h3>
+          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -73,16 +115,56 @@ export function BadgesPage() {
   const [earnedBadges, setEarnedBadges] = useState<Array<Record<string, unknown>>>([]);
   const [allBadges, setAllBadges] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    fetch("/api/badges?userId=" + user.id)
-      .then((r) => r.json())
-      .then((d) => { setEarnedBadges(d.earnedBadges || []); setAllBadges(d.allBadges || []); })
-      .finally(() => setLoading(false));
+    const fetchBadges = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("/api/badges?userId=" + user.id);
+        if (!res.ok) {
+          throw new Error(`Erreur ${res.status}: ${res.statusText}`);
+        }
+        const d = await res.json();
+        if (d.error) {
+          throw new Error(d.error);
+        }
+        setEarnedBadges(d.earnedBadges || []);
+        setAllBadges(d.allBadges || []);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Impossible de charger les badges";
+        setError(message);
+        toast({
+          title: "Erreur",
+          description: message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBadges();
   }, [user]);
 
   if (loading) return <div className="space-y-4"><Skeleton className="h-8 w-48" />{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>;
+
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fadeIn">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Mes Badges</h2>
+        </div>
+        <div className="text-center py-20">
+          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <h3 className="font-semibold text-foreground mb-2">Erreur de chargement</h3>
+          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
 
   const earnedIds = new Set(earnedBadges.map((b) => b.badgeId as string));
 
@@ -121,5 +203,3 @@ export function BadgesPage() {
     </div>
   );
 }
-
-

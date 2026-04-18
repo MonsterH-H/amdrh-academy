@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { BadgeLevel } from "@prisma/client";
+import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/badges — list all badges with earned count
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const badges = await db.badge.findMany({
       include: {
@@ -23,6 +26,8 @@ export async function GET() {
 
 // POST /api/admin/badges — create new badge
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const body = await req.json();
     const { name, description, level, icon, criteria, points } = body;

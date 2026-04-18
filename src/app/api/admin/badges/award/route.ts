@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 
 // POST /api/admin/badges/award — award a badge to a user
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const body = await req.json();
     const { userId, badgeId } = body;

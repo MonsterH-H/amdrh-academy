@@ -12,14 +12,12 @@ import {
   BookOpen,
   GraduationCap,
   Award,
-  FileCheck,
   BarChart3,
   TrendingUp,
   Download,
   Clock,
   CheckCircle2,
   XCircle,
-  Mail,
   Target,
   PieChart as PieChartIcon,
   Activity,
@@ -178,9 +176,70 @@ export function AdminAnalyticsPage() {
   }, []);
 
   const handleExport = () => {
+    if (!data) return;
+
+    const rows: string[] = [];
+
+    // Section 1: Vue d'ensemble
+    rows.push("Vue d'ensemble");
+    rows.push("Métrique,Valeur");
+    rows.push(`Utilisateurs totaux,${data.overview.totalUsers}`);
+    rows.push(`Utilisateurs actifs,${data.overview.totalActiveUsers}`);
+    rows.push(`Cours totaux,${data.overview.totalCourses}`);
+    rows.push(`Cours publiés,${data.overview.totalPublishedCourses}`);
+    rows.push(`Inscriptions totales,${data.overview.totalEnrollments}`);
+    rows.push(`Inscriptions terminées,${data.overview.completedEnrollments}`);
+    rows.push(`Taux de complétion,${data.overview.completionRate}%`);
+    rows.push(`Certificats,${data.overview.totalCertificates}`);
+    rows.push(`Tentatives de quiz,${data.overview.totalQuizAttempts}`);
+    rows.push(`Taux de réussite quiz,${data.overview.quizPassRate}%`);
+    rows.push(`Badges,${data.overview.totalBadges}`);
+    rows.push(`Messages,${data.overview.totalMessages}`);
+    rows.push("");
+
+    // Section 2: Utilisateurs par rôle
+    rows.push("Utilisateurs par rôle");
+    rows.push("Rôle,Nombre");
+    for (const r of data.usersByRole) {
+      rows.push(`${ROLE_LABELS[r.role] || r.role},${r._count.role}`);
+    }
+    rows.push("");
+
+    // Section 3: Inscriptions par mois
+    rows.push("Inscriptions par mois");
+    rows.push("Mois,Nombre");
+    for (const m of data.enrollmentsByMonth) {
+      rows.push(`${formatMonthFull(m.month)},${m.count}`);
+    }
+    rows.push("");
+
+    // Section 4: Certificats par mois
+    rows.push("Certificats par mois");
+    rows.push("Mois,Nombre");
+    for (const m of data.certificatesByMonth) {
+      rows.push(`${formatMonthFull(m.month)},${m.count}`);
+    }
+    rows.push("");
+
+    // Section 5: Cours par catégorie
+    rows.push("Cours par catégorie");
+    rows.push("Catégorie,Nombre");
+    for (const c of data.coursesByCategory) {
+      rows.push(`${CATEGORY_LABELS[c.category] || c.category},${c._count.category}`);
+    }
+
+    const csvContent = rows.join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `analytics-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
     toast({
-      title: "Export en cours...",
-      description: "Le fichier sera prêt dans quelques instants.",
+      title: "Export réussi",
+      description: "Le fichier CSV a été téléchargé.",
     });
   };
 
@@ -648,26 +707,22 @@ function TopCoursesSection() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("/api/courses?limit=100&sortBy=enrollments&sortOrder=desc");
+        const res = await fetch("/api/admin/course-stats");
+        if (!res.ok) throw new Error("Erreur");
         const json = await res.json();
-        // Transform the API response to our display format
-        const courseList = (json.courses || json || []).map(
-          (c: Record<string, unknown>) => {
-            const counts = c._count as Record<string, unknown> | undefined;
-            return {
-              id: c.id as string,
-              title: c.title as string,
-              category: (c.category as string) || "ARBITRAGE",
-              difficulty: (c.difficulty as string) || "DEBUTANT",
-              enrollmentCount: (counts?.enrollments as number) || 0,
-              completionRate: Math.round(Math.random() * 40 + 50), // placeholder
-              passRate: Math.round(Math.random() * 25 + 65), // placeholder
-            };
-          }
+        // The API returns already-computed stats sorted by enrollment count
+        const courseList: TopCourse[] = (json.courses || []).map(
+          (c: Record<string, unknown>) => ({
+            id: c.id as string,
+            title: c.title as string,
+            category: (c.category as string) || "ARBITRAGE",
+            difficulty: (c.difficulty as string) || "DEBUTANT",
+            enrollmentCount: (c.enrollmentCount as number) || 0,
+            completionRate: (c.completionRate as number) || 0,
+            passRate: (c.passRate as number) || 0,
+          })
         );
-        // Sort by enrollment count descending, take top 10
-        courseList.sort((a: TopCourse, b: TopCourse) => b.enrollmentCount - a.enrollmentCount);
-        setCourses(courseList.slice(0, 10));
+        setCourses(courseList);
       } catch {
         // silently fail
       } finally {
@@ -796,30 +851,41 @@ function RecentActivitySection() {
     const fetchData = async () => {
       try {
         const [enrollRes, quizRes, certRes] = await Promise.all([
-          fetch("/api/courses?limit=20").catch(() => null),
-          fetch("/api/certificates?limit=20").catch(() => null),
-          fetch("/api/certificates?limit=20").catch(() => null),
+          fetch("/api/admin/enrollments?limit=20").catch(() => null),
+          fetch("/api/admin/quiz-attempts?limit=20").catch(() => null),
+          fetch("/api/admin/certificates?limit=20").catch(() => null),
         ]);
 
         if (enrollRes?.ok) {
           const enrollData = await enrollRes.json();
-          // Get enrollments from courses data — use the course list as a proxy
-          // We'll use a dedicated approach: fetch users list for recent activity
-          const usersRes = await fetch("/api/users?limit=20&sortBy=createdAt&sortOrder=desc").catch(() => null);
-          if (usersRes?.ok) {
-            const usersData = await usersRes.json();
-            setEnrollments(
-              (usersData.users || []).slice(0, 20).map(
-                (u: Record<string, unknown>) => ({
-                  id: u.id as string,
-                  userName: `${u.prenom as string} ${u.nom as string}`,
-                  userEmail: u.email as string,
-                  role: u.role as string,
-                  createdAt: u.createdAt as string,
-                })
-              )
-            );
-          }
+          setEnrollments(
+            (enrollData.enrollments || []).slice(0, 20).map(
+              (e: Record<string, unknown>) => ({
+                id: e.id as string,
+                userName: e.userName as string,
+                userEmail: e.userEmail as string,
+                courseTitle: (e.courseTitle as string) || "Cours",
+                status: (e.status as string) || "en_cours",
+                createdAt: e.createdAt as string,
+              })
+            )
+          );
+        }
+
+        if (quizRes?.ok) {
+          const quizData = await quizRes.json();
+          setQuizAttempts(
+            (quizData.attempts || []).slice(0, 20).map(
+              (a: Record<string, unknown>) => ({
+                id: a.id as string,
+                userName: a.userName as string,
+                quizTitle: a.quizTitle as string,
+                score: a.score as number,
+                status: a.status as string,
+                submittedAt: a.submittedAt as string | null,
+              })
+            )
+          );
         }
 
         if (certRes?.ok) {
@@ -883,9 +949,22 @@ function RecentActivitySection() {
                     key={item.id}
                     icon={<GraduationCap className="w-4 h-4 text-blue-500" />}
                     title={item.userName}
-                    subtitle={`Rôle: ${ROLE_LABELS[item.role] || item.role}`}
+                    subtitle={item.courseTitle}
                     time={item.createdAt}
-                    badge={null}
+                    badge={{
+                      label:
+                        item.status === "termine"
+                          ? "Terminé"
+                          : item.status === "abandonne"
+                            ? "Abandonné"
+                            : "En cours",
+                      className:
+                        item.status === "termine"
+                          ? "bg-green-100 text-green-700"
+                          : item.status === "abandonne"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-blue-100 text-blue-700",
+                    }}
                   />
                 ))}
               </div>
@@ -1026,7 +1105,8 @@ interface RecentEnrollment {
   id: string;
   userName: string;
   userEmail: string;
-  role: string;
+  courseTitle: string;
+  status: string;
   createdAt: string;
 }
 

@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/learning-paths/[id] — get single learning path with full details + enrolled users
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { id } = await params;
 
@@ -78,6 +81,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { id } = await params;
     const body = await req.json();
@@ -202,9 +207,11 @@ export async function PATCH(
 
 // DELETE /api/admin/learning-paths/[id] — delete a learning path
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { id } = await params;
 

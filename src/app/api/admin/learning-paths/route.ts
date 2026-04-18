@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/learning-paths — list all learning paths with stats
 export async function GET(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { searchParams } = new URL(req.url);
     const targetRole = searchParams.get("targetRole");
@@ -73,6 +76,8 @@ export async function GET(req: NextRequest) {
 
 // POST /api/admin/learning-paths — create a new learning path
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+  if (!auth.authorized) return auth.response;
   try {
     const body = await req.json();
     const { title, description, targetRole, mode, isMandatory, courses } = body;

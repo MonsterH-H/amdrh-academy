@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { NotificationType, UserRole } from "@prisma/client";
+import { requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type");
@@ -87,6 +90,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN"]);
+  if (!auth.authorized) return auth.response;
   try {
     const body = await req.json();
     const { title, message, type, targetAll, targetRoles, userId } = body;
