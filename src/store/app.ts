@@ -4,6 +4,8 @@ export type AppView =
   | "landing"
   | "login"
   | "register"
+  | "forgot-password"
+  | "reset-password"
   | "dashboard"
   | "courses"
   | "course-detail"

@@ -6,6 +6,8 @@ import { Sidebar, TopBar, MobileBottomNav } from "@/components/amdrh/layout";
 import { LandingPage } from "@/components/amdrh/landing";
 import { LoginPage } from "@/components/amdrh/login";
 import { RegisterPage } from "@/components/amdrh/register";
+import { ForgotPasswordPage } from "@/components/amdrh/forgot-password";
+import { ResetPasswordPage } from "@/components/amdrh/reset-password";
 import { DashboardPage } from "@/components/amdrh/dashboard";
 import { CourseCatalogPage } from "@/components/amdrh/course-catalog";
 import { CourseDetailPage } from "@/components/amdrh/course-detail";
@@ -47,6 +49,8 @@ function AppContent() {
     if (currentView === "landing") return <LandingPage />;
     if (currentView === "login") return <LoginPage />;
     if (currentView === "register") return <RegisterPage />;
+    if (currentView === "forgot-password") return <ForgotPasswordPage />;
+    if (currentView === "reset-password") return <ResetPasswordPage />;
 
     // Protected pages (with sidebar/topbar)
     if (!isAuthenticated) {
@@ -73,7 +77,7 @@ function AppContent() {
     }
   };
 
-  const isAuthPage = ["landing", "login", "register"].includes(currentView);
+  const isAuthPage = ["landing", "login", "register", "forgot-password", "reset-password"].includes(currentView);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">

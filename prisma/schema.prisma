@@ -471,3 +471,36 @@ model FederationSync {
   completedAt   DateTime?
   triggeredBy   String
 }
+
+// ============================================
+// PASSWORD RESET
+// ============================================
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// ============================================
+// EMAIL VERIFICATION
+// ============================================
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+}

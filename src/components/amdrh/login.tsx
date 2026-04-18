@@ -82,12 +82,22 @@ export function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   className="h-11 rounded-lg"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+                  <button
+                    type="button"
+                    onClick={() => navigate("forgot-password")}
+                    className="text-xs text-primary font-medium hover:text-primary/80 hover:underline transition-colors"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
@@ -96,6 +106,7 @@ export function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    autoComplete="current-password"
                     className="h-11 rounded-lg pr-10"
                   />
                   <button
@@ -124,28 +135,43 @@ export function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-border/40">
-              <p className="text-sm text-muted-foreground mb-4">Comptes de test :</p>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/40" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-3 text-muted-foreground">
+                  ou
+                </span>
+              </div>
+            </div>
+
+            {/* Quick test accounts (dev only) */}
+            <div className="bg-muted/40 rounded-lg p-4">
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-3">
+                Comptes de démonstration
+              </p>
               <div className="space-y-1.5">
                 {[
-                  { label: "Admin", email: "admin@amdrh.ma" },
-                  { label: "Formateur", email: "formateur@amdrh.ma" },
-                  { label: "Arbitre", email: "arbitre1@amdrh.ma" },
-                  { label: "Entraîneur", email: "entraineur1@amdrh.ma" },
-                  { label: "Joueur", email: "joueur1@amdrh.ma" },
+                  { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN" },
+                  { label: "Formateur", email: "formateur@amdrh.ma", role: "FORMATEUR" },
+                  { label: "Arbitre", email: "arbitre1@amdrh.ma", role: "ARBITRE" },
+                  { label: "Entraîneur", email: "entraineur1@amdrh.ma", role: "ENTRAINEUR" },
+                  { label: "Joueur", email: "joueur1@amdrh.ma", role: "JOUEUR" },
                 ].map((account) => (
                   <button
                     key={account.email}
                     onClick={() => { setEmail(account.email); setPassword("Password123!"); }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs hover:bg-muted/60 transition-colors"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs hover:bg-muted/80 transition-colors group"
                   >
-                    <span className="font-medium text-foreground">{account.label}</span>
+                    <span className="font-medium text-foreground group-hover:text-primary transition-colors">{account.label}</span>
                     <span className="text-muted-foreground">{account.email}</span>
                   </button>
                 ))}
               </div>
               <p className="text-[10px] text-muted-foreground mt-3 text-center">
-                Mot de passe pour tous : Password123!
+                Mot de passe : <span className="font-mono font-medium">Password123!</span>
               </p>
             </div>
           </CardContent>
