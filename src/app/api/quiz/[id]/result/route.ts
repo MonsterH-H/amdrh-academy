@@ -1,0 +1,132 @@
+import { NextRequest, NextResponse } from "next/server"
+import { db } from "@/lib/db"
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const { searchParams } = new URL(request.url)
+    const attemptId = searchParams.get("attemptId")
+    const userId = searchParams.get("userId")
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Identifiant utilisateur requis" },
+        { status: 400 }
+      )
+    }
+
+    // Get quiz with full question data
+    const quiz = await db.quiz.findUnique({
+      where: { id },
+      include: {
+        questions: {
+          orderBy: { order: "asc" },
+        },
+        course: {
+          select: {
+            id: true,
+            title: true,
+            passingScore: true,
+          },
+        },
+      },
+    })
+
+    if (!quiz) {
+      return NextResponse.json(
+        { error: "Quiz non trouvé" },
+        { status: 404 }
+      )
+    }
+
+    // Get attempt
+    const whereClause: Record<string, string> = {
+      quizId: id,
+      userId,
+    }
+    if (attemptId) {
+      whereClause.id = attemptId
+    }
+
+    const attempt = await db.quizAttempt.findFirst({
+      where: whereClause,
+      orderBy: { submittedAt: "desc" },
+      include: {
+        answers: {
+          include: {
+            question: true,
+          },
+        },
+      },
+    })
+
+    if (!attempt) {
+      return NextResponse.json(
+        { error: "Aucune tentative trouvée" },
+        { status: 404 }
+      )
+    }
+
+    // Build result with correct answers and explanations
+    const results = attempt.answers.map((answer) => {
+      const question = quiz.questions.find((q) => q.id === answer.questionId)
+      return {
+        questionId: answer.questionId,
+        questionText: question?.text || "",
+        questionType: question?.type || "",
+        options: question ? JSON.parse(question.options) : [],
+        correctAnswer: question ? JSON.parse(question.correctAnswer) : [],
+        selectedAnswer: JSON.parse(answer.selectedAnswer),
+        isCorrect: answer.isCorrect,
+        pointsEarned: answer.pointsEarned,
+        maxPoints: question?.points || 0,
+        explanation: question?.explanation || null,
+      }
+    })
+
+    // Get all attempts for this user on this quiz
+    const allAttempts = await db.quizAttempt.findMany({
+      where: { quizId: id, userId },
+      orderBy: { submittedAt: "desc" },
+      select: {
+        id: true,
+        score: true,
+        maxScore: true,
+        status: true,
+        duration: true,
+        startedAt: true,
+        submittedAt: true,
+      },
+    })
+
+    return NextResponse.json({
+      quiz: {
+        id: quiz.id,
+        title: quiz.title,
+        passingScore: quiz.passingScore,
+        showAnswers: quiz.showAnswers,
+        course: quiz.course,
+      },
+      attempt: {
+        id: attempt.id,
+        score: attempt.score,
+        maxScore: attempt.maxScore,
+        status: attempt.status,
+        duration: attempt.duration,
+        startedAt: attempt.startedAt,
+        submittedAt: attempt.submittedAt,
+      },
+      results,
+      allAttempts,
+    })
+  } catch (error) {
+    console.error("Quiz result error:", error)
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des résultats" },
+      { status: 500 }
+    )
+  }
+}
