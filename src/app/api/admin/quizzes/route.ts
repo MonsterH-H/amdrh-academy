@@ -6,10 +6,17 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search");
     const courseId = searchParams.get("courseId");
+    const userRole = searchParams.get("role") || "";
+    const instructorId = searchParams.get("instructorId") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
     const where: Record<string, unknown> = {};
+
+    // FORMATEUR: only show quizzes for courses they created
+    if (userRole === "FORMATEUR" && instructorId) {
+      where.course = { instructorId };
+    }
 
     if (search) {
       where.OR = [
@@ -20,6 +27,12 @@ export async function GET(req: NextRequest) {
 
     if (courseId) {
       where.courseId = courseId;
+    }
+
+    // For FORMATEUR, only show their own courses as options
+    const coursesWhere: Record<string, unknown> = {};
+    if (userRole === "FORMATEUR" && instructorId) {
+      coursesWhere.instructorId = instructorId;
     }
 
     const [quizzes, total, courses] = await Promise.all([
@@ -37,7 +50,7 @@ export async function GET(req: NextRequest) {
           maxAttempts: true,
           createdAt: true,
           course: {
-            select: { title: true, category: true, slug: true },
+            select: { title: true, category: true, slug: true, instructorId: true },
           },
           questions: { select: { id: true }, orderBy: { order: "asc" } },
           attempts: {
@@ -51,6 +64,7 @@ export async function GET(req: NextRequest) {
       }),
       db.quiz.count({ where }),
       db.course.findMany({
+        where: Object.keys(coursesWhere).length > 0 ? coursesWhere : undefined,
         select: { id: true, title: true, category: true },
         orderBy: { title: "asc" },
       }),

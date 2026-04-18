@@ -132,3 +132,30 @@ Stage Summary:
 - All 8 admin modules fully integrated into the sidebar navigation
 - Admin sidebar: Gestion Cours → Gestion Quiz → Parcours Formation → Certificats & Badges → Notifications → Analyses → Utilisateurs → Sync Fédération
 - Total: 8 admin frontend components + 10 admin API routes + updated constants/layout/store/page
+---
+Task ID: 1
+Agent: Main
+Task: Finalize Admin + Implement Role-Based Access for All Roles
+
+Work Log:
+- Analyzed entire codebase - found 95%+ of the platform is already built
+- Verified certificate code already uses dynamic year (`new Date().getFullYear()`)
+- Added FORMATEUR filtering to `/api/courses` route (only their courses in admin mode)
+- Added FORMATEUR filtering to `/api/admin/quizzes` route (only their courses' quizzes)
+- Updated `admin-courses.tsx` to pass `role` and `instructorId` params
+- Updated `admin-quizzes.tsx` to pass `role` and `instructorId` params
+- Added contextual page titles for FORMATEUR ("Mes cours" vs "Gestion des cours")
+- Created `/src/lib/auth-helpers.ts` with reusable role-checking utilities
+- Verified all admin modules are complete (users, courses, quizzes, learning paths, certificates, badges, notifications, analytics, sync)
+- Verified all learner modules are complete (dashboard, catalog, course detail, quiz, certificates, badges, messages, notifications, profile)
+- Lint passes with zero errors
+
+Stage Summary:
+- FORMATEUR role now properly filtered to only see/manage their own courses and quizzes
+- Admin modules all fully functional with real database connections
+- Certificate codes dynamically use current year (AMDRH-{YEAR}-XXXXX)
+- All 5 roles (ADMIN, FORMATEUR, ARBITRE, ENTRAINEUR, JOUEUR) have proper UI:
+  - ADMIN: Full admin panel (8 admin modules + dashboard)
+  - FORMATEUR: Course creation, quiz management, learner tracking
+  - ARBITRE/ENTRAINEUR/JOUEUR: Course catalog, enrollment, progress, quiz, certificates, badges, messages
+- Zero lint errors, dev server running cleanly

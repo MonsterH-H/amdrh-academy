@@ -96,6 +96,8 @@ export function AdminQuizzesPage() {
   const fetchQuizzes = useCallback(async () => {
     try {
       const params = new URLSearchParams({ page: String(page), limit: "12" });
+      if (user?.role) params.set("role", user.role);
+      if (user?.id) params.set("instructorId", user.id);
       if (courseFilter !== "ALL") params.set("courseId", courseFilter);
       if (search) params.set("search", search);
       const res = await fetch(`/api/admin/quizzes?${params}`);
@@ -141,12 +143,14 @@ export function AdminQuizzesPage() {
 
   if (loading) return <AdminQuizzesSkeleton />;
 
+  const isFormateur = user?.role === "FORMATEUR";
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-foreground">
-            Gestion des quiz
+            {isFormateur ? "Mes quiz" : "Gestion des quiz"}
           </h2>
           <p className="text-muted-foreground mt-1">{total} quiz au total</p>
         </div>

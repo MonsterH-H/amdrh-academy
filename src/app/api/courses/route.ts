@@ -11,6 +11,8 @@ export async function GET(req: NextRequest) {
     const userId = searchParams.get("userId");
     const status = searchParams.get("status");
     const admin = searchParams.get("admin") === "true";
+    const userRole = searchParams.get("role") || "";
+    const instructorId = searchParams.get("instructorId") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
 
@@ -21,6 +23,11 @@ export async function GET(req: NextRequest) {
       where.status = "PUBLIE";
     } else if (status && status !== "ALL") {
       where.status = status;
+    }
+
+    // FORMATEUR: only show their own courses
+    if (userRole === "FORMATEUR" && instructorId) {
+      where.instructorId = instructorId;
     }
 
     if (category && category !== "ALL") where.category = category;
@@ -57,11 +64,16 @@ export async function GET(req: NextRequest) {
     // For admin mode, also return aggregated stats
     let stats = null;
     if (admin) {
+      const statsWhere: Record<string, unknown> = {};
+      // FORMATEUR: stats only for their own courses
+      if (userRole === "FORMATEUR" && instructorId) {
+        statsWhere.instructorId = instructorId;
+      }
       const [totalCount, publishedCount, draftCount, archivedCount] = await Promise.all([
-        db.course.count(),
-        db.course.count({ where: { status: "PUBLIE" } }),
-        db.course.count({ where: { status: "BROUILLON" } }),
-        db.course.count({ where: { status: "ARCHIVE" } }),
+        db.course.count({ where: statsWhere }),
+        db.course.count({ where: { ...statsWhere, status: "PUBLIE" } }),
+        db.course.count({ where: { ...statsWhere, status: "BROUILLON" } }),
+        db.course.count({ where: { ...statsWhere, status: "ARCHIVE" } }),
       ]);
       stats = {
         total: totalCount,

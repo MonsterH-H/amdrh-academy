@@ -170,6 +170,8 @@ export function AdminCoursesPage() {
         limit: "12",
         admin: "true",
       });
+      if (user?.role) params.set("role", user.role);
+      if (user?.id) params.set("instructorId", user.id);
       if (statusFilter !== "ALL") params.set("status", statusFilter);
       if (categoryFilter !== "ALL") params.set("category", categoryFilter);
       if (difficultyFilter !== "ALL") params.set("difficulty", difficultyFilter);
@@ -339,12 +341,16 @@ export function AdminCoursesPage() {
 
   if (loading) return <AdminCoursesSkeleton />;
 
+  const isFormateur = user?.role === "FORMATEUR";
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Gestion des cours</h2>
+          <h2 className="text-2xl font-bold text-foreground">
+            {isFormateur ? "Mes cours" : "Gestion des cours"}
+          </h2>
           <p className="text-muted-foreground mt-1">
             {total} cours au total
             {totalSections > 0 && ` · ${totalSections} sections`}
