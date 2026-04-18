@@ -43,20 +43,31 @@ const mainNavItems = [
   { view: "courses" as const, label: "Catalogue Cours", icon: BookOpen },
   { view: "learning-paths" as const, label: "Parcours Formation", icon: GraduationCap },
   { view: "messages" as const, label: "Messagerie", icon: MessageSquare },
+  { view: "notifications" as const, label: "Notifications", icon: Bell },
   { view: "certificates" as const, label: "Certificats", icon: Award },
   { view: "badges" as const, label: "Badges", icon: Star },
 ];
 
-const adminNavItems = [
-  { view: "admin-courses" as const, label: "Gestion Cours", icon: BookOpen },
-  { view: "admin-quizzes" as const, label: "Gestion Quiz", icon: ClipboardList },
-  { view: "admin-learning-paths" as const, label: "Parcours Formation", icon: GraduationCap },
-  { view: "admin-certificates" as const, label: "Certificats & Badges", icon: Award },
-  { view: "admin-notifications" as const, label: "Notifications", icon: Send },
-  { view: "admin-analytics" as const, label: "Analyses", icon: BarChart3 },
-  { view: "admin-users" as const, label: "Utilisateurs", icon: Users },
-  { view: "admin-sync" as const, label: "Sync Fédération", icon: RefreshCw },
-];
+// Admin items per CDC rights matrix:
+// ADMIN: Full access to everything
+// FORMATEUR: Can create/manage own courses & quizzes
+// Others: No admin access
+const adminNavItems: Record<string, Array<{ view: AppView; label: string; icon: typeof BookOpen }>> = {
+  ADMIN: [
+    { view: "admin-courses", label: "Gestion Cours", icon: BookOpen },
+    { view: "admin-quizzes", label: "Gestion Quiz", icon: ClipboardList },
+    { view: "admin-learning-paths", label: "Parcours Formation", icon: GraduationCap },
+    { view: "admin-certificates", label: "Certificats & Badges", icon: Award },
+    { view: "admin-notifications", label: "Notifications", icon: Send },
+    { view: "admin-analytics", label: "Analyses", icon: BarChart3 },
+    { view: "admin-users", label: "Utilisateurs", icon: Users },
+    { view: "admin-sync", label: "Sync Fédération", icon: RefreshCw },
+  ],
+  FORMATEUR: [
+    { view: "admin-courses", label: "Mes Cours", icon: BookOpen },
+    { view: "admin-quizzes", label: "Mes Quiz", icon: ClipboardList },
+  ],
+};
 
 const bottomNavItems = [
   { view: "dashboard" as const, label: "Accueil", icon: LayoutDashboard },
@@ -112,7 +123,8 @@ export function Sidebar() {
 
   if (!user) return null;
 
-  const isAdmin = user.role === "ADMIN" || user.role === "FORMATEUR";
+  const userRole = user.role as string;
+  const adminItems = adminNavItems[userRole] || [];
 
   const navContent = (
     <div className="flex flex-col h-full">
@@ -162,13 +174,13 @@ export function Sidebar() {
             );
           })}
 
-          {isAdmin && (
+          {adminItems.length > 0 && (
             <>
               <Separator className="my-4" />
               <p className={cn("text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-2", sidebarCollapsed && "text-center")}>
-                {sidebarCollapsed ? "•••" : "Administration"}
+                {sidebarCollapsed ? "•••" : userRole === "FORMATEUR" ? "Formateur" : "Administration"}
               </p>
-              {adminNavItems.map((item) => {
+              {adminItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentView === item.view;
                 return (

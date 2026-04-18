@@ -146,7 +146,8 @@ export async function POST(
       });
 
       if (!existingCert) {
-        const certCode = `AMDRH-2026-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+        const certYear = new Date().getFullYear();
+        const certCode = `AMDRH-${certYear}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
         await db.certificate.create({
           data: {
             code: certCode,
