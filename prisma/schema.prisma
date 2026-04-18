@@ -84,6 +84,24 @@ enum FederationSyncStatus {
   ERREUR
 }
 
+enum ResourceType {
+  VIDEO
+  PDF
+  IMAGE
+  DOCUMENT
+  AUDIO
+  ARCHIVE
+  AUTRE
+}
+
+enum ResourceCategory {
+  SUPPORT_COURS
+  RESSOURCE_ANNEXE
+  EVALUATION
+  MEDIA_COURS
+  AUTRE
+}
+
 // ============================================
 // UTILISATEURS
 // ============================================
@@ -117,6 +135,7 @@ model User {
   receivedMessages  Message[]       @relation("ReceivedMessages")
   conversationParticipants ConversationParticipant[]
   notifications     Notification[]
+  uploadedResources Resource[]       @relation("ResourceUploader")
 
   @@index([role])
   @@index([isActive])
@@ -151,6 +170,7 @@ model Course {
   quiz           Quiz?
   enrollments    Enrollment[]
   learningPaths  LearningPathCourse[]
+  resources      Resource[]          @relation("CourseResources")
 
   @@index([category])
   @@index([status])
@@ -453,6 +473,42 @@ model Notification {
   @@index([userId])
   @@index([isRead])
   @@index([type])
+}
+
+// ============================================
+// RESSOURCES & MÉDIATHÈQUE
+// ============================================
+
+model Resource {
+  id            String           @id @default(cuid())
+  title         String
+  description   String?
+  fileName      String
+  filePath      String
+  fileSize      Int              @default(0) // en bytes
+  fileType      ResourceType     @default(AUTRE)
+  mimeType      String?
+  category      ResourceCategory @default(AUTRE)
+  isDownloadable Boolean         @default(true)
+  downloadCount Int              @default(0)
+  order         Int              @default(0)
+
+  // Liens vers cours/section/lesson
+  courseId      String?
+  course        Course?          @relation("CourseResources", fields: [courseId], references: [id], onDelete: SetNull)
+  sectionId     String?
+  lessonId      String?
+
+  uploadedById  String
+  uploadedBy    User             @relation("ResourceUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([fileType])
+  @@index([category])
+  @@index([courseId])
+  @@index([uploadedById])
+  @@index([createdAt])
 }
 
 // ============================================

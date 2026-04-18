@@ -159,3 +159,35 @@ Stage Summary:
   - FORMATEUR: Course creation, quiz management, learner tracking
   - ARBITRE/ENTRAINEUR/JOUEUR: Course catalog, enrollment, progress, quiz, certificates, badges, messages
 - Zero lint errors, dev server running cleanly
+
+---
+Task ID: 4
+Agent: Main Agent + Subagents
+Task: Complete Resource Management System (Médiathèque)
+
+Work Log:
+- Added ResourceType (VIDEO/PDF/IMAGE/DOCUMENT/AUDIO/ARCHIVE/AUTRE) and ResourceCategory (SUPPORT_COURS/RESSOURCE_ANNEXE/EVALUATION/MEDIA_COURS/AUTRE) enums to Prisma schema
+- Added Resource model with full fields: title, description, fileName, filePath, fileSize, fileType, mimeType, category, isDownloadable, downloadCount, courseId, sectionId, lessonId, uploadedById
+- Added Resource relations to User (uploadedResources) and Course (resources)
+- Pushed schema to Neon PostgreSQL DB successfully
+- Created /api/upload/route.ts: multipart/form-data upload, auto-detect fileType from mimeType, save to /public/uploads/resources/, create DB records, support single + multiple files
+- Created /api/resources/route.ts: GET with filters (courseId, type, category, search, uploadedById), pagination, stats (totalSize, byType, byCategory); POST for external URL resources
+- Created /api/resources/[id]/route.ts: GET single (with download streaming + count increment), PATCH update metadata, DELETE (DB + physical file)
+- Created admin-resources.tsx (1700+ lines): stats row, drag&drop upload zone, filter bar (search/type/category/course), grid+list toggle, resource cards with type icons, edit dialog, delete dialog, pagination, loading/empty/error states
+- Added RESOURCE_TYPE_LABELS, RESOURCE_TYPE_COLORS, RESOURCE_TYPE_ICONS, RESOURCE_CATEGORY_LABELS, RESOURCE_CATEGORY_COLORS to constants.ts
+- Updated course-detail.tsx: added Resources tab with list of downloadable resources per course, file size formatting, download button, type/category badges
+- Updated store/app.ts with "admin-resources" view
+- Updated layout.tsx: added Médiathèque to ADMIN and FORMATEUR sidebar nav, added FolderOpen icon, added view title
+- Updated page.tsx: imported AdminResourcesPage, added switch case
+- ESLint clean: 0 errors
+- Dev server running: GET / 200
+
+Stage Summary:
+- Complete resource management system connected to real DB and local file storage
+- Admin Médiathèque: upload (drag&drop + click), browse, search, filter, edit, delete, attach to courses
+- FORMATEUR has access to Médiathèque in sidebar
+- Learners see "Ressources" tab in course detail with downloadable files
+- 7 resource types: Vidéo, PDF, Image, Document, Audio, Archive, Autre
+- 5 categories: Support de cours, Ressource annexe, Évaluation, Média du cours, Autre
+- Full download tracking (downloadCount incremented on each download)
+- File streaming with proper Content-Type and Content-Disposition headers

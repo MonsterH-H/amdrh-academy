@@ -200,3 +200,53 @@ export const LEARNING_PATH_MODE_COLORS: Record<string, string> = {
   FLEXIBLE: "bg-emerald-100 text-emerald-700",
   HYBRIDE: "bg-purple-100 text-purple-700",
 };
+
+// ────────────────────────────────────────────
+// Resource (Médiathèque) constants
+// ────────────────────────────────────────────
+
+export const RESOURCE_TYPE_LABELS: Record<string, string> = {
+  VIDEO: "Vidéo",
+  PDF: "PDF",
+  IMAGE: "Image",
+  DOCUMENT: "Document",
+  AUDIO: "Audio",
+  ARCHIVE: "Archive",
+  AUTRE: "Autre",
+};
+
+export const RESOURCE_TYPE_COLORS: Record<string, string> = {
+  VIDEO: "bg-purple-100 text-purple-700",
+  PDF: "bg-red-100 text-red-700",
+  IMAGE: "bg-sky-100 text-sky-700",
+  DOCUMENT: "bg-emerald-100 text-emerald-700",
+  AUDIO: "bg-pink-100 text-pink-700",
+  ARCHIVE: "bg-orange-100 text-orange-700",
+  AUTRE: "bg-gray-100 text-gray-700",
+};
+
+export const RESOURCE_TYPE_ICONS: Record<string, string> = {
+  VIDEO: "Video",
+  PDF: "FileText",
+  IMAGE: "Image",
+  DOCUMENT: "File",
+  AUDIO: "Music",
+  ARCHIVE: "Archive",
+  AUTRE: "FileQuestion",
+};
+
+export const RESOURCE_CATEGORY_LABELS: Record<string, string> = {
+  SUPPORT_COURS: "Support de cours",
+  RESSOURCE_ANNEXE: "Ressource annexe",
+  EVALUATION: "Évaluation",
+  MEDIA_COURS: "Média du cours",
+  AUTRE: "Autre",
+};
+
+export const RESOURCE_CATEGORY_COLORS: Record<string, string> = {
+  SUPPORT_COURS: "bg-blue-100 text-blue-700",
+  RESSOURCE_ANNEXE: "bg-amber-100 text-amber-700",
+  EVALUATION: "bg-emerald-100 text-emerald-700",
+  MEDIA_COURS: "bg-purple-100 text-purple-700",
+  AUTRE: "bg-gray-100 text-gray-700",
+};

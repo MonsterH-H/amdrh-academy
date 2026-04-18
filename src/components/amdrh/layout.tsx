@@ -27,6 +27,7 @@ import {
   ClipboardList,
   BarChart3,
   Send,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
@@ -57,6 +58,7 @@ const adminNavItems: Record<string, Array<{ view: AppView; label: string; icon: 
     { view: "admin-courses", label: "Gestion Cours", icon: BookOpen },
     { view: "admin-quizzes", label: "Gestion Quiz", icon: ClipboardList },
     { view: "admin-learning-paths", label: "Parcours Formation", icon: GraduationCap },
+    { view: "admin-resources", label: "Médiathèque", icon: FolderOpen },
     { view: "admin-certificates", label: "Certificats & Badges", icon: Award },
     { view: "admin-notifications", label: "Notifications", icon: Send },
     { view: "admin-analytics", label: "Analyses", icon: BarChart3 },
@@ -66,6 +68,7 @@ const adminNavItems: Record<string, Array<{ view: AppView; label: string; icon: 
   FORMATEUR: [
     { view: "admin-courses", label: "Mes Cours", icon: BookOpen },
     { view: "admin-quizzes", label: "Mes Quiz", icon: ClipboardList },
+    { view: "admin-resources", label: "Médiathèque", icon: FolderOpen },
   ],
 };
 
@@ -575,6 +578,7 @@ function getViewTitle(view: string): string {
     "admin-courses": "Gestion des cours",
     "admin-notifications": "Gestion des notifications",
     "admin-analytics": "Analytique",
+    "admin-resources": "Médiathèque",
     profile: "Mon profil",
   };
   return titles[view] || view;

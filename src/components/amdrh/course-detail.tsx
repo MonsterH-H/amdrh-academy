@@ -14,11 +14,13 @@ import {
   ArrowLeft, BookOpen, Clock, Users, Award,
   CheckCircle2, Lock, PlayCircle, Loader2,
   X, ChevronLeft, ChevronRight, Video, FileText,
-  MousePointerClick, GraduationCap,
+  MousePointerClick, GraduationCap, Download, FolderOpen,
 } from "lucide-react";
 import {
   CATEGORY_LABELS, DIFFICULTY_LABELS, DIFFICULTY_COLORS,
   LESSON_TYPE_LABELS, LESSON_TYPE_ICONS, LESSON_TYPE_COLORS,
+  RESOURCE_TYPE_LABELS, RESOURCE_TYPE_COLORS, RESOURCE_TYPE_ICONS,
+  RESOURCE_CATEGORY_LABELS, RESOURCE_CATEGORY_COLORS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +34,19 @@ interface LessonData {
   sectionId: string;
 }
 
+interface ResourceData {
+  id: string;
+  title: string;
+  description: string | null;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  category: string;
+  isDownloadable: boolean;
+  downloadCount: number;
+  createdAt: string;
+}
+
 function LessonTypeIcon({ type }: { type: string }) {
   switch (type) {
     case "VIDEO":
@@ -42,6 +57,24 @@ function LessonTypeIcon({ type }: { type: string }) {
       return <MousePointerClick className="w-4 h-4" />;
     default:
       return <BookOpen className="w-4 h-4" />;
+  }
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 o";
+  const units = ["o", "Ko", "Mo", "Go"];
+  const k = 1024;
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${units[i]}`;
+}
+
+function ResourceIcon({ type }: { type: string }) {
+  switch (type) {
+    case "VIDEO": return <Video className="w-5 h-5" />;
+    case "PDF": return <FileText className="w-5 h-5" />;
+    case "IMAGE": return <GraduationCap className="w-5 h-5" />;
+    case "AUDIO": return <PlayCircle className="w-5 h-5" />;
+    default: return <FolderOpen className="w-5 h-5" />;
   }
 }
 
@@ -97,6 +130,8 @@ export function CourseDetailPage() {
   const [enrolling, setEnrolling] = useState(false);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [resources, setResources] = useState<ResourceData[]>([]);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
 
   useEffect(() => {
     if (!courseId || !user) return;
@@ -114,6 +149,24 @@ export function CourseDetailPage() {
     };
     fetchCourse();
   }, [courseId, user]);
+
+  // Fetch resources for this course
+  useEffect(() => {
+    if (!courseId) return;
+    const fetchResources = async () => {
+      setResourcesLoading(true);
+      try {
+        const res = await fetch(`/api/resources?courseId=${courseId}&limit=50`);
+        const data = await res.json();
+        setResources((data.resources || []) as ResourceData[]);
+      } catch {
+        // silently fail
+      } finally {
+        setResourcesLoading(false);
+      }
+    };
+    fetchResources();
+  }, [courseId]);
 
   // Build flat lessons array for navigation
   const allLessons = useMemo(() => {
@@ -216,6 +269,10 @@ export function CourseDetailPage() {
     if (nextLesson) setActiveLessonId(nextLesson.id);
   };
 
+  const handleDownloadResource = (resourceId: string) => {
+    window.open(`/api/resources/${resourceId}?download=true`, "_blank");
+  };
+
   if (loading) return <CourseDetailSkeleton />;
   if (!course) {
     return (
@@ -315,6 +372,9 @@ export function CourseDetailPage() {
       <Tabs defaultValue="contenu" className="w-full">
         <TabsList className="bg-white rounded-lg border border-border/60">
           <TabsTrigger value="contenu" className="text-sm rounded-md">Contenu</TabsTrigger>
+          <TabsTrigger value="ressources" className="text-sm rounded-md">
+            Ressources {resources.length > 0 && `(${resources.length})`}
+          </TabsTrigger>
           <TabsTrigger value="infos" className="text-sm rounded-md">Informations</TabsTrigger>
         </TabsList>
 
@@ -510,6 +570,76 @@ export function CourseDetailPage() {
               );
             })}
           </div>
+        </TabsContent>
+
+        <TabsContent value="ressources" className="mt-6">
+          {resourcesLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 rounded-xl" />
+              ))}
+            </div>
+          ) : resources.length === 0 ? (
+            <Card className="border-border/60">
+              <CardContent className="p-10 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-4">
+                  <FolderOpen className="w-6 h-6 text-muted-foreground/60" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-1">Aucune ressource</h3>
+                <p className="text-sm text-muted-foreground">
+                  Ce cours n'a pas encore de ressources téléchargeables.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {resources.map((resource) => (
+                <Card key={resource.id} className="border-border/60 hover:border-primary/20 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0",
+                        RESOURCE_TYPE_COLORS[resource.fileType] || "bg-gray-100 text-gray-600"
+                      )}>
+                        <ResourceIcon type={resource.fileType} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="text-sm font-semibold text-foreground truncate">{resource.title}</h4>
+                          <Badge variant="secondary" className={cn("text-[10px] flex-shrink-0", RESOURCE_TYPE_COLORS[resource.fileType])}>
+                            {RESOURCE_TYPE_LABELS[resource.fileType] || resource.fileType}
+                          </Badge>
+                          {resource.category && resource.category !== "AUTRE" && (
+                            <Badge variant="outline" className="text-[10px] flex-shrink-0">
+                              {RESOURCE_CATEGORY_LABELS[resource.category] || resource.category}
+                            </Badge>
+                          )}
+                        </div>
+                        {resource.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{resource.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                          <span>{formatFileSize(resource.fileSize)}</span>
+                          <span>{resource.downloadCount} téléchargement{resource.downloadCount > 1 ? "s" : ""}</span>
+                        </div>
+                      </div>
+                      {resource.isDownloadable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-lg flex-shrink-0 gap-1.5 text-xs"
+                          onClick={() => handleDownloadResource(resource.id)}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Télécharger
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="infos" className="mt-6">

@@ -25,6 +25,7 @@ export type AppView =
   | "admin-notifications"
   | "admin-analytics"
   | "admin-sync"
+  | "admin-resources"
   | "course-create"
   | "profile";
 
