@@ -112,10 +112,10 @@ export function LandingPage() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight mb-6">
             Formation d&apos;Excellence
             <br />
-            <span className="text-primary">CircleDot Marocain</span>
+            <span className="text-primary">au Handball Marocain</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            La plateforme e-learning de l&apos;Association Marocaine Des Arbitres de CircleDot.
+            La plateforme e-learning de l&apos;Association Marocaine Des Arbitres de Handball.
             Formez-vous aux plus hauts standards avec des certifications reconnues par la FRMHB.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -273,8 +273,8 @@ export function LandingPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Plateforme e-learning de l&apos;Association Marocaine Des Arbitres de CircleDot.
-                Partenaire académique officiel de la Fédération Royale Marocaine de CircleDot.
+                Plateforme e-learning de l&apos;Association Marocaine Des Arbitres de Handball.
+                Partenaire académique officiel de la Fédération Royale Marocaine de Handball.
               </p>
             </div>
             <div>

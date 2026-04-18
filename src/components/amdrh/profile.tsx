@@ -10,7 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { ROLE_LABELS, ROLE_COLORS, REGIONS_MAROC } from "@/lib/constants";
-import { BookOpen, Award, HelpCircle, Star, Save, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BookOpen, Award, HelpCircle, Star, Save } from "lucide-react";
 
 export function ProfilePage() {
   const { user, navigate } = useAppStore();
@@ -108,6 +109,4 @@ export function ProfilePage() {
   );
 }
 
-function cn(...args: unknown[]) {
-  return args.filter(Boolean).join(" ");
-}
+

@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Award, Download, ExternalLink, Copy, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Award, CheckCircle2 } from "lucide-react";
 
 export function CertificatesPage() {
   const { user } = useAppStore();
@@ -121,6 +122,4 @@ export function BadgesPage() {
   );
 }
 
-function cn(...args: unknown[]) {
-  return args.filter(Boolean).join(" ");
-}
+
