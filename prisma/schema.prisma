@@ -3,109 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// ============================================
-// ENUMS
-// ============================================
-
-enum UserRole {
-  ADMIN
-  FORMATEUR
-  ARBITRE
-  ENTRAINEUR
-  JOUEUR
-}
-
-enum CourseStatus {
-  BROUILLON
-  EN_REVISION
-  VALIDE
-  PUBLIE
-  ARCHIVE
-}
-
-enum CourseCategory {
-  ARBITRAGE
-  ENTRAINEMENT
-  JOUEURS
-  ADMINISTRATION
-}
-
-enum DifficultyLevel {
-  DEBUTANT
-  INTERMEDIAIRE
-  AVANCE
-  EXPERT
-}
-
-enum LessonType {
-  VIDEO
-  PDF
-  TEXTE
-  INTERACTIF
-}
-
-enum QuestionType {
-  QCM_SIMPLE
-  QCM_MULTIPLE
-  VRAI_FAUX
-}
-
-enum QuizStatus {
-  EN_COURS
-  SOUMIS
-  REUSSI
-  ECHOUE
-}
-
-enum BadgeLevel {
-  BRONZE
-  ARGENT
-  OR
-  PLATINE
-}
-
-enum NotificationType {
-  COURS
-  CERTIFICAT
-  MESSAGE
-  QUIZ
-  BADGE
-  SYSTEME
-}
-
-enum FederationSyncStatus {
-  EN_ATTENTE
-  EN_COURS
-  TERMINE
-  ERREUR
-}
-
-enum ResourceType {
-  VIDEO
-  PDF
-  IMAGE
-  DOCUMENT
-  AUDIO
-  ARCHIVE
-  AUTRE
-}
-
-enum CertificateStatus {
-  ACTIVE
-  REVOKED
-  SUSPENDED
-}
-
-enum ResourceCategory {
-  SUPPORT_COURS
-  RESSOURCE_ANNEXE
-  EVALUATION
-  MEDIA_COURS
-  AUTRE
+  provider = "sqlite"
+  url      = "file:./db/amdrh.db"
 }
 
 // ============================================
@@ -120,7 +19,7 @@ model User {
   prenom        String
   telephone     String?
   avatar        String?
-  role          UserRole  @default(ARBITRE)
+  role          String    @default("ARBITRE") // ADMIN, FORMATEUR, ARBITRE, ENTRAINEUR, JOUEUR
   licenceNumber String?   @unique
   club          String?
   region        String?
@@ -131,7 +30,6 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relations
   coursesCreated    Course[]          @relation("CourseInstructor")
   enrollments       Enrollment[]
   quizAttempts      QuizAttempt[]
@@ -142,10 +40,6 @@ model User {
   conversationParticipants ConversationParticipant[]
   notifications     Notification[]
   uploadedResources Resource[]       @relation("ResourceUploader")
-
-  @@index([role])
-  @@index([isActive])
-  @@index([club])
 }
 
 // ============================================
@@ -153,35 +47,29 @@ model User {
 // ============================================
 
 model Course {
-  id            String           @id @default(cuid())
+  id            String    @id @default(cuid())
   title         String
-  slug          String           @unique
+  slug          String    @unique
   description   String
   coverImage    String?
-  category      CourseCategory
-  difficulty    DifficultyLevel  @default(DEBUTANT)
-  status        CourseStatus     @default(BROUILLON)
-  duration      Int              @default(0) // en minutes
-  isCertifying  Boolean          @default(false)
-  passingScore  Int              @default(70) // pourcentage
-  maxAttempts   Int              @default(3)
-  order         Int              @default(0)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  category      String    @default("ARBITRAGE") // ARBITRAGE, ENTRAINEMENT, JOUEURS, ADMINISTRATION
+  difficulty    String    @default("DEBUTANT") // DEBUTANT, INTERMEDIAIRE, AVANCE, EXPERT
+  status        String    @default("BROUILLON") // BROUILLON, EN_REVISION, VALIDE, PUBLIE, ARCHIVE
+  duration      Int       @default(0)
+  isCertifying  Boolean   @default(false)
+  passingScore  Int       @default(70)
+  maxAttempts   Int       @default(3)
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  // Relations
   instructorId   String?
   instructor     User?            @relation("CourseInstructor", fields: [instructorId], references: [id])
   sections       Section[]
   quiz           Quiz?
   enrollments    Enrollment[]
   learningPaths  LearningPathCourse[]
-  resources      Resource[]          @relation("CourseResources")
-
-  @@index([category])
-  @@index([status])
-  @@index([difficulty])
-  @@index([instructorId])
+  resources      Resource[]       @relation("CourseResources")
 }
 
 model Section {
@@ -191,24 +79,19 @@ model Section {
   courseId  String
   course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons   Lesson[]
-
-  @@index([courseId])
 }
 
 model Lesson {
-  id          String      @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
-  type        LessonType  @default(TEXTE)
-  content     String      @default("") // URL vidéo, texte markdown, ou base64 PDF
-  duration    Int         @default(0) // en minutes
-  order       Int         @default(0)
+  type        String  @default("TEXTE") // VIDEO, PDF, TEXTE, INTERACTIF
+  content     String  @default("")
+  duration    Int     @default(0)
+  order       Int     @default(0)
   sectionId   String
-  section     Section     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  section     Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
-  // Relations
   progress    LessonProgress[]
-
-  @@index([sectionId])
 }
 
 // ============================================
@@ -216,42 +99,38 @@ model Lesson {
 // ============================================
 
 model Enrollment {
-  id            String        @id @default(cuid())
+  id            String    @id @default(cuid())
   userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   courseId      String
-  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  status        String        @default("en_cours") // en_cours, termine, abandonne
-  progress      Float         @default(0) // pourcentage 0-100
-  startedAt     DateTime      @default(now())
+  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status        String    @default("en_cours") // en_cours, termine, abandonne
+  progress      Float     @default(0)
+  startedAt     DateTime  @default(now())
   completedAt   DateTime?
-  lastAccessAt  DateTime      @default(now())
+  lastAccessAt  DateTime  @default(now())
 
   lessonProgress LessonProgress[]
 
   @@unique([userId, courseId])
-  @@index([userId])
-  @@index([courseId])
-  @@index([status])
 }
 
 model LessonProgress {
-  id              String     @id @default(cuid())
-  enrollmentId    String
-  enrollment      Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  lessonId        String
-  lesson          Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  completed       Boolean    @default(false)
-  lastPosition    Int        @default(0) // pour vidéo, position en secondes
-  timeSpent       Int        @default(0) // temps total passé en secondes
-  watchPercentage Float      @default(0) // pourcentage de la vidéo regardée (0-100)
-  scrollPercentage Float     @default(0) // pourcentage de scroll pour texte/PDF (0-100)
-  completionTrigger String   @default("manual") // manual, auto_video, auto_scroll, auto_time
-  viewedAt        DateTime   @default(now())
-  completedAt     DateTime?
+  id               String   @id @default(cuid())
+  enrollmentId     String
+  enrollment       Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lessonId         String
+  lesson           Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed        Boolean   @default(false)
+  lastPosition     Int       @default(0)
+  timeSpent        Int       @default(0)
+  watchPercentage  Float     @default(0)
+  scrollPercentage Float     @default(0)
+  completionTrigger String   @default("manual")
+  viewedAt         DateTime  @default(now())
+  completedAt      DateTime?
 
   @@unique([enrollmentId, lessonId])
-  @@index([enrollmentId])
 }
 
 // ============================================
@@ -259,69 +138,62 @@ model LessonProgress {
 // ============================================
 
 model Quiz {
-  id            String    @id @default(cuid())
-  title         String
-  description   String?
-  courseId      String    @unique
-  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  duration      Int       @default(30) // en minutes
-  passingScore  Int       @default(70)
+  id               String  @id @default(cuid())
+  title            String
+  description      String?
+  courseId         String  @unique
+  course           Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  duration         Int     @default(30)
+  passingScore     Int     @default(70)
   shuffleQuestions Boolean @default(true)
-  showAnswers   Boolean   @default(true)
-  maxAttempts   Int       @default(3)
-  createdAt     DateTime  @default(now())
+  showAnswers      Boolean @default(true)
+  maxAttempts      Int     @default(3)
+  createdAt        DateTime @default(now())
 
   questions     Question[]
   attempts      QuizAttempt[]
 }
 
 model Question {
-  id            String       @id @default(cuid())
+  id            String  @id @default(cuid())
   quizId        String
-  quiz          Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz          Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
   text          String
-  type          QuestionType @default(QCM_SIMPLE)
-  options       String       @default("[]") // JSON array of options
-  correctAnswer String       @default("[]") // JSON array of correct option indices
+  type          String  @default("QCM_SIMPLE") // QCM_SIMPLE, QCM_MULTIPLE, VRAI_FAUX
+  options       String  @default("[]")
+  correctAnswer String  @default("[]")
   explanation   String?
-  points        Int          @default(1)
-  order         Int          @default(0)
+  points        Int     @default(1)
+  order         Int     @default(0)
 
   answers       QuizAnswer[]
-
-  @@index([quizId])
 }
 
 model QuizAttempt {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   quizId      String
-  quiz        Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  status      QuizStatus  @default(EN_COURS)
-  score       Int         @default(0)
-  maxScore    Int         @default(0)
-  duration    Int         @default(0) // temps passé en secondes
-  answers     QuizAnswer[]
-  startedAt   DateTime    @default(now())
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  status      String   @default("EN_COURS") // EN_COURS, SOUMIS, REUSSI, ECHOUE
+  score       Int      @default(0)
+  maxScore    Int      @default(0)
+  duration    Int      @default(0)
+  startedAt   DateTime @default(now())
   submittedAt DateTime?
 
-  @@index([userId])
-  @@index([quizId])
-  @@index([status])
+  answers     QuizAnswer[]
 }
 
 model QuizAnswer {
-  id           String      @id @default(cuid())
-  attemptId    String
-  attempt      QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  questionId   String
-  question     Question    @relation(fields: [questionId], references: [id])
-  selectedAnswer String    @default("[]") // JSON array of selected option indices
-  isCorrect    Boolean?
-  pointsEarned Int         @default(0)
-
-  @@index([attemptId])
+  id             String     @id @default(cuid())
+  attemptId      String
+  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question   @relation(fields: [questionId], references: [id])
+  selectedAnswer String     @default("[]")
+  isCorrect      Boolean?
+  pointsEarned   Int        @default(0)
 }
 
 // ============================================
@@ -329,53 +201,48 @@ model QuizAnswer {
 // ============================================
 
 model Certificate {
-  id              String           @id @default(cuid())
-  code            String           @unique // AMDRH-2026-XXXXX
-  type            String           @default("CERTIFICAT") // ATTESTATION, CERTIFICAT_COMPLETION, DIPLOME
-  status          CertificateStatus @default(ACTIVE)
-  userId          String
-  user            User             @relation(fields: [userId], references: [id])
-  courseId        String
-  courseTitle     String
-  userName        String
-  userLicence     String?
-  score           Int
-  maxScore        Int
-  issuedAt        DateTime         @default(now())
-  expiresAt       DateTime?
-  revokedAt       DateTime?
-  revokeReason    String?
-  qrCodeUrl       String?
-  verifiedBy      String?          // ID du validateur AMDRH
-  pdfUrl          String?
-
-  @@index([userId])
-  @@index([code])
-  @@index([status])
+  id            String   @id @default(cuid())
+  code          String   @unique
+  type          String   @default("CERTIFICAT") // ATTESTATION, CERTIFICAT_COMPLETION, DIPLOME
+  status        String   @default("ACTIVE") // ACTIVE, REVOKED, SUSPENDED
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  courseId      String
+  courseTitle   String
+  userName      String
+  userLicence   String?
+  score         Int
+  maxScore      Int
+  issuedAt      DateTime @default(now())
+  expiresAt     DateTime?
+  revokedAt     DateTime?
+  revokeReason  String?
+  qrCodeUrl     String?
+  verifiedBy    String?
+  pdfUrl        String?
 }
 
 model Badge {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String
-  icon        String      // emoji ou nom d'icône
-  level       BadgeLevel  @default(BRONZE)
-  criteria    String      // description des critères
-  createdAt   DateTime    @default(now())
+  icon        String
+  level       String   @default("BRONZE") // BRONZE, ARGENT, OR, PLATINE
+  criteria    String
+  createdAt   DateTime @default(now())
 
   userBadges  UserBadge[]
 }
 
 model UserBadge {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badgeId     String
-  badge       Badge      @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-  earnedAt    DateTime  @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  earnedAt  DateTime @default(now())
 
   @@unique([userId, badgeId])
-  @@index([userId])
 }
 
 // ============================================
@@ -383,48 +250,46 @@ model UserBadge {
 // ============================================
 
 model LearningPath {
-  id             String           @id @default(cuid())
+  id             String   @id @default(cuid())
   title          String
   description    String
-  slug           String           @unique
-  targetRole     UserRole
-  mode           String           @default("sequentiel") // sequentiel, flexible, hybride
-  isMandatory    Boolean          @default(false)
-  order          Int              @default(0)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  slug           String   @unique
+  targetRole     String   @default("ARBITRE") // UserRole enum as string
+  mode           String   @default("sequentiel") // sequentiel, flexible, hybride
+  isMandatory    Boolean  @default(false)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   courses        LearningPathCourse[]
   enrollments    LearningPathEnrollment[]
 }
 
 model LearningPathCourse {
-  id              String        @id @default(cuid())
+  id              String       @id @default(cuid())
   learningPathId  String
-  learningPath    LearningPath  @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  learningPath    LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
   courseId        String
-  course          Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  order           Int           @default(0)
-  isRequired      Boolean       @default(true)
-  minScore        Int           @default(70)
+  course          Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  order           Int          @default(0)
+  isRequired      Boolean      @default(true)
+  minScore        Int          @default(70)
 
   @@unique([learningPathId, courseId])
-  @@index([learningPathId])
 }
 
 model LearningPathEnrollment {
-  id              String        @id @default(cuid())
-  userId          String
-  learningPathId  String
-  learningPath    LearningPath  @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
-  progress        Float         @default(0)
-  currentCourseOrder Int        @default(0)
-  status          String        @default("en_cours")
-  startedAt       DateTime      @default(now())
-  completedAt     DateTime?
+  id               String       @id @default(cuid())
+  userId           String
+  learningPathId   String
+  learningPath     LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  progress         Float        @default(0)
+  currentCourseOrder Int         @default(0)
+  status           String       @default("en_cours")
+  startedAt        DateTime     @default(now())
+  completedAt      DateTime?
 
   @@unique([userId, learningPathId])
-  @@index([userId])
 }
 
 // ============================================
@@ -451,7 +316,6 @@ model ConversationParticipant {
   joinedAt       DateTime     @default(now())
 
   @@unique([userId, conversationId])
-  @@index([userId])
 }
 
 model Message {
@@ -465,11 +329,6 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
-
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([conversationId])
-  @@index([createdAt])
 }
 
 // ============================================
@@ -477,19 +336,15 @@ model Message {
 // ============================================
 
 model Notification {
-  id          String            @id @default(cuid())
-  userId      String
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        NotificationType
-  title       String
-  message     String
-  link        String?
-  isRead      Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-
-  @@index([userId])
-  @@index([isRead])
-  @@index([type])
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   @default("SYSTEME") // COURS, CERTIFICAT, MESSAGE, QUIZ, BADGE, SYSTEME
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 // ============================================
@@ -497,35 +352,28 @@ model Notification {
 // ============================================
 
 model Resource {
-  id            String           @id @default(cuid())
+  id            String   @id @default(cuid())
   title         String
   description   String?
   fileName      String
   filePath      String
-  fileSize      Int              @default(0) // en bytes
-  fileType      ResourceType     @default(AUTRE)
+  fileSize      Int      @default(0)
+  fileType      String   @default("AUTRE") // VIDEO, PDF, IMAGE, DOCUMENT, AUDIO, ARCHIVE, AUTRE
   mimeType      String?
-  category      ResourceCategory @default(AUTRE)
-  isDownloadable Boolean         @default(true)
-  downloadCount Int              @default(0)
-  order         Int              @default(0)
+  category      String   @default("AUTRE") // SUPPORT_COURS, RESSOURCE_ANNEXE, EVALUATION, MEDIA_COURS, AUTRE
+  isDownloadable Boolean  @default(true)
+  downloadCount Int      @default(0)
+  order         Int      @default(0)
 
-  // Liens vers cours/section/lesson
   courseId      String?
-  course        Course?          @relation("CourseResources", fields: [courseId], references: [id], onDelete: SetNull)
+  course        Course?  @relation("CourseResources", fields: [courseId], references: [id], onDelete: SetNull)
   sectionId     String?
   lessonId      String?
 
   uploadedById  String
-  uploadedBy    User             @relation("ResourceUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  @@index([fileType])
-  @@index([category])
-  @@index([courseId])
-  @@index([uploadedById])
-  @@index([createdAt])
+  uploadedBy    User     @relation("ResourceUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // ============================================
@@ -533,16 +381,16 @@ model Resource {
 // ============================================
 
 model FederationSync {
-  id            String               @id @default(cuid())
-  type          String               // licence_sync, certification_sync
-  status        FederationSyncStatus @default(EN_ATTENTE)
-  totalRecords  Int                  @default(0)
-  processedRecords Int               @default(0)
-  errorRecords  Int                  @default(0)
-  errorMessage  String?
-  startedAt     DateTime             @default(now())
-  completedAt   DateTime?
-  triggeredBy   String
+  id               String   @id @default(cuid())
+  type             String   // licence_sync, certification_sync
+  status           String   @default("EN_ATTENTE") // EN_ATTENTE, EN_COURS, TERMINE, ERREUR
+  totalRecords     Int      @default(0)
+  processedRecords Int      @default(0)
+  errorRecords     Int      @default(0)
+  errorMessage     String?
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+  triggeredBy      String
 }
 
 // ============================================
@@ -556,10 +404,6 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
-
-  @@index([email])
-  @@index([token])
-  @@index([expiresAt])
 }
 
 // ============================================
@@ -573,7 +417,4 @@ model VerificationToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
-
-  @@index([email])
-  @@index([token])
 }

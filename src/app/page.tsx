@@ -1,53 +1,98 @@
 "use client";
 
-import { useEffect } from "react";
-import { useAppStore } from "@/store/app";
-import { Sidebar, TopBar, MobileBottomNav } from "@/components/amdrh/layout";
+import { useEffect, lazy, Suspense, type ComponentType } from "react";
+import { useAppStore, type AppView } from "@/store/app";
+import { TopBar, MobileBottomNav } from "@/components/amdrh/layout";
+
+// Eagerly loaded components (small, needed immediately)
 import { LandingPage } from "@/components/amdrh/landing";
 import { LoginPage } from "@/components/amdrh/login";
 import { RegisterPage } from "@/components/amdrh/register";
 import { ForgotPasswordPage } from "@/components/amdrh/forgot-password";
 import { ResetPasswordPage } from "@/components/amdrh/reset-password";
-import { DashboardPage } from "@/components/amdrh/dashboard";
-import { CourseCatalogPage } from "@/components/amdrh/course-catalog";
-import { CourseDetailPage } from "@/components/amdrh/course-detail";
-import { LearningPathsPage } from "@/components/amdrh/learning-paths";
-import { QuizPage } from "@/components/amdrh/quiz";
-import { CertificatesPage, BadgesPage } from "@/components/amdrh/certificates-badges";
-import { MessagesPage, ConversationPage } from "@/components/amdrh/messages";
-import { NotificationsPage } from "@/components/amdrh/notifications";
-import { AdminUsersPage, AdminUserDetailPage } from "@/components/amdrh/admin-users";
-import { AdminCertificatesPage } from "@/components/amdrh/admin-certificates";
-import { AdminCoursesPage } from "@/components/amdrh/admin-courses";
-import { AdminNotificationsPage } from "@/components/amdrh/admin-notifications";
-import { AdminSyncPage } from "@/components/amdrh/admin-sync";
-import { AdminLearningPathsPage } from "@/components/amdrh/admin-learning-paths";
-import { AdminAnalyticsPage } from "@/components/amdrh/admin-analytics";
-import { AdminQuizzesPage } from "@/components/amdrh/admin-quizzes";
-import { AdminResourcesPage } from "@/components/amdrh/admin-resources";
-import { AdminTraceabilityPage } from "@/components/amdrh/admin-traceability";
-import { CourseCreatePage } from "@/components/amdrh/course-create";
-import { LearnerTraceabilityPage } from "@/components/amdrh/learner-traceability";
-import { ProfilePage } from "@/components/amdrh/profile";
-import { cn } from "@/lib/utils";
+
+// Lazy loaded components (larger, loaded on demand)
+const lazyLoad = <T extends ComponentType>(loader: () => Promise<{ default: T }>) =>
+  lazy(loader);
+
+const DashboardPage = lazyLoad(() => import("@/components/amdrh/dashboard").then(m => ({ default: m.DashboardPage as ComponentType })));
+const CourseCatalogPage = lazyLoad(() => import("@/components/amdrh/course-catalog").then(m => ({ default: m.CourseCatalogPage as ComponentType })));
+const CourseDetailPage = lazyLoad(() => import("@/components/amdrh/course-detail").then(m => ({ default: m.CourseDetailPage as ComponentType })));
+const LearningPathsPage = lazyLoad(() => import("@/components/amdrh/learning-paths").then(m => ({ default: m.LearningPathsPage as ComponentType })));
+const QuizPage = lazyLoad(() => import("@/components/amdrh/quiz").then(m => ({ default: m.QuizPage as ComponentType })));
+const CertificatesPage = lazyLoad(() => import("@/components/amdrh/certificates-badges").then(m => ({ default: m.CertificatesPage as ComponentType })));
+const BadgesPage = lazyLoad(() => import("@/components/amdrh/certificates-badges").then(m => ({ default: m.BadgesPage as ComponentType })));
+const MessagesPage = lazyLoad(() => import("@/components/amdrh/messages").then(m => ({ default: m.MessagesPage as ComponentType })));
+const ConversationPage = lazyLoad(() => import("@/components/amdrh/messages").then(m => ({ default: m.ConversationPage as ComponentType })));
+const NotificationsPage = lazyLoad(() => import("@/components/amdrh/notifications").then(m => ({ default: m.NotificationsPage as ComponentType })));
+const ProfilePage = lazyLoad(() => import("@/components/amdrh/profile").then(m => ({ default: m.ProfilePage as ComponentType })));
+const LearnerTraceabilityPage = lazyLoad(() => import("@/components/amdrh/learner-traceability").then(m => ({ default: m.LearnerTraceabilityPage as ComponentType })));
+const CourseCreatePage = lazyLoad(() => import("@/components/amdrh/course-create").then(m => ({ default: m.CourseCreatePage as ComponentType })));
+
+// Admin pages (lazy loaded)
+const AdminUsersPage = lazyLoad(() => import("@/components/amdrh/admin-users").then(m => ({ default: m.AdminUsersPage as ComponentType })));
+const AdminUserDetailPage = lazyLoad(() => import("@/components/amdrh/admin-users").then(m => ({ default: m.AdminUserDetailPage as ComponentType })));
+const AdminCertificatesPage = lazyLoad(() => import("@/components/amdrh/admin-certificates").then(m => ({ default: m.AdminCertificatesPage as ComponentType })));
+const AdminCoursesPage = lazyLoad(() => import("@/components/amdrh/admin-courses").then(m => ({ default: m.AdminCoursesPage as ComponentType })));
+const AdminNotificationsPage = lazyLoad(() => import("@/components/amdrh/admin-notifications").then(m => ({ default: m.AdminNotificationsPage as ComponentType })));
+const AdminSyncPage = lazyLoad(() => import("@/components/amdrh/admin-sync").then(m => ({ default: m.AdminSyncPage as ComponentType })));
+const AdminLearningPathsPage = lazyLoad(() => import("@/components/amdrh/admin-learning-paths").then(m => ({ default: m.AdminLearningPathsPage as ComponentType })));
+const AdminAnalyticsPage = lazyLoad(() => import("@/components/amdrh/admin-analytics").then(m => ({ default: m.AdminAnalyticsPage as ComponentType })));
+const AdminQuizzesPage = lazyLoad(() => import("@/components/amdrh/admin-quizzes").then(m => ({ default: m.AdminQuizzesPage as ComponentType })));
+const AdminResourcesPage = lazyLoad(() => import("@/components/amdrh/admin-resources").then(m => ({ default: m.AdminResourcesPage as ComponentType })));
+const AdminTraceabilityPage = lazyLoad(() => import("@/components/amdrh/admin-traceability").then(m => ({ default: m.AdminTraceabilityPage as ComponentType })));
+
+// View component map
+const viewComponentMap: Record<string, ComponentType> = {
+  dashboard: DashboardPage,
+  courses: CourseCatalogPage,
+  "course-detail": CourseDetailPage,
+  "learning-paths": LearningPathsPage,
+  quiz: QuizPage,
+  certificates: CertificatesPage,
+  badges: BadgesPage,
+  messages: MessagesPage,
+  conversation: ConversationPage,
+  notifications: NotificationsPage,
+  "admin-users": AdminUsersPage,
+  "admin-user-detail": AdminUserDetailPage,
+  "admin-courses": AdminCoursesPage,
+  "admin-notifications": AdminNotificationsPage,
+  "admin-sync": AdminSyncPage,
+  "admin-learning-paths": AdminLearningPathsPage,
+  "admin-analytics": AdminAnalyticsPage,
+  "admin-certificates": AdminCertificatesPage,
+  "admin-quizzes": AdminQuizzesPage,
+  "admin-resources": AdminResourcesPage,
+  "admin-traceability": AdminTraceabilityPage,
+  "course-create": CourseCreatePage,
+  "learner-traceability": LearnerTraceabilityPage,
+  profile: ProfilePage,
+};
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground">Chargement...</p>
+      </div>
+    </div>
+  );
+}
 
 function AppContent() {
   const { currentView, user, isAuthenticated, sidebarCollapsed, setUnreadCount } = useAppStore();
 
-  // Fetch unread count periodically when authenticated
   useEffect(() => {
     if (!isAuthenticated || !user) return;
-
     const fetchUnread = async () => {
       try {
         const res = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=true`);
         const data = await res.json();
         setUnreadCount(data.unreadCount || 0);
-      } catch {
-        // silently fail
-      }
+      } catch { /* silently fail */ }
     };
-
     fetchUnread();
     const interval = setInterval(fetchUnread, 30000);
     return () => clearInterval(interval);
@@ -66,48 +111,23 @@ function AppContent() {
       return <LandingPage />;
     }
 
-    switch (currentView) {
-      case "dashboard": return <DashboardPage />;
-      case "courses": return <CourseCatalogPage />;
-      case "course-detail": return <CourseDetailPage />;
-      case "learning-paths": return <LearningPathsPage />;
-      case "quiz": return <QuizPage />;
-      case "certificates": return <CertificatesPage />;
-      case "badges": return <BadgesPage />;
-      case "messages": return <MessagesPage />;
-      case "conversation": return <ConversationPage />;
-      case "notifications": return <NotificationsPage />;
-      case "admin-users": return <AdminUsersPage />;
-      case "admin-user-detail": return <AdminUserDetailPage />;
-      case "admin-courses": return <AdminCoursesPage />;
-      case "admin-notifications": return <AdminNotificationsPage />;
-      case "admin-sync": return <AdminSyncPage />;
-      case "admin-learning-paths": return <AdminLearningPathsPage />;
-      case "admin-analytics": return <AdminAnalyticsPage />;
-      case "admin-certificates": return <AdminCertificatesPage />;
-      case "admin-quizzes": return <AdminQuizzesPage />;
-      case "admin-resources": return <AdminResourcesPage />;
-      case "admin-traceability": return <AdminTraceabilityPage />;
-      case "course-create": return <CourseCreatePage />;
-      case "learner-traceability": return <LearnerTraceabilityPage />;
-      case "profile": return <ProfilePage />;
-      default: return <DashboardPage />;
+    const Component = viewComponentMap[currentView];
+    if (Component) {
+      return <Suspense fallback={<PageLoader />}><Component /></Suspense>;
     }
+    return <Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>;
   };
 
   const isAuthPage = ["landing", "login", "register", "forgot-password", "reset-password"].includes(currentView);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] overflow-x-hidden">
-      {!isAuthPage && <Sidebar />}
+      {!isAuthPage && <SidebarWrapper />}
       {!isAuthPage && <TopBar />}
       <main
-        className={cn(
-          "transition-all duration-300 min-w-0",
-          !isAuthPage && sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]"
-        )}
+        className={`transition-all duration-300 min-w-0 ${!isAuthPage ? (sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]") : ""}`}
       >
-        <div className={cn(!isAuthPage && "pt-14 sm:pt-16 pb-20 lg:pb-6")}>
+        <div className={!isAuthPage ? "pt-14 sm:pt-16 pb-20 lg:pb-6" : ""}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {renderView()}
           </div>
@@ -115,6 +135,17 @@ function AppContent() {
       </main>
       {!isAuthPage && <MobileBottomNav />}
     </div>
+  );
+}
+
+// Lazy load Sidebar since it's also large
+const SidebarLazy = lazyLoad(() => import("@/components/amdrh/layout").then(m => ({ default: m.Sidebar as ComponentType })));
+
+function SidebarWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <SidebarLazy />
+    </Suspense>
   );
 }
 

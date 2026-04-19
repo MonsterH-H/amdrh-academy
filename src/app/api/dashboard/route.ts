@@ -12,6 +12,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "ADMIN") {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
       const [
         totalUsers,
         totalCourses,
@@ -31,13 +34,11 @@ export async function GET(req: NextRequest) {
           take: 5,
           select: { id: true, nom: true, prenom: true, email: true, role: true, createdAt: true },
         }),
-        // Monthly enrollments for the last 6 months
-        db.$queryRaw<Array<{ month: string; count: bigint }>>`
-          SELECT TO_CHAR("createdAt", 'YYYY-MM') as month, COUNT(*)::bigint as count
-          FROM "Enrollment"
-          WHERE "createdAt" >= NOW() - INTERVAL '6 months'
-          GROUP BY month ORDER BY month
-        `,
+        // Monthly enrollments for the last 6 months (SQLite compatible)
+        db.enrollment.findMany({
+          where: { startedAt: { gte: sixMonthsAgo } },
+          select: { startedAt: true, id: true },
+        }),
         db.user.groupBy({
           by: ["role"],
           _count: { role: true },
@@ -62,10 +63,20 @@ export async function GET(req: NextRequest) {
         }),
       ]);
 
+      // Group enrollments by month
+      const monthMap: Record<string, number> = {};
+      for (const e of enrollmentsByMonth) {
+        const month = e.startedAt.toISOString().slice(0, 7); // YYYY-MM
+        monthMap[month] = (monthMap[month] || 0) + 1;
+      }
+      const enrollmentsMonthly = Object.entries(monthMap)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([month, count]) => ({ month, count }));
+
       const completionRate = totalCourses > 0
         ? Math.round(
             (await db.enrollment.count({ where: { status: "termine" } })) /
-              (await db.enrollment.count()) *
+              Math.max(1, await db.enrollment.count()) *
               100
           )
         : 0;
@@ -79,10 +90,7 @@ export async function GET(req: NextRequest) {
           completionRate: Math.max(0, completionRate),
         },
         recentUsers,
-        enrollmentsByMonth: enrollmentsByMonth.map((e) => ({
-          month: e.month,
-          count: Number(e.count),
-        })),
+        enrollmentsByMonth: enrollmentsMonthly,
         roleDistribution: roleDistribution.map((r) => ({
           role: r.role,
           count: r._count.role,
@@ -116,7 +124,6 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: "desc" },
       });
 
-      // Flatten all enrollments across all myCourses for recent learners
       const allEnrollments = myCourses.flatMap((c) =>
         c.enrollments.map((e) => ({
           ...e,
@@ -128,14 +135,12 @@ export async function GET(req: NextRequest) {
         .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
         .slice(0, 8);
 
-      // Calculate stats
       const totalEnrollments = myCourses.reduce((sum, c) => sum + c._count.enrollments, 0);
       const allProgressValues = myCourses.flatMap((c) => c.enrollments.map((e) => e.progress));
       const avgCompletion = allProgressValues.length > 0
         ? Math.round(allProgressValues.reduce((s, p) => s + p, 0) / allProgressValues.length)
         : 0;
 
-      // Get passed quiz count for courses created by this formateur
       const myCourseIds = myCourses.map((c) => c.id);
       const passedQuizzes = myCourseIds.length > 0
         ? await db.quizAttempt.count({
@@ -146,14 +151,10 @@ export async function GET(req: NextRequest) {
           })
         : 0;
 
-      // Avg score per course
       const courseStatsMap = await Promise.all(
         myCourseIds.map(async (courseId) => {
           const attempts = await db.quizAttempt.findMany({
-            where: {
-              quiz: { courseId },
-              status: "REUSSI",
-            },
+            where: { quiz: { courseId }, status: "REUSSI" },
             select: { score: true, maxScore: true },
           });
           const cAvgScore = attempts.length > 0
@@ -259,7 +260,6 @@ export async function GET(req: NextRequest) {
           )
         : 0;
 
-    // Recommended courses
     const user = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
     const enrolledCourseIds = enrollments.map((e) => e.courseId);
     const recommended = await db.course.findMany({

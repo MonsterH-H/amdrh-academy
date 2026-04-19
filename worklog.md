@@ -1,30 +1,22 @@
 ---
 Task ID: 1
-Agent: Main
-Task: Fix app display issues and full responsive design
+Agent: Main Developer
+Task: Fix app display issues, ensure all pages work, switch to SQLite, comprehensive testing
 
 Work Log:
-- Diagnosed dev server crashes — caused by TypeScript compilation errors in API routes
-- Fixed 7 API route files with TypeScript errors: admin/certificates, certificates/verify, admin/learning-paths/[id], admin/traceability, courses, courses/[id], auth/forgot-password, dashboard, quiz/[id]
-- Fixed 5 admin component files with ReactNode type errors: admin-analytics, admin-certificates, admin-notifications, admin-quizzes, admin-users
-- Fixed core component errors: layout.tsx (missing AppView import), dashboard.tsx (user type, Recharts Tooltip, unknown casts), profile.tsx (navigate type), quiz.tsx (unknown casts), course-detail.tsx (unknown cast)
-- Applied comprehensive responsive design fixes to 11 files:
-  - page.tsx: overflow-hidden, min-w-0, responsive top padding
-  - layout.tsx: responsive TopBar h-14/h-16, mobile spacing, touch targets
-  - landing.tsx: responsive hero/sections/grids for mobile/tablet/desktop
-  - dashboard.tsx: responsive stat cards, charts, tables
-  - course-catalog.tsx: responsive header, filters, pagination
-  - course-detail.tsx: scrollable tabs, responsive viewer
-  - login.tsx: scrollable test accounts, touch targets
-  - register.tsx: responsive role selector
-  - messages.tsx: mobile-aware height, touch targets
-  - notifications.tsx: scrollable tab list
-  - profile.tsx: responsive stats grid
+- Diagnosed that the app wasn't displaying due to massive synchronous imports in page.tsx (18,000+ lines of components)
+- Rewrote page.tsx with React.lazy() dynamic imports to solve compilation hanging
+- Discovered Neon PostgreSQL database was unreachable ("Can't reach database server")
+- Converted entire Prisma schema from PostgreSQL (with enums) to SQLite (with strings)
+- Created comprehensive seed data: 13 users, 13 courses, 4 learning paths, 5 badges, 29 enrollments, 15 notifications, 2 conversations
+- Fixed Dashboard API that used PostgreSQL raw SQL ($queryRaw with TO_CHAR, NOW(), INTERVAL)
+- Fixed Enrollment model reference (no createdAt field, uses startedAt instead)
+- Verified all 13 API routes work correctly with SQLite
+- All 27 pages exist and are properly exported
 
 Stage Summary:
-- Zero TypeScript errors remaining (verified with tsc --noEmit)
-- Zero ESLint errors (verified with bun run lint)
-- App compiles and renders successfully (64KB landing page verified)
-- Full responsive design across 320px-1280px+ screens
-- All touch targets meet 44px minimum
-- No horizontal overflow on any screen size
+- App now compiles and renders in ~2 seconds (previously hung indefinitely)
+- SQLite database with full seed data
+- All APIs tested and working: login, dashboard (admin/formateur/learner), courses, users, learning-paths, badges, certificates, notifications
+- Dynamic imports reduce initial bundle size significantly
+- 13 demo accounts available (admin, formateur, arbitre, entraineur, joueur roles)
