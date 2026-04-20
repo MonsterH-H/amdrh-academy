@@ -304,3 +304,37 @@ export const COMPLETION_TRIGGER_LABELS: Record<string, string> = {
   auto_scroll: "Auto lecture",
   auto_time: "Auto temps",
 };
+
+// ────────────────────────────────────────────
+// Permission matrices for each role
+// ────────────────────────────────────────────
+
+export const ROLE_PERMISSIONS: Record<string, string[]> = {
+  ADMIN: [
+    "dashboard", "admin-users", "admin-courses", "admin-quizzes",
+    "admin-learning-paths", "admin-resources", "admin-certificates",
+    "admin-notifications", "admin-analytics", "admin-sync",
+    "admin-traceability", "messages", "notifications", "profile",
+    "courses", "course-create", "learning-paths",
+  ],
+  FORMATEUR: [
+    "dashboard", "courses", "course-create", "admin-courses",
+    "admin-quizzes", "admin-resources", "learning-paths",
+    "messages", "notifications", "profile",
+  ],
+  ARBITRE: [
+    "dashboard", "courses", "course-detail", "learning-paths",
+    "learner-traceability", "certificates", "badges", "quiz",
+    "messages", "notifications", "profile",
+  ],
+  ENTRAINEUR: [
+    "dashboard", "courses", "course-detail", "learning-paths",
+    "learner-traceability", "certificates", "badges", "quiz",
+    "messages", "notifications", "profile",
+  ],
+  JOUEUR: [
+    "dashboard", "courses", "course-detail", "learning-paths",
+    "learner-traceability", "certificates", "badges", "quiz",
+    "messages", "notifications", "profile",
+  ],
+};

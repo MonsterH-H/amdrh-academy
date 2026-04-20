@@ -26,7 +26,7 @@ export type RegisterStep1Input = z.infer<typeof registerStep1Schema>;
 
 export const registerStep2Schema = z.object({
   role: z.enum(["ARBITRE", "ENTRAINEUR", "JOUEUR"], {
-    required_error: "Veuillez sélectionner un rôle",
+    message: "Veuillez sélectionner un rôle",
   }),
   telephone: z.string().optional(),
   club: z.string().optional(),

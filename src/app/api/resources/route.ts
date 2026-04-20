@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
-import { ResourceType, ResourceCategory } from "@prisma/client";
+const RESOURCE_TYPES = ["VIDEO", "PDF", "IMAGE", "DOCUMENT", "AUDIO", "ARCHIVE", "AUTRE"] as const;
+const RESOURCE_CATEGORIES = ["SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", "MEDIA_COURS", "AUTRE"] as const;
 
 // ─────────────────────────────────────────────────────────────
 // GET /api/resources — List resources with filters & pagination
@@ -22,10 +23,10 @@ export async function GET(req: NextRequest) {
     const where: Record<string, unknown> = {};
 
     if (courseId) where.courseId = courseId;
-    if (type && Object.values(ResourceType).includes(type as ResourceType)) {
+    if (type && RESOURCE_TYPES.includes(type as typeof RESOURCE_TYPES[number])) {
       where.fileType = type;
     }
-    if (category && Object.values(ResourceCategory).includes(category as ResourceCategory)) {
+    if (category && RESOURCE_CATEGORIES.includes(category as typeof RESOURCE_CATEGORIES[number])) {
       where.category = category;
     }
     if (uploadedById) where.uploadedById = uploadedById;
@@ -145,16 +146,16 @@ export async function POST(req: NextRequest) {
 
     // Validate enums if provided
     const resolvedFileType = fileType
-      ? Object.values(ResourceType).includes(fileType as ResourceType)
-        ? (fileType as ResourceType)
-        : ResourceType.AUTRE
-      : ResourceType.AUTRE;
+      ? RESOURCE_TYPES.includes(fileType as typeof RESOURCE_TYPES[number])
+        ? fileType
+        : "AUTRE"
+      : "AUTRE";
 
     const resolvedCategory = category
-      ? Object.values(ResourceCategory).includes(category as ResourceCategory)
-        ? (category as ResourceCategory)
-        : ResourceCategory.AUTRE
-      : ResourceCategory.AUTRE;
+      ? RESOURCE_CATEGORIES.includes(category as typeof RESOURCE_CATEGORIES[number])
+        ? category
+        : "AUTRE"
+      : "AUTRE";
 
     // Create resource
     const resource = await db.resource.create({

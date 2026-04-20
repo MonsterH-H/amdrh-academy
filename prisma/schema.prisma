@@ -418,3 +418,28 @@ model VerificationToken {
   usedAt    DateTime?
   createdAt DateTime @default(now())
 }
+
+// ============================================
+// PERMISSIONS
+// ============================================
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique           // e.g. "courses.view", "users.manage"
+  description String   @default("")
+  module      String   @default("general") // e.g. "courses", "users", "quizzes", "admin"
+  action      String   @default("view")   // view, create, edit, delete, manage
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  role         String     // ADMIN, FORMATEUR, ARBITRE, ENTRAINEUR, JOUEUR
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([role, permissionId])
+}

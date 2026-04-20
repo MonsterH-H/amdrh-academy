@@ -43,6 +43,10 @@ interface User {
   region?: string | null;
   bio?: string | null;
   licenceNumber?: string | null;
+  emailVerified?: Date | string | null;
+  createdAt?: Date | string | null;
+  isActive?: boolean;
+  lastLoginAt?: Date | string | null;
 }
 
 interface AppState {
@@ -50,6 +54,7 @@ interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   setUser: (user: User | null) => void;
+  logout: () => void;
 
   // Navigation
   currentView: AppView;
@@ -79,6 +84,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   setUser: (user) => set({ user, isAuthenticated: !!user }),
+  logout: () => set({ user: null, isAuthenticated: false }),
 
   // Navigation
   currentView: "landing",

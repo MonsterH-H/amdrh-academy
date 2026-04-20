@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -34,8 +36,16 @@ export default function RootLayout({
         className={`${plusJakarta.variable} ${inter.variable} antialiased bg-[#FAFAFA]`}
         style={{ fontFamily: "var(--font-plus-jakarta), sans-serif" }}
       >
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <ShadcnToaster />
+          <SonnerToaster position="top-right" richColors closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );

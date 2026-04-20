@@ -1,29 +1,123 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" fill="none">
-  <!-- Handball circle background -->
-  <circle cx="28" cy="28" r="25" fill="#1D4ED8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Blue gradient for the handball sphere -->
+    <linearGradient id="ballGrad" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
 
-  <!-- Handball panel stitching — vertical S-curve -->
-  <path d="M28 3 C21 13, 21 43, 28 53" stroke="#ffffff" stroke-width="1" opacity="0.25" fill="none"/>
-  <!-- Handball panel stitching — horizontal S-curve -->
-  <path d="M3 28 C13 21, 43 21, 53 28" stroke="#ffffff" stroke-width="1" opacity="0.25" fill="none"/>
-  <!-- Second vertical stitch line -->
-  <path d="M28 3 C35 13, 35 43, 28 53" stroke="#ffffff" stroke-width="1" opacity="0.25" fill="none"/>
-  <!-- Second horizontal stitch line -->
-  <path d="M3 28 C13 35, 43 35, 53 28" stroke="#ffffff" stroke-width="1" opacity="0.25" fill="none"/>
+    <!-- Radial highlight for 3D depth -->
+    <radialGradient id="shine" cx="0.32" cy="0.28" r="0.68" fx="0.32" fy="0.28">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
 
-  <!-- Gold accent ring -->
-  <circle cx="28" cy="28" r="25" stroke="#F59E0B" stroke-width="2.2" fill="none"/>
+    <!-- Clip to circle for seams -->
+    <clipPath id="ballClip">
+      <circle cx="256" cy="256" r="246"/>
+    </clipPath>
 
-  <!-- Letter A — geometric Swiss style -->
-  <path d="M18 41 L28 14 L38 41" stroke="#F59E0B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <path d="M21 34 L35 34" stroke="#F59E0B" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+    <!-- Clip to inner circle -->
+    <clipPath id="innerClip">
+      <circle cx="256" cy="256" r="190"/>
+    </clipPath>
+  </defs>
 
-  <!-- Separator line -->
-  <line x1="62" y1="13" x2="62" y2="43" stroke="#E2E8F0" stroke-width="1.2"/>
+  <!-- ============================================ -->
+  <!--  LAYER 1: Handball sphere (blue gradient)    -->
+  <!-- ============================================ -->
+  <circle cx="256" cy="256" r="247" fill="#162E6E"/>
+  <circle cx="256" cy="256" r="246" fill="url(#ballGrad)"/>
+  <circle cx="256" cy="256" r="246" fill="url(#shine)"/>
 
-  <!-- Académie text -->
-  <text x="74" y="29" font-family="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif" font-weight="700" font-size="18.5" fill="#1D4ED8" letter-spacing="-0.3">Académie</text>
+  <!-- ============================================ -->
+  <!--  LAYER 2: Handball seam curves               -->
+  <!-- ============================================ -->
+  <g clip-path="url(#ballClip)" fill="none" stroke="#fff" stroke-opacity="0.1" stroke-width="2.5" stroke-linecap="round">
+    <!-- Vertical S-curve seams -->
+    <path d="M256 8 C202 135 202 205 256 256 C310 307 310 377 256 504"/>
+    <path d="M256 8 C310 135 310 205 256 256 C202 307 202 377 256 504"/>
+    <!-- Horizontal S-curve seams -->
+    <path d="M8 256 C135 202 205 202 256 256 C307 310 377 310 504 256"/>
+    <path d="M8 256 C135 310 205 310 256 256 C307 202 377 202 504 256"/>
+  </g>
 
-  <!-- AMDRH text -->
-  <text x="74" y="46" font-family="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif" font-weight="700" font-size="11" fill="#64748B" letter-spacing="4.5">AMDRH</text>
+  <!-- ============================================ -->
+  <!--  LAYER 3: White inner circle (emblem face)   -->
+  <!-- ============================================ -->
+  <circle cx="256" cy="256" r="192" fill="#fff"/>
+
+  <!-- ============================================ -->
+  <!--  LAYER 4: Handball goal net (subtle bg)      -->
+  <!-- ============================================ -->
+  <g clip-path="url(#innerClip)" fill="none" stroke="#1D4ED8" stroke-linecap="round" opacity="0.06">
+    <!-- Goal frame -->
+    <path d="M178 174v178M334 174v178M178 174h156" stroke-width="5"/>
+    <!-- Net horizontal lines -->
+    <line x1="178" y1="210" x2="334" y2="210" stroke-width="2"/>
+    <line x1="178" y1="246" x2="334" y2="246" stroke-width="2"/>
+    <line x1="178" y1="282" x2="334" y2="282" stroke-width="2"/>
+    <line x1="178" y1="318" x2="334" y2="318" stroke-width="2"/>
+    <line x1="178" y1="354" x2="334" y2="354" stroke-width="2"/>
+    <!-- Net vertical lines -->
+    <line x1="217" y1="174" x2="217" y2="352" stroke-width="2"/>
+    <line x1="256" y1="174" x2="256" y2="352" stroke-width="2"/>
+    <line x1="295" y1="174" x2="295" y2="352" stroke-width="2"/>
+  </g>
+
+  <!-- ============================================ -->
+  <!--  LAYER 5: Graduation mortarboard (academic)  -->
+  <!-- ============================================ -->
+  <g fill="#1D4ED8">
+    <!-- Board (diamond/rhombus) -->
+    <polygon points="228,120 256,98 284,120 256,133"/>
+    <!-- Skull cap base -->
+    <path d="M246 131 L246 137 Q246 140 249 140 L263 140 Q266 140 266 137 L266 131 Z"/>
+    <!-- Tassel line -->
+    <line x1="270" y1="114" x2="288" y2="134" stroke="#1D4ED8" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- Tassel bobble -->
+    <circle cx="288" cy="136" r="3"/>
+  </g>
+
+  <!-- ============================================ -->
+  <!--  LAYER 6: "AH" Monogram (hero element)       -->
+  <!-- ============================================ -->
+  <g fill="none" stroke="#1D4ED8" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <!--
+      Letter A — geometric, two angled strokes converging at apex
+      Left foot:  (146, 365)
+      Apex:       (206, 145)
+      Right foot: (266, 365)
+    -->
+    <polyline points="146,365 206,145 266,365"/>
+    <!-- A crossbar — slightly below midpoint for classic proportion -->
+    <line x1="170" y1="288" x2="242" y2="288"/>
+
+    <!--
+      Letter H — two vertical strokes with connecting crossbar
+      Left leg:  x=296
+      Right leg: x=368
+    -->
+    <line x1="296" y1="145" x2="296" y2="365"/>
+    <line x1="368" y1="145" x2="368" y2="365"/>
+    <!-- H crossbar — at visual center of letter height -->
+    <line x1="296" y1="258" x2="368" y2="258"/>
+  </g>
+
+  <!-- ============================================ -->
+  <!--  LAYER 7: Decorative accent ring             -->
+  <!-- ============================================ -->
+  <!-- Thin blue ring between outer sphere and inner white -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#1D4ED8" stroke-width="1.2" stroke-opacity="0.18"/>
+
+  <!-- ============================================ -->
+  <!--  LAYER 8: Small stars (academic flair)       -->
+  <!-- ============================================ -->
+  <g fill="#1D4ED8" opacity="0.35">
+    <!-- Left star -->
+    <polygon points="156,406 159,414 168,414 161,420 163,428 156,423 149,428 151,420 144,414 153,414" />
+    <!-- Right star -->
+    <polygon points="356,406 359,414 368,414 361,420 363,428 356,423 349,428 351,420 344,414 353,414" />
+  </g>
 </svg>

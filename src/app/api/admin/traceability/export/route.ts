@@ -16,9 +16,9 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       where.OR = [
-        { user: { nom: { contains: search, mode: "insensitive" } } },
-        { user: { prenom: { contains: search, mode: "insensitive" } } },
-        { user: { email: { contains: search, mode: "insensitive" } } },
+        { user: { nom: { contains: search } } },
+        { user: { prenom: { contains: search } } },
+        { user: { email: { contains: search } } },
       ];
     }
     if (courseId) where.courseId = courseId;

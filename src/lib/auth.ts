@@ -46,8 +46,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as Record<string, unknown>).role;
-        token.name = user.name;
+        token.role = (user as unknown as Record<string, string>).role ?? "";
+        token.name = user.name ?? "";
       }
       return token;
     },
@@ -65,24 +65,4 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name?: string | null;
-      image?: string | null;
-      role?: string;
-    };
-  }
-  interface User {
-    role?: string;
-  }
-}
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    role?: string;
-  }
-}

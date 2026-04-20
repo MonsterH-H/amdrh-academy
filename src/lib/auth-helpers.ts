@@ -68,6 +68,18 @@ export async function requireRole(
 }
 
 /**
+ * Convenience wrapper: allows both ADMIN and FORMATEUR roles.
+ * Usage:
+ *   const auth = await requireRoleOrInstructor(req);
+ *   if (!auth.authorized) return auth.response;
+ */
+export async function requireRoleOrInstructor(
+  req: NextRequest,
+): Promise<{ authorized: true; role: string; userId: string; user: Record<string, unknown> } | { authorized: false; response: NextResponse }> {
+  return requireRole(req, ["ADMIN", "FORMATEUR"]);
+}
+
+/**
  * Get user ID and role from request params.
  * Returns { userId, role } or null.
  */

@@ -4,7 +4,7 @@ import { join } from "path";
 import { Readable } from "stream";
 import { db } from "@/lib/db";
 import { requireRole, getUserFromRequest } from "@/lib/auth-helpers";
-import { ResourceCategory } from "@prisma/client";
+const RESOURCE_CATEGORIES = ["SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", "MEDIA_COURS", "AUTRE"] as const;
 
 // ─────────────────────────────────────────────────────────────
 // GET /api/resources/[id] — Fetch single resource, stream file
@@ -165,7 +165,7 @@ export async function PATCH(
       if (body[field] !== undefined) {
         // Validate category enum
         if (field === "category" && body[field]) {
-          if (!Object.values(ResourceCategory).includes(body[field])) {
+          if (!RESOURCE_CATEGORIES.includes(body[field] as typeof RESOURCE_CATEGORIES[number])) {
             return NextResponse.json(
               { error: `Catégorie invalide: ${body[field]}` },
               { status: 400 }

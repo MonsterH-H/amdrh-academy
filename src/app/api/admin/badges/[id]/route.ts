@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { BadgeLevel } from "@prisma/client";
+const BADGE_LEVELS = ["BRONZE", "ARGENT", "OR", "PLATINE"] as const;
 import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/badges/[id] — get badge with users who earned it
@@ -60,10 +60,9 @@ export async function PATCH(
 
     // Validate level if provided
     if (level) {
-      const validLevels = Object.values(BadgeLevel);
-      if (!validLevels.includes(level)) {
+      if (!BADGE_LEVELS.includes(level as typeof BADGE_LEVELS[number])) {
         return NextResponse.json(
-          { error: `Niveau invalide. Valeurs acceptées : ${validLevels.join(", ")}` },
+          { error: `Niveau invalide. Valeurs acceptées : ${BADGE_LEVELS.join(", ")}` },
           { status: 400 }
         );
       }

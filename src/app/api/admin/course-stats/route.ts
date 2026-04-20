@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+  if (!auth.authorized) return auth.response;
   try {
     const courses = await db.course.findMany({
       select: {

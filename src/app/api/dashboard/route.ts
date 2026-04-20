@@ -115,6 +115,7 @@ export async function GET(req: NextRequest) {
               progress: true,
               status: true,
               startedAt: true,
+              completedAt: true,
               user: { select: { id: true, prenom: true, nom: true, avatar: true, role: true } },
             },
             orderBy: { lastAccessAt: "desc" },
@@ -142,6 +143,11 @@ export async function GET(req: NextRequest) {
         : 0;
 
       const myCourseIds = myCourses.map((c) => c.id);
+
+      // Count pending reviews (courses in EN_REVISION status)
+      const pendingReviews = myCourses.filter((c) => c.status === "EN_REVISION").length;
+
+      // Quiz statistics
       const passedQuizzes = myCourseIds.length > 0
         ? await db.quizAttempt.count({
             where: {
@@ -151,23 +157,45 @@ export async function GET(req: NextRequest) {
           })
         : 0;
 
+      const totalQuizAttempts = myCourseIds.length > 0
+        ? await db.quizAttempt.count({
+            where: {
+              quiz: { courseId: { in: myCourseIds } },
+              status: { in: ["REUSSI", "ECHOUE"] },
+            },
+          })
+        : 0;
+
+      const avgPassRate = totalQuizAttempts > 0
+        ? Math.round((passedQuizzes / totalQuizAttempts) * 100)
+        : 0;
+
+      // Per-course stats with pass rate
       const courseStatsMap = await Promise.all(
         myCourseIds.map(async (courseId) => {
-          const attempts = await db.quizAttempt.findMany({
-            where: { quiz: { courseId }, status: "REUSSI" },
-            select: { score: true, maxScore: true },
+          const allAttempts = await db.quizAttempt.findMany({
+            where: {
+              quiz: { courseId },
+              status: { in: ["REUSSI", "ECHOUE"] },
+            },
+            select: { score: true, maxScore: true, status: true },
           });
-          const cAvgScore = attempts.length > 0
+          const passedAttempts = allAttempts.filter((a) => a.status === "REUSSI");
+          const cAvgScore = passedAttempts.length > 0
             ? Math.round(
-                attempts.reduce((acc, a) => acc + (a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0), 0) /
-                  attempts.length
+                passedAttempts.reduce((acc, a) => acc + (a.maxScore > 0 ? (a.score / a.maxScore) * 100 : 0), 0) /
+                  passedAttempts.length
               )
             : 0;
+          const cPassRate = allAttempts.length > 0
+            ? Math.round((passedAttempts.length / allAttempts.length) * 100)
+            : 0;
           const courseEnrollments = myCourses.find((c) => c.id === courseId)?.enrollments || [];
-          const completionRate = courseEnrollments.length > 0
+          const avgProgress = courseEnrollments.length > 0
             ? Math.round(courseEnrollments.reduce((s, e) => s + e.progress, 0) / courseEnrollments.length)
             : 0;
-          return { courseId, avgScore: cAvgScore, completionRate };
+          const completedCount = courseEnrollments.filter((e) => e.status === "termine").length;
+          return { courseId, avgScore: cAvgScore, completionRate: avgProgress, passRate: cPassRate, completedCount };
         })
       );
 
@@ -175,6 +203,77 @@ export async function GET(req: NextRequest) {
       const avgScore = scoredCourses.length > 0
         ? Math.round(scoredCourses.reduce((s, c) => s + c.avgScore, 0) / scoredCourses.length)
         : 0;
+
+      // Recent student activity (quiz submissions and completions)
+      const recentQuizActivity = myCourseIds.length > 0
+        ? await db.quizAttempt.findMany({
+            where: {
+              quiz: { courseId: { in: myCourseIds } },
+              status: { in: ["REUSSI", "ECHOUE", "SOUMIS"] },
+            },
+            select: {
+              id: true,
+              score: true,
+              maxScore: true,
+              status: true,
+              submittedAt: true,
+              duration: true,
+              user: { select: { id: true, prenom: true, nom: true, avatar: true } },
+              quiz: { select: { title: true, course: { select: { id: true, title: true } } } },
+            },
+            orderBy: { submittedAt: "desc" },
+            take: 10,
+          })
+        : [];
+
+      // Recent enrollment completions
+      const recentCompletions = myCourseIds.length > 0
+        ? await db.enrollment.findMany({
+            where: {
+              courseId: { in: myCourseIds },
+              status: "termine",
+              completedAt: { not: null },
+            },
+            select: {
+              id: true,
+              completedAt: true,
+              progress: true,
+              user: { select: { id: true, prenom: true, nom: true, avatar: true } },
+              course: { select: { id: true, title: true } },
+            },
+            orderBy: { completedAt: "desc" },
+            take: 5,
+          })
+        : [];
+
+      // Merge and sort recent activity
+      const recentActivity = [
+        ...recentQuizActivity.map((a) => ({
+          id: a.id,
+          type: "quiz" as const,
+          status: a.status,
+          score: a.maxScore > 0 ? Math.round((a.score / a.maxScore) * 100) : 0,
+          timestamp: a.submittedAt?.getTime() || Date.now(),
+          user: a.user,
+          quizTitle: a.quiz.title,
+          courseTitle: a.quiz.course.title,
+          courseId: a.quiz.course.id,
+          duration: a.duration,
+        })),
+        ...recentCompletions.map((e) => ({
+          id: e.id,
+          type: "completion" as const,
+          status: "termine" as const,
+          score: 0,
+          timestamp: e.completedAt?.getTime() || Date.now(),
+          user: e.user,
+          quizTitle: null,
+          courseTitle: e.course.title,
+          courseId: e.course.id,
+          progress: e.progress,
+          duration: 0,
+        })),
+      ].sort((a, b) => b.timestamp - a.timestamp).slice(0, 12);
 
       return NextResponse.json({
         type: "formateur",
@@ -184,6 +283,8 @@ export async function GET(req: NextRequest) {
           avgCompletion,
           passedQuizzes,
           avgScore,
+          avgPassRate,
+          pendingReviews,
         },
         myCourses: myCourses.map((c) => ({
           id: c.id,
@@ -196,8 +297,11 @@ export async function GET(req: NextRequest) {
           enrollmentCount: c._count.enrollments,
           avgScore: courseStatsMap.find((cs) => cs.courseId === c.id)?.avgScore || 0,
           completionRate: courseStatsMap.find((cs) => cs.courseId === c.id)?.completionRate || 0,
+          passRate: courseStatsMap.find((cs) => cs.courseId === c.id)?.passRate || 0,
+          completedCount: courseStatsMap.find((cs) => cs.courseId === c.id)?.completedCount || 0,
         })),
         recentLearners,
+        recentActivity,
       });
     }
 

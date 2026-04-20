@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { NotificationType, UserRole } from "@prisma/client";
+const NOTIFICATION_TYPES = ["COURS", "CERTIFICAT", "MESSAGE", "QUIZ", "BADGE", "SYSTEME"] as const;
+const USER_ROLES = ["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"] as const;
 import { requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     // Build where clause for notifications
     const where: Record<string, unknown> = {};
-    if (type && Object.values(NotificationType).includes(type as NotificationType)) {
+    if (type && NOTIFICATION_TYPES.includes(type as typeof NOTIFICATION_TYPES[number])) {
       where.type = type;
     }
     if (search) {
@@ -103,14 +104,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!Object.values(NotificationType).includes(type)) {
+    if (!NOTIFICATION_TYPES.includes(type as typeof NOTIFICATION_TYPES[number])) {
       return NextResponse.json(
         { error: "Type de notification invalide" },
         { status: 400 }
       );
     }
-
-    const validRoles = Object.values(UserRole);
 
     if (targetAll) {
       // Broadcast to ALL active users (exclude ADMIN to avoid self-spam)
@@ -143,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     if (targetRoles && Array.isArray(targetRoles) && targetRoles.length > 0) {
       // Validate roles
-      const invalidRoles = targetRoles.filter((r: string) => !validRoles.includes(r as UserRole));
+      const invalidRoles = targetRoles.filter((r: string) => !USER_ROLES.includes(r as typeof USER_ROLES[number]));
       if (invalidRoles.length > 0) {
         return NextResponse.json(
           { error: `Rôles invalides: ${invalidRoles.join(", ")}` },
@@ -154,7 +153,7 @@ export async function POST(req: NextRequest) {
       const users = await db.user.findMany({
         where: {
           isActive: true,
-          role: { in: targetRoles as UserRole[] },
+          role: { in: targetRoles as string[] },
         },
         select: { id: true },
       });
