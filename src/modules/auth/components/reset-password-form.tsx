@@ -72,8 +72,12 @@ export function ResetPasswordPage() {
 
       if (!res.ok) {
         const msg = data.error;
-        if (typeof msg === "object" && msg.token) setError(msg.token[0]);
-        else setError(typeof msg === "string" ? msg : "Erreur de réinitialisation");
+        if (typeof msg === "object" && msg !== null) {
+          const allErrors = Object.values(msg).flat().filter(Boolean).join(", ");
+          setError(allErrors || "Erreur de réinitialisation");
+        } else {
+          setError(typeof msg === "string" ? msg : "Erreur de réinitialisation");
+        }
         return;
       }
 

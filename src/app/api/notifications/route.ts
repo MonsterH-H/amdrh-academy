@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { pushToUser, updateNotificationCount } from "@/app/api/realtime/push/route";
+import { pushToUser, updateNotificationCount } from "@/lib/realtime";
 
 export async function GET(req: NextRequest) {
   try {
@@ -38,13 +38,30 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, notificationId, markAll, action } = body;
+    const { userId, notificationId, markAll, action, title, message, type, link } = body;
 
     // ──────────────────────────────────────────────
     // CREATE a new notification with real-time push
+    // (only ADMIN can create notifications)
     // ──────────────────────────────────────────────
-    if (action === "create" && userId) {
-      const { title, message, type, link } = body;
+    if (action === "create") {
+      // Require ADMIN role to create notifications
+      const { searchParams } = new URL(req.url);
+      const callerRole = searchParams.get("role");
+      const callerId = searchParams.get("userId");
+      if (callerRole !== "ADMIN" || !callerId) {
+        return NextResponse.json(
+          { error: "Seuls les administrateurs peuvent créer des notifications" },
+          { status: 403 }
+        );
+      }
+
+      if (!userId) {
+        return NextResponse.json(
+          { error: "Utilisateur cible requis" },
+          { status: 400 }
+        );
+      }
 
       if (!title || !message) {
         return NextResponse.json(

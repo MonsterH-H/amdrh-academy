@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { userUpdateSchema } from "@/lib/validations";
+import { requireRole } from "@/lib/auth-helpers";
+import bcrypt from "bcryptjs";
 
 export async function GET(req: NextRequest) {
   try {
@@ -61,11 +62,58 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Only ADMIN can create users
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const body = await req.json();
+    const { email, nom, prenom, password, role, telephone, club, region, licenceNumber } = body;
+
+    // Validate required fields
+    if (!email || !nom || !prenom || !role) {
+      return NextResponse.json(
+        { error: "Email, nom, prénom et rôle sont requis" },
+        { status: 400 }
+      );
+    }
+
+    // Validate role
+    const validRoles = ["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"];
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { error: `Rôle invalide. Valeurs acceptées: ${validRoles.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    // Check if email already exists
+    const existing = await db.user.findUnique({ where: { email } });
+    if (existing) {
+      return NextResponse.json(
+        { error: "Un utilisateur avec cet email existe déjà" },
+        { status: 409 }
+      );
+    }
+
+    // Hash password if provided
+    const passwordHash = password ? await bcrypt.hash(password, 12) : null;
+
     const user = await db.user.create({
-      data: body,
+      data: {
+        email,
+        nom,
+        prenom,
+        role,
+        telephone: telephone || null,
+        club: club || null,
+        region: region || null,
+        licenceNumber: licenceNumber || null,
+        passwordHash,
+        isActive: true,
+      },
       select: { id: true, email: true, nom: true, prenom: true, role: true },
     });
+
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
     console.error("User create error:", error);

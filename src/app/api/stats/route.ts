@@ -29,13 +29,13 @@ function getActivePeriodDays(period: string): number {
 }
 
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
-
-  const { searchParams } = new URL(req.url);
-  const period = searchParams.get("period") || "all";
-
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
+    const { searchParams } = new URL(req.url);
+    const period = searchParams.get("period") || "all";
+
     const periodDate = getPeriodDate(period);
     const activeDays = getActivePeriodDays(period);
 

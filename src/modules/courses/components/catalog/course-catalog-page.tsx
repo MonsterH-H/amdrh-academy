@@ -21,7 +21,7 @@ export function CourseCatalogPage() {
 
   useEffect(() => {
     fetchCourses();
-  }, [category, difficulty, page]);
+  }, [category, difficulty, page, search]);
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -36,8 +36,8 @@ export function CourseCatalogPage() {
       const data = await res.json();
       setCourses(data.courses || []);
       setTotalPages(data.pagination?.totalPages || 1);
-    } catch {
-      // silently fail
+    } catch (err) {
+      console.error("Failed to fetch courses:", err);
     } finally {
       setLoading(false);
     }

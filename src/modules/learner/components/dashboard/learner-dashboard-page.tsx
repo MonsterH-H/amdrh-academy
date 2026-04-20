@@ -103,11 +103,17 @@ export function LearnerDashboardPage() {
       </div>
     );
   }
-  if (!data || !user) return null;
+  if (!data || !user?.id || !user?.role) return null;
 
-  const stats = data.stats as { coursesEnCours: number; coursesTermines: number; certificatesCount: number; avgScore: number };
-  const enrollments = data.enrollments as Array<Record<string, unknown>>;
-  const recommended = data.recommended as Array<Record<string, unknown>>;
+  const statsData = (data.stats || {}) as Record<string, unknown>;
+  const stats = {
+    coursesEnCours: (statsData.coursesEnCours as number) ?? 0,
+    coursesTermines: (statsData.coursesTermines as number) ?? 0,
+    certificatesCount: (statsData.certificatesCount as number) ?? 0,
+    avgScore: (statsData.avgScore as number) ?? 0,
+  };
+  const enrollments = (data.enrollments || []) as Array<Record<string, unknown>>;
+  const recommended = (data.recommended || []) as Array<Record<string, unknown>>;
 
   const statCards = [
     { label: "Cours en cours", value: stats.coursesEnCours, icon: BookOpen, colorClass: "text-blue-600", bgColor: "bg-blue-100" },

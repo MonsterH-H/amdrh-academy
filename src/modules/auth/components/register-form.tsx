@@ -101,7 +101,7 @@ export function RegisterPage() {
         });
         const loginData = await loginRes.json();
 
-        if (loginRes.ok) {
+        if (loginRes.ok && loginData.user) {
           setUser(loginData.user);
           navigate("dashboard");
         } else {

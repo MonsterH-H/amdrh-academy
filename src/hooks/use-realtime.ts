@@ -23,10 +23,17 @@ let socketInstance: Socket | null = null;
 let connectionListeners: Set<(connected: boolean) => void> = new Set();
 
 let isSocketAvailable: boolean | null = null;
+let socketDisabledUntil: number = 0;
+const SOCKET_RETRY_COOLDOWN = 60_000; // 1 minute cooldown after failure
 
 function getOrCreateSocket(userId: string, role: string): Socket | null {
-  // Skip if we've already determined socket server is unavailable
-  if (isSocketAvailable === false) return null;
+  // Skip if we've recently determined socket server is unavailable (cooldown)
+  const now = Date.now();
+  if (isSocketAvailable === false && now < socketDisabledUntil) return null;
+  // Reset cooldown period if it expired
+  if (isSocketAvailable === false && now >= socketDisabledUntil) {
+    isSocketAvailable = null; // Allow retry
+  }
 
   if (socketInstance?.connected && (socketInstance.auth as Record<string, unknown>).userId === userId) {
     return socketInstance;
@@ -61,17 +68,19 @@ function getOrCreateSocket(userId: string, role: string): Socket | null {
     });
 
     socketInstance.on("connect_error", () => {
-      // If we fail to connect after retries, mark as unavailable to avoid spamming
       connectionListeners.forEach(fn => fn(false));
-      if (socketInstance?.io?.opts?.reconnectionAttempts !== undefined) {
-        // After repeated failures, give up until next auth session
-      }
+    });
+
+    socketInstance.io.on("reconnect_failed", () => {
+      isSocketAvailable = false;
+      socketDisabledUntil = Date.now() + SOCKET_RETRY_COOLDOWN;
     });
 
     return socketInstance;
   } catch {
     // socket.io-client itself might throw (e.g. in SSR)
     isSocketAvailable = false;
+    socketDisabledUntil = Date.now() + SOCKET_RETRY_COOLDOWN;
     return null;
   }
 }

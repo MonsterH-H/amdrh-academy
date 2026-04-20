@@ -36,6 +36,11 @@ export function LoginPage() {
         return;
       }
 
+      if (!data.user) {
+        setError("Réponse serveur invalide");
+        return;
+      }
+
       setUser(data.user);
       navigate("dashboard");
     } catch {
