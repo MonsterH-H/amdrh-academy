@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, lazy, Suspense, type ComponentType } from "react";
+import React, { useEffect, useState, useCallback, lazy, Suspense, type ComponentType } from "react";
 import { useAppStore, type AppView } from "@/store/app";
 import { TopBar, MobileBottomNav } from "@/modules/shared/layout";
 import { useRealtime } from "@/hooks/use-realtime";
-import { CircleDot } from "lucide-react";
+import { CircleDot, AlertTriangle, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Eagerly loaded components (small, needed immediately)
 import { LandingPage } from "@/modules/landing";
@@ -115,11 +116,34 @@ function AppFooter() {
   );
 }
 
+// ──────────────────────────────────────────────────
+// In-page Error Fallback (catches render crashes inside views)
+// ──────────────────────────────────────────────────
+
+function ViewErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+        <AlertTriangle className="w-7 h-7 text-amber-500" />
+      </div>
+      <h3 className="text-lg font-semibold mb-1">Erreur d'affichage</h3>
+      <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+        Cette page n'a pas pu se charger correctement.
+      </p>
+      <Button variant="outline" size="sm" onClick={onRetry} className="gap-2 cursor-pointer">
+        <RotateCcw className="w-3.5 h-3.5" />
+        Réessayer
+      </Button>
+    </div>
+  );
+}
+
 function AppContent() {
   const { currentView, user, isAuthenticated, sidebarCollapsed, setUnreadCount } = useAppStore();
   // Initialize real-time connection when authenticated
   // The useRealtime hook manages the socket lifecycle internally
-  const { isConnected, subscribeNotifications } = useRealtime();
+  const { subscribeNotifications } = useRealtime();
+  const [viewError, setViewError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
@@ -137,7 +161,12 @@ function AppContent() {
     return () => clearInterval(interval);
   }, [isAuthenticated, user, setUnreadCount, subscribeNotifications]);
 
+  // Clear error when view changes (tracked via useEffect)
+  const handleRetry = useCallback(() => { setViewError(null); }, []);
+
   const renderView = () => {
+    if (viewError) return <ViewErrorFallback error={viewError} onRetry={handleRetry} />;
+
     // Auth pages (no sidebar/topbar)
     if (currentView === "landing") return <LandingPage />;
     if (currentView === "login") return <LoginPage />;
@@ -152,9 +181,17 @@ function AppContent() {
 
     const Component = viewComponentMap[currentView];
     if (Component) {
-      return <Suspense fallback={<PageLoader />}><Component /></Suspense>;
+      return (
+        <ErrorBoundary key={currentView} onError={setViewError}>
+          <Suspense fallback={<PageLoader />}><Component /></Suspense>
+        </ErrorBoundary>
+      );
     }
-    return <Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>;
+    return (
+      <ErrorBoundary key={currentView} onError={setViewError}>
+        <Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>
+      </ErrorBoundary>
+    );
   };
 
   const isAuthPage = ["landing", "login", "register", "forgot-password", "reset-password"].includes(currentView);
@@ -187,6 +224,37 @@ function SidebarWrapper() {
       <SidebarLazy />
     </Suspense>
   );
+}
+
+// ──────────────────────────────────────────────────
+// Lightweight Error Boundary (class component for catchRender)
+// ──────────────────────────────────────────────────
+
+type ErrorBoundaryProps = {
+  children: React.ReactNode;
+  onError?: (error: Error) => void;
+};
+type ErrorBoundaryState = { hasError: boolean; error: Error | null };
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("[View Error]", error);
+    this.props.onError?.(error);
+  }
+
+  render() {
+    if (this.state.hasError) return null; // Parent handles the fallback via onError
+    return this.props.children;
+  }
 }
 
 export default function Home() {

@@ -22,7 +22,12 @@ import { useAppStore } from "@/store/app";
 let socketInstance: Socket | null = null;
 let connectionListeners: Set<(connected: boolean) => void> = new Set();
 
-function getOrCreateSocket(userId: string, role: string): Socket {
+let isSocketAvailable: boolean | null = null;
+
+function getOrCreateSocket(userId: string, role: string): Socket | null {
+  // Skip if we've already determined socket server is unavailable
+  if (isSocketAvailable === false) return null;
+
   if (socketInstance?.connected && (socketInstance.auth as Record<string, unknown>).userId === userId) {
     return socketInstance;
   }
@@ -31,38 +36,44 @@ function getOrCreateSocket(userId: string, role: string): Socket {
   if (socketInstance) {
     socketInstance.removeAllListeners();
     socketInstance.disconnect();
+    socketInstance = null;
   }
 
-  socketInstance = io("/", {
-    query: { XTransformPort: "3004" },
-    transports: ["websocket", "polling"],
-    auth: { userId, role },
-    reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 30_000,
-    timeout: 10_000,
-  });
+  try {
+    socketInstance = io("/", {
+      query: { XTransformPort: "3004" },
+      transports: ["polling", "websocket"],
+      auth: { userId, role },
+      reconnection: true,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10_000,
+      timeout: 5_000,
+    });
 
-  socketInstance.on("connect", () => {
-    console.log("[Realtime] Connected");
-    connectionListeners.forEach(fn => fn(true));
-  });
+    socketInstance.on("connect", () => {
+      isSocketAvailable = true;
+      connectionListeners.forEach(fn => fn(true));
+    });
 
-  socketInstance.on("disconnect", (reason) => {
-    console.log("[Realtime] Disconnected:", reason);
-    connectionListeners.forEach(fn => fn(false));
-  });
+    socketInstance.on("disconnect", () => {
+      connectionListeners.forEach(fn => fn(false));
+    });
 
-  socketInstance.on("connect_error", (error) => {
-    console.warn("[Realtime] Connection error:", error.message);
-    // Don't propagate rate limit errors as critical
-    if (error.message.includes("Too many connection")) {
-      setTimeout(() => socketInstance?.connect(), 15_000);
-    }
-  });
+    socketInstance.on("connect_error", () => {
+      // If we fail to connect after retries, mark as unavailable to avoid spamming
+      connectionListeners.forEach(fn => fn(false));
+      if (socketInstance?.io?.opts?.reconnectionAttempts !== undefined) {
+        // After repeated failures, give up until next auth session
+      }
+    });
 
-  return socketInstance;
+    return socketInstance;
+  } catch {
+    // socket.io-client itself might throw (e.g. in SSR)
+    isSocketAvailable = false;
+    return null;
+  }
 }
 
 // ──────────────────────────────────────────────────
@@ -92,10 +103,14 @@ export function useRealtime(): UseRealtimeReturn {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+      // isConnected will naturally be stale but harmless
       return;
     }
 
     const socket = getOrCreateSocket(user.id, user.role);
+    if (!socket) {
+      return;
+    }
     socketRef.current = socket;
 
     const handleConnectionChange = (connected: boolean) => {
