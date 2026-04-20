@@ -5,9 +5,9 @@ import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/badges — list all badges with earned count
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const badges = await db.badge.findMany({
       include: {
         _count: {
@@ -26,9 +26,9 @@ export async function GET(req: NextRequest) {
 
 // POST /api/admin/badges — create new badge
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const body = await req.json();
     const { name, description, level, icon, criteria, points } = body;
 

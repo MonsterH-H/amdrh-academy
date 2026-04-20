@@ -91,7 +91,7 @@ export function formatMonthFull(monthKey: string): string {
 
 export const tooltipStyle = {
   borderRadius: "8px",
-  border: "1px solid hsl(var(--border))",
+  border: "1px solid var(--border)",
   fontSize: "12px",
   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
 };

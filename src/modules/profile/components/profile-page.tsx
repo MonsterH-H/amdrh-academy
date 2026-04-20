@@ -15,7 +15,7 @@ import {
   Award, HelpCircle, Star, BookOpen, Mail, MapPin, Phone, User, Lock,
   Bell, Clock, CheckCircle2, Circle, Shield, Activity,
 } from "lucide-react";
-import type { AppView } from "@/store/app";
+
 import { formatTimeAgo } from "@/utils/format";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";

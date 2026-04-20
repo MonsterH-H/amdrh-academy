@@ -7,9 +7,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
 
     const learningPath = await db.learningPath.findUnique({
@@ -68,9 +68,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const body = await req.json();
     const { title, description, targetRole, mode, isMandatory, order, courses } = body;
@@ -197,9 +197,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
 
     const existing = await db.learningPath.findUnique({

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import {
   Search, BookOpen, ChevronLeft, ChevronRight,
-  Users, Award, Globe, FileText, Archive, X, Filter,
+  Award, Globe, FileText, Archive, X, Filter,
   Eye, Loader2, AlertTriangle, Trash2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";

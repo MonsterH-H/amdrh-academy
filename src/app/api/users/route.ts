@@ -18,10 +18,10 @@ export async function GET(req: NextRequest) {
     if (status === "inactive") where.isActive = false;
     if (search) {
       where.OR = [
-        { nom: { contains: search, mode: "insensitive" } },
-        { prenom: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-        { licenceNumber: { contains: search, mode: "insensitive" } },
+        { nom: { contains: search } },
+        { prenom: { contains: search } },
+        { email: { contains: search } },
+        { licenceNumber: { contains: search } },
       ];
     }
 

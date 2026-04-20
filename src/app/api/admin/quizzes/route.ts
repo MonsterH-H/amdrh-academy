@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search");
     const courseId = searchParams.get("courseId");
@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { course: { title: { contains: search, mode: "insensitive" } } },
+        { title: { contains: search } },
+        { course: { title: { contains: search } } },
       ];
     }
 
@@ -136,9 +136,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const body = await req.json();
     const { title, courseId, description, duration, passingScore, shuffleQuestions, showAnswers, maxAttempts } = body;
 

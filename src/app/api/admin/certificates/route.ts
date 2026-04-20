@@ -4,9 +4,9 @@ import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/certificates — list all certificates
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
@@ -18,11 +18,11 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       where.OR = [
-        { code: { contains: search, mode: "insensitive" } },
-        { userName: { contains: search, mode: "insensitive" } },
-        { courseTitle: { contains: search, mode: "insensitive" } },
-        { user: { nom: { contains: search, mode: "insensitive" } } },
-        { user: { prenom: { contains: search, mode: "insensitive" } } },
+        { code: { contains: search } },
+        { userName: { contains: search } },
+        { courseTitle: { contains: search } },
+        { user: { nom: { contains: search } } },
+        { user: { prenom: { contains: search } } },
       ];
     }
 
@@ -91,9 +91,9 @@ export async function GET(req: NextRequest) {
 
 // POST /api/admin/certificates — create certificate manually
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const body = await req.json();
     const {
       userId,

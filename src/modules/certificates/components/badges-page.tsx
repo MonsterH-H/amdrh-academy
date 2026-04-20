@@ -9,7 +9,7 @@ import { AlertCircle, Medal } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { BADGE_LEVEL_LABELS, BADGE_LEVEL_COLORS } from "@/lib/constants";
-import { BadgeCard, type BadgeData, type UserBadgeData, getBadgeLevelStyle } from "./badge-card";
+import { BadgeCard, type BadgeData, type UserBadgeData } from "./badge-card";
 
 // ─── Manager Guard ──────────────────────────────────────────────────────────
 

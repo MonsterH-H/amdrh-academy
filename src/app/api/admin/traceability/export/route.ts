@@ -4,9 +4,9 @@ import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/traceability/export — CSV export
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
     const courseId = searchParams.get("courseId") || "";

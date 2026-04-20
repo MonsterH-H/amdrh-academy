@@ -76,7 +76,7 @@ export function DistributionCharts({ data }: { data: StatsData }) {
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={registrationLineData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value, _name, props) => [
@@ -101,7 +101,7 @@ export function DistributionCharts({ data }: { data: StatsData }) {
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={categoryBarData} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                 <XAxis type="number" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value} cours`, "Nombre"]} labelFormatter={() => ""} />

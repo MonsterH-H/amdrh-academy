@@ -72,7 +72,7 @@ export async function GET(
           // Use RFC 5987 encoding for non-ASCII filenames
           const encodedFileName = encodeURIComponent(resource.fileName).replace(
             /['()]/g,
-            escape
+            (c) => encodeURIComponent(c)
           );
           headers.set(
             "Content-Disposition",

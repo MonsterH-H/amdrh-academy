@@ -33,6 +33,7 @@ export function formatCountdown(seconds: number): string {
  * @returns Formatted string (e.g., "45 min", "1h 30min")
  */
 export function formatDuration(minutes: number): string {
+  if (!minutes && minutes !== 0) return "—";
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
@@ -44,6 +45,7 @@ export function formatDuration(minutes: number): string {
  * e.g., "14 janv. 2025"
  */
 export function formatDate(dateStr: string): string {
+  if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "short",
@@ -56,6 +58,7 @@ export function formatDate(dateStr: string): string {
  * e.g., "14 janvier 2025"
  */
 export function formatDateLong(dateStr: string): string {
+  if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "long",
@@ -83,6 +86,7 @@ export function formatFileSize(bytes: number): string {
  * e.g., "À l'instant", "Il y a 5 min", "Il y a 2h", "il y a 3j"
  */
 export function formatTimeAgo(dateStr: string): string {
+  if (!dateStr) return "—";
   const now = new Date();
   const date = new Date(dateStr);
   const diffMs = now.getTime() - date.getTime();
@@ -103,6 +107,7 @@ export function formatTimeAgo(dateStr: string): string {
  * e.g., "il y a 3 sem.", "il y a 2 mois", "il y a 1 an"
  */
 export function formatRelativeTime(dateStr: string): string {
+  if (!dateStr) return "—";
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -128,6 +133,7 @@ export function formatRelativeTime(dateStr: string): string {
  * e.g., getInitials("Dupont", "Jean") → "JD"
  */
 export function getInitials(nom: string, prenom: string): string {
+  if (!nom || !prenom) return "—";
   return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
 }
 
@@ -136,6 +142,7 @@ export function getInitials(nom: string, prenom: string): string {
  * e.g., "à l'instant", "il y a 5s", "il y a 3 min", "il y a 2h"
  */
 export function formatTimestampAgo(timestamp: number): string {
+  if (!timestamp && timestamp !== 0) return "—";
   const diff = Date.now() - timestamp;
   const sec = Math.floor(diff / 1000);
   if (sec < 60) return "à l'instant";

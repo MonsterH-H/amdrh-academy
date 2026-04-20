@@ -4,9 +4,9 @@ import { requireRole } from "@/lib/auth-helpers";
 
 // GET /api/admin/certificates/[id] — get single certificate
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const certificate = await db.certificate.findUnique({
       where: { id },
@@ -26,9 +26,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 // PATCH /api/admin/certificates/[id] — revoke/reactivate
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const body = await req.json();
     const { status, revokeReason } = body;

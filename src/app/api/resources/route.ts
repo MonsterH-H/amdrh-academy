@@ -32,8 +32,8 @@ export async function GET(req: NextRequest) {
     if (uploadedById) where.uploadedById = uploadedById;
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        { title: { contains: search } },
+        { description: { contains: search } },
       ];
     }
 

@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const courses = await db.course.findMany({
       select: {
         id: true,

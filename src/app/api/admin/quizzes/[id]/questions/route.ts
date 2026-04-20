@@ -6,9 +6,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const body = await req.json();
 
@@ -52,9 +52,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const body = await req.json();
     const { questionId, text, type, options, correctAnswer, explanation, points, order } = body;
@@ -107,9 +107,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const { searchParams } = new URL(req.url);
     const questionId = searchParams.get("questionId");

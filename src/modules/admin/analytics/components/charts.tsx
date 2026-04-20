@@ -134,7 +134,7 @@ export function ChartsSection({ data }: { data: StatsData }) {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={enrollmentBarData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                   <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={tooltipStyle} formatter={(value, _name, props) => [
@@ -157,7 +157,7 @@ export function ChartsSection({ data }: { data: StatsData }) {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={certificateLineData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                   <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={tooltipStyle} formatter={(value, _name, props) => [

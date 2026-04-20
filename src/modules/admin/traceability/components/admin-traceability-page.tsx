@@ -2,19 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   TrendingUp, CheckCircle, Clock, Target, Search, Download,
-  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Filter,
-  Loader2, Award, AlertCircle, BookOpen,
+  ChevronLeft, ChevronRight, Filter,
+  AlertCircle, BookOpen,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAppStore } from "@/store/app";

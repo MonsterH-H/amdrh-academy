@@ -6,9 +6,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
 
     const quiz = await db.quiz.findUnique({
@@ -70,9 +70,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
     const body = await req.json();
 
@@ -105,9 +105,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
     const { id } = await params;
 
     // Delete quiz answers first (through cascade), then attempts, then questions, then quiz

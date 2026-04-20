@@ -4,9 +4,9 @@ import { requireRole } from "@/lib/auth-helpers";
 
 // POST /api/admin/certificates/bulk-issue — bulk issue certificates
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const body = await req.json();
     const { courseId, userIds, type } = body;
 

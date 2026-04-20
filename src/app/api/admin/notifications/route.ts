@@ -5,9 +5,9 @@ const USER_ROLES = ["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"] as 
 import { requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type");
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
     }
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { message: { contains: search, mode: "insensitive" } },
+        { title: { contains: search } },
+        { message: { contains: search } },
       ];
     }
 
@@ -91,9 +91,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const body = await req.json();
     const { title, message, type, targetAll, targetRoles, userId } = body;
 

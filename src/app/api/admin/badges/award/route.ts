@@ -4,9 +4,9 @@ import { requireRole } from "@/lib/auth-helpers";
 
 // POST /api/admin/badges/award — award a badge to a user
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ["ADMIN"]);
-  if (!auth.authorized) return auth.response;
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
     const body = await req.json();
     const { userId, badgeId } = body;
 
