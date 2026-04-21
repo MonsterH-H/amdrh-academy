@@ -95,8 +95,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password if provided
-    const passwordHash = password ? await bcrypt.hash(password, 12) : null;
+    // Hash password if provided, otherwise generate a temporary one
+    const passwordHash = password
+      ? await bcrypt.hash(password, 12)
+      : await bcrypt.hash(crypto.randomUUID().slice(0, 16), 12);
 
     const user = await db.user.create({
       data: {
