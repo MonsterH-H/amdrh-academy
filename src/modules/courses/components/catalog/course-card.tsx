@@ -72,7 +72,7 @@ export function CourseCard({ course, onClick }: CourseCardProps) {
           </div>
           {instructor && (
             <p className="text-xs text-muted-foreground mt-2">
-              {instructor.prenom as string} {instructor.nom as string}
+              {(instructor.prenom as string) || ""} {(instructor.nom as string) || ""}
             </p>
           )}
         </div>

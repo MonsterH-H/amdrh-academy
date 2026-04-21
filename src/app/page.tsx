@@ -7,14 +7,12 @@ import { useRealtime } from "@/hooks/use-realtime";
 import { CircleDot, AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Eagerly loaded components (small, needed immediately)
 import { LandingPage } from "@/modules/landing";
 import { LoginPage } from "@/modules/auth";
 import { RegisterPage } from "@/modules/auth";
 import { ForgotPasswordPage } from "@/modules/auth";
 import { ResetPasswordPage } from "@/modules/auth";
 
-// Lazy loaded components (larger, loaded on demand)
 const lazyLoad = <T extends ComponentType>(loader: () => Promise<{ default: T }>) =>
   lazy(loader);
 
@@ -31,8 +29,6 @@ const NotificationsPage = lazyLoad(() => import("@/modules/notifications").then(
 const ProfilePage = lazyLoad(() => import("@/modules/profile").then(m => ({ default: m.ProfilePage as ComponentType })));
 const LearnerTraceabilityPage = lazyLoad(() => import("@/modules/learner").then(m => ({ default: m.LearnerTraceabilityPage as ComponentType })));
 const CourseCreatePage = lazyLoad(() => import("@/modules/courses").then(m => ({ default: m.CourseCreatePage as ComponentType })));
-
-// Admin pages (lazy loaded)
 const AdminUsersPage = lazyLoad(() => import("@/modules/admin/users").then(m => ({ default: m.AdminUsersPage as ComponentType })));
 const AdminUserDetailPage = lazyLoad(() => import("@/modules/admin/users").then(m => ({ default: m.AdminUserDetailPage as ComponentType })));
 const AdminCertificatesPage = lazyLoad(() => import("@/modules/admin/certificates").then(m => ({ default: m.AdminCertificatesPage as ComponentType })));
@@ -44,8 +40,8 @@ const AdminAnalyticsPage = lazyLoad(() => import("@/modules/admin/analytics").th
 const AdminQuizzesPage = lazyLoad(() => import("@/modules/admin/quizzes").then(m => ({ default: m.AdminQuizzesPage as ComponentType })));
 const AdminResourcesPage = lazyLoad(() => import("@/modules/admin/resources").then(m => ({ default: m.AdminResourcesPage as ComponentType })));
 const AdminTraceabilityPage = lazyLoad(() => import("@/modules/admin/traceability").then(m => ({ default: m.AdminTraceabilityPage as ComponentType })));
+const SidebarLazy = lazyLoad(() => import("@/modules/shared/layout").then(m => ({ default: m.Sidebar as ComponentType })));
 
-// View component map
 const viewComponentMap: Record<string, ComponentType> = {
   dashboard: DashboardPage,
   courses: CourseCatalogPage,
@@ -84,13 +80,8 @@ function PageLoader() {
   );
 }
 
-// ──────────────────────────────────────────────────
-// App Footer (sticky to bottom when content is short)
-// ──────────────────────────────────────────────────
-
 function AppFooter() {
   const { user } = useAppStore();
-
   return (
     <footer className="hidden lg:block border-t border-border/40 bg-white/60 backdrop-blur-sm mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -106,9 +97,7 @@ function AppFooter() {
           <div className="flex items-center gap-4">
             <span>© {new Date().getFullYear()} AMDRH</span>
             <span className="text-border">|</span>
-            <span className="text-muted-foreground/70">
-              {user?.prenom} {user?.nom}
-            </span>
+            <span className="text-muted-foreground/70">{user?.prenom} {user?.nom}</span>
           </div>
         </div>
       </div>
@@ -116,32 +105,40 @@ function AppFooter() {
   );
 }
 
-// ──────────────────────────────────────────────────
-// In-page Error Fallback (catches render crashes inside views)
-// ──────────────────────────────────────────────────
-
 function ViewErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4">
         <AlertTriangle className="w-7 h-7 text-amber-500" />
       </div>
-      <h3 className="text-lg font-semibold mb-1">Erreur d'affichage</h3>
-      <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-        Cette page n'a pas pu se charger correctement.
-      </p>
+      <h3 className="text-lg font-semibold mb-1">Erreur d&apos;affichage</h3>
+      <p className="text-sm text-muted-foreground mb-4 max-w-sm">Cette page n&apos;a pas pu se charger correctement.</p>
       <Button variant="outline" size="sm" onClick={onRetry} className="gap-2 cursor-pointer">
-        <RotateCcw className="w-3.5 h-3.5" />
-        Réessayer
+        <RotateCcw className="w-3.5 h-3.5" />Réessayer
       </Button>
     </div>
   );
 }
 
+type EBProps = { children: React.ReactNode; onError?: (error: Error) => void };
+type EBState = { hasError: boolean; error: Error | null };
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  constructor(props: EBProps) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
+  componentDidCatch(error: Error) { console.error("[View Error]", error); this.props.onError?.(error); }
+  render() { if (this.state.hasError) return null; return this.props.children; }
+}
+
+function SidebarWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <SidebarLazy />
+    </Suspense>
+  );
+}
+
 function AppContent() {
   const { currentView, user, isAuthenticated, sidebarCollapsed, setUnreadCount } = useAppStore();
-  // Initialize real-time connection when authenticated
-  // The useRealtime hook manages the socket lifecycle internally
   const { subscribeNotifications } = useRealtime();
   const [viewError, setViewError] = useState<Error | null>(null);
 
@@ -152,32 +149,24 @@ function AppContent() {
         const res = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=true`);
         const data = await res.json();
         setUnreadCount(data.unreadCount || 0);
-      } catch { /* silently fail */ }
+      } catch { /* silent */ }
     };
     fetchUnread();
-    // Subscribe to real-time notifications
     subscribeNotifications();
     const interval = setInterval(fetchUnread, 30000);
     return () => clearInterval(interval);
   }, [isAuthenticated, user, setUnreadCount, subscribeNotifications]);
 
-  // Clear error when view changes (tracked via useEffect)
   const handleRetry = useCallback(() => { setViewError(null); }, []);
 
   const renderView = () => {
     if (viewError) return <ViewErrorFallback error={viewError} onRetry={handleRetry} />;
-
-    // Auth pages (no sidebar/topbar)
     if (currentView === "landing") return <LandingPage />;
     if (currentView === "login") return <LoginPage />;
     if (currentView === "register") return <RegisterPage />;
     if (currentView === "forgot-password") return <ForgotPasswordPage />;
     if (currentView === "reset-password") return <ResetPasswordPage />;
-
-    // Protected pages (with sidebar/topbar)
-    if (!isAuthenticated) {
-      return <LandingPage />;
-    }
+    if (!isAuthenticated) return <LandingPage />;
 
     const Component = viewComponentMap[currentView];
     if (Component) {
@@ -200,9 +189,7 @@ function AppContent() {
     <div className="min-h-screen bg-[#FAFAFA] overflow-x-hidden flex flex-col">
       {!isAuthPage && <SidebarWrapper />}
       {!isAuthPage && <TopBar />}
-      <main
-        className={`transition-all duration-300 min-w-0 flex-1 ${!isAuthPage ? (sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]") : ""}`}
-      >
+      <main className={`transition-all duration-300 min-w-0 flex-1 ${!isAuthPage ? (sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]") : ""}`}>
         <div className={!isAuthPage ? "pt-14 sm:pt-16 pb-20 lg:pb-6" : ""}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {renderView()}
@@ -213,48 +200,6 @@ function AppContent() {
       {!isAuthPage && <MobileBottomNav />}
     </div>
   );
-}
-
-// Lazy load Sidebar since it's also large
-const SidebarLazy = lazyLoad(() => import("@/modules/shared/layout").then(m => ({ default: m.Sidebar as ComponentType })));
-
-function SidebarWrapper() {
-  return (
-    <Suspense fallback={null}>
-      <SidebarLazy />
-    </Suspense>
-  );
-}
-
-// ──────────────────────────────────────────────────
-// Lightweight Error Boundary (class component for catchRender)
-// ──────────────────────────────────────────────────
-
-type ErrorBoundaryProps = {
-  children: React.ReactNode;
-  onError?: (error: Error) => void;
-};
-type ErrorBoundaryState = { hasError: boolean; error: Error | null };
-
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error) {
-    console.error("[View Error]", error);
-    this.props.onError?.(error);
-  }
-
-  render() {
-    if (this.state.hasError) return null; // Parent handles the fallback via onError
-    return this.props.children;
-  }
 }
 
 export default function Home() {
