@@ -18,6 +18,10 @@ export async function GET(
       )
     }
 
+    function safeJsonParse(str: string, fallback: unknown = []): unknown {
+      try { return JSON.parse(str); } catch { return fallback; }
+    }
+
     // Get quiz with full question data
     const quiz = await db.quiz.findUnique({
       where: { id },
@@ -77,9 +81,9 @@ export async function GET(
         questionId: answer.questionId,
         questionText: question?.text || "",
         questionType: question?.type || "",
-        options: question ? JSON.parse(question.options) : [],
-        correctAnswer: question ? JSON.parse(question.correctAnswer) : [],
-        selectedAnswer: JSON.parse(answer.selectedAnswer),
+        options: question ? safeJsonParse(question.options, []) : [],
+        correctAnswer: question ? safeJsonParse(question.correctAnswer, []) : [],
+        selectedAnswer: safeJsonParse(answer.selectedAnswer, []),
         isCorrect: answer.isCorrect,
         pointsEarned: answer.pointsEarned,
         maxPoints: question?.points || 0,

@@ -126,7 +126,7 @@ export function NotificationPopover({ unreadCount, setUnreadCount, onNavigate }:
             <div className="py-1">
               {recentNotifs.map((notif) => {
                 const Icon = notificationTypeIcons[notif.type] || Bell;
-                const colorClass = notificationTypeColors[notif.type] || "bg-gray-100 text-gray-600";
+                const colorClass = notificationTypeColors[notif.type] || "bg-muted text-muted-foreground";
                 return (
                   <button key={notif.id} className="w-full flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
                     onClick={() => { setNotifOpen(false); onNavigate("notifications"); }}>

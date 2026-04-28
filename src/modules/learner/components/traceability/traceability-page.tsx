@@ -141,7 +141,7 @@ function TraceabilityContent() {
 
       {/* Overview Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={BookOpen} label="Cours en cours" value={inProgressCount} colorClass="text-blue-600" bgColor="bg-blue-50" />
+        <StatCard icon={BookOpen} label="Cours en cours" value={inProgressCount} colorClass="text-primary" bgColor="bg-primary/10" />
         <StatCard icon={GraduationCap} label="Cours terminés" value={completedCount} colorClass="text-green-600" bgColor="bg-green-50" />
         <StatCard icon={Clock} label="Temps total" value={formatTime(totalTimeSpent)} colorClass="text-amber-600" bgColor="bg-amber-50" />
         <StatCard icon={Zap} label="Quiz réussis" value={`${passedQuizzes}/${quizAttempts.length}`} colorClass="text-purple-600" bgColor="bg-purple-50" />

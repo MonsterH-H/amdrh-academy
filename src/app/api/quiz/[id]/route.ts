@@ -97,10 +97,10 @@ export async function POST(
       const userAnswer = answers?.find(
         (a: { questionId: string }) => a.questionId === question.id
       );
-      const correctAnswer = JSON.parse(question.correctAnswer) as number[];
-      const selectedAnswer = userAnswer
-        ? (JSON.parse(userAnswer.selectedAnswer as string) as number[])
-        : [];
+      let correctAnswer: number[] = [];
+      let selectedAnswer: number[] = [];
+      try { correctAnswer = JSON.parse(question.correctAnswer); } catch { correctAnswer = []; }
+      try { selectedAnswer = userAnswer ? JSON.parse(userAnswer.selectedAnswer as string) : []; } catch { selectedAnswer = []; }
       const isCorrect =
         JSON.stringify([...selectedAnswer].sort()) ===
         JSON.stringify([...correctAnswer].sort());

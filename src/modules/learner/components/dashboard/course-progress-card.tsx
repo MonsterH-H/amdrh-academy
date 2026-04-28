@@ -22,8 +22,8 @@ export function CourseProgressCard({
       onClick={() => onViewCourse(course.id as string)}
     >
       <CardContent className="p-4">
-        <div className="w-full h-32 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center mb-3">
-          <BookOpen className="w-8 h-8 text-blue-500" />
+        <div className="w-full h-32 rounded-lg bg-gradient-to-br from-primary/20 to-blue-600/10 flex items-center justify-center mb-3">
+          <BookOpen className="w-8 h-8 text-primary" />
         </div>
         <Badge variant="secondary" className={cn("text-[10px] mb-2", DIFFICULTY_COLORS[(course.difficulty as string) || "DEBUTANT"])}>
           {DIFFICULTY_LABELS[(course.difficulty as string) || "DEBUTANT"]}

@@ -226,7 +226,7 @@ export function CourseDetailPage() {
 
       <Tabs defaultValue="contenu" className="w-full">
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <TabsList className="bg-white rounded-lg border border-border/60 inline-flex min-w-max">
+          <TabsList className="bg-card rounded-lg border border-border/60 inline-flex min-w-max">
             <TabsTrigger value="contenu" className="text-sm rounded-md">Contenu</TabsTrigger>
             <TabsTrigger value="ressources" className="text-sm rounded-md">
               Ressources {resources.length > 0 && `(${resources.length})`}

@@ -12,7 +12,7 @@ import { toast } from "@/hooks/use-toast";
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
   EN_ATTENTE: { label: "En attente", color: "bg-gray-100 text-gray-700", icon: Clock },
-  EN_COURS: { label: "En cours", color: "bg-blue-100 text-blue-700", icon: Loader2 },
+  EN_COURS: { label: "En cours", color: "bg-primary/10 text-primary", icon: Loader2 },
   TERMINE: { label: "Terminé", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
   ERREUR: { label: "Erreur", color: "bg-red-100 text-red-700", icon: XCircle },
 };

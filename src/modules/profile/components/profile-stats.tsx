@@ -71,7 +71,7 @@ export function ProfileStats({ stats, loadingStats, onNavigate }: ProfileStatsPr
             <button
               key={s.label}
               onClick={() => onNavigate(s.action)}
-              className="bg-white border border-border/60 rounded-xl p-4 text-left hover:shadow-md transition-all group"
+              className="bg-card border border-border/60 rounded-xl p-4 text-left hover:shadow-md transition-all group"
             >
               <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mb-3", s.bg)}>
                 <Icon className={cn("w-5 h-5", s.color)} />

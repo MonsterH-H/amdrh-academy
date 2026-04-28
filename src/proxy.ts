@@ -30,7 +30,7 @@ const PROTECTED_API_PATHS = [
 // Allowed origins for CORS
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
-  : ["*"];
+  : [];
 
 /**
  * Security headers applied to ALL responses
@@ -52,19 +52,17 @@ function getSecurityHeaders(): HeadersInit {
  */
 function getCORSHeaders(request: NextRequest): HeadersInit {
   const origin = request.headers.get("origin") || "";
-
   const corsHeaders: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers":
       "Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control",
     "Access-Control-Max-Age": "86400",
-    "Access-Control-Allow-Credentials": "true",
   };
 
-  if (ALLOWED_ORIGINS.includes("*")) {
+  // Only set CORS for allowed origins or same-origin
+  if (!origin || ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin)) {
     corsHeaders["Access-Control-Allow-Origin"] = origin || "*";
-  } else if (ALLOWED_ORIGINS.includes(origin)) {
-    corsHeaders["Access-Control-Allow-Origin"] = origin;
+    corsHeaders["Access-Control-Allow-Credentials"] = "true";
   }
 
   return corsHeaders;

@@ -83,7 +83,7 @@ function PageLoader() {
 function AppFooter() {
   const { user } = useAppStore();
   return (
-    <footer className="hidden lg:block border-t border-border/40 bg-white/60 backdrop-blur-sm mt-auto">
+    <footer className="hidden lg:block border-t border-border/40 bg-card/60 backdrop-blur-sm mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
@@ -126,7 +126,23 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
   constructor(props: EBProps) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
   componentDidCatch(error: Error) { console.error("[View Error]", error); this.props.onError?.(error); }
-  render() { if (this.state.hasError) return null; return this.props.children; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+            <AlertTriangle className="w-7 h-7 text-amber-500" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">Erreur d&apos;affichage</h3>
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm">Cette page n&apos;a pas pu se charger correctement.</p>
+          <Button variant="outline" size="sm" onClick={() => this.setState({ hasError: false, error: null })} className="gap-2 cursor-pointer">
+            <RotateCcw className="w-3.5 h-3.5" />Réessayer
+          </Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function SidebarWrapper() {

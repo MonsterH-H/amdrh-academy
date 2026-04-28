@@ -151,7 +151,7 @@ export function AdminCoursesPage() {
           {[
             { label: "Total cours", value: stats.total, icon: BookOpen, color: "bg-primary/10 text-primary" },
             { label: "Publiés", value: stats.published, icon: Globe, color: "bg-green-500/10 text-green-600" },
-            { label: "Brouillons", value: stats.drafts, icon: FileText, color: "bg-gray-500/10 text-gray-600" },
+            { label: "Brouillons", value: stats.drafts, icon: FileText, color: "bg-muted text-muted-foreground" },
             { label: "Archivés", value: stats.archived, icon: Archive, color: "bg-red-500/10 text-red-500" },
           ].map((stat) => (
             <Card key={stat.label} className="border-border/60">
@@ -177,7 +177,7 @@ export function AdminCoursesPage() {
         <div className="flex gap-1.5 flex-wrap">
           {STATUS_FILTERS.map((f) => (
             <button key={f.value} onClick={() => { setStatusFilter(f.value); setPage(1); setLoading(true); }}
-              className={cn("px-3 py-1.5 rounded-full text-xs font-medium transition-all border flex items-center gap-1.5", statusFilter === f.value ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border/60 hover:border-border")}>
+              className={cn("px-3 py-1.5 rounded-full text-xs font-medium transition-all border flex items-center gap-1.5", statusFilter === f.value ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border/60 hover:border-border")}>
               {statusFilter === f.value && <span className={cn("w-1.5 h-1.5 rounded-full bg-white")} />}{f.label}
             </button>
           ))}

@@ -21,7 +21,7 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-border/40 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
+        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 bg-card/80 backdrop-blur-xl border-b border-border/40 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
         sidebarCollapsed ? "lg:left-[72px]" : "lg:left-[280px]"
       )}
     >

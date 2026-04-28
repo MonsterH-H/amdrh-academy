@@ -3,6 +3,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 
+if (!process.env.NEXTAUTH_SECRET) {
+  console.warn("[Auth] NEXTAUTH_SECRET is not set. Sessions may not persist across restarts.");
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({

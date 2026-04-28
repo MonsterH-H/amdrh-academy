@@ -153,8 +153,8 @@ export function CourseCreatePage() {
               disabled={s.num > step}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full",
-                step === s.num ? "bg-[#1D4ED8] text-white shadow-sm"
-                  : step > s.num ? "bg-[#1D4ED8]/10 text-[#1D4ED8] cursor-pointer hover:bg-[#1D4ED8]/20"
+                step === s.num ? "bg-primary text-white shadow-sm"
+                  : step > s.num ? "bg-primary/10 text-primary cursor-pointer hover:bg-primary/20"
                   : "bg-muted text-muted-foreground cursor-not-allowed",
               )}
             >
@@ -173,7 +173,7 @@ export function CourseCreatePage() {
         <Card className="border-border/60">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-[#1D4ED8]" />
+              <BookOpen className="w-5 h-5 text-primary" />
               Informations générales
             </CardTitle>
           </CardHeader>
@@ -237,7 +237,7 @@ export function CourseCreatePage() {
               </div>
             )}
             <div className="flex justify-end pt-2">
-              <Button onClick={() => { if (validateStep1()) setStep(2); }} className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg">
+              <Button onClick={() => { if (validateStep1()) setStep(2); }} className="bg-primary hover:bg-primary/90 rounded-lg">
                 Continuer <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
@@ -251,10 +251,10 @@ export function CourseCreatePage() {
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-[#1D4ED8]" />
+                <BookOpen className="w-5 h-5 text-primary" />
                 Sections & Leçons
               </CardTitle>
-              <Button variant="outline" size="sm" onClick={addSection} className="rounded-lg text-[#1D4ED8] border-[#1D4ED8]/30 hover:bg-[#1D4ED8]/10">
+              <Button variant="outline" size="sm" onClick={addSection} className="rounded-lg text-primary border-primary/30 hover:bg-primary/10">
                 <Plus className="w-4 h-4 mr-1" /> Ajouter une section
               </Button>
             </div>
@@ -283,7 +283,7 @@ export function CourseCreatePage() {
               <Button variant="outline" onClick={() => setStep(1)} className="rounded-lg">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Retour
               </Button>
-              <Button onClick={() => { if (validateStep2()) handleSubmit(); }} disabled={submitting} className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg min-w-[160px]">
+              <Button onClick={() => { if (validateStep2()) handleSubmit(); }} disabled={submitting} className="bg-primary hover:bg-primary/90 rounded-lg min-w-[160px]">
                 {submitting ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Création...</>) : "Créer le cours"}
               </Button>
             </div>

@@ -126,11 +126,11 @@ export function VideoSimulator({
 
   return (
     <div className="space-y-4">
-      <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+      <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center">
         <div className="absolute inset-0 bg-black/20" />
         <div className="relative z-10 flex flex-col items-center gap-4 text-white">
           <div
-            className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
+            className="w-16 h-16 rounded-full bg-card/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-card/30 transition-colors"
             onClick={() => { if (!isCompleted) setIsPlaying(!isPlaying); }}
           >
             {isCompleted ? <Check className="w-8 h-8 text-green-400" />

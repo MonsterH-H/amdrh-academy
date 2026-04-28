@@ -205,7 +205,7 @@ export function CertificatesTab() {
                         </td>
                         <td className="py-3 px-4 hidden sm:table-cell"><p className="text-sm text-muted-foreground truncate max-w-[180px]">{c.courseTitle}</p></td>
                         <td className="py-3 px-4 hidden md:table-cell">
-                          <Badge variant="secondary" className={cn("text-[9px]", CERTIFICATE_TYPE_COLORS[c.type] || "bg-gray-100 text-gray-700")}>{CERTIFICATE_TYPE_LABELS[c.type] || c.type}</Badge>
+                          <Badge variant="secondary" className={cn("text-[9px]", CERTIFICATE_TYPE_COLORS[c.type] || "bg-muted text-muted-foreground")}>{CERTIFICATE_TYPE_LABELS[c.type] || c.type}</Badge>
                         </td>
                         <td className="py-3 px-4 hidden md:table-cell">
                           <span className={cn("text-sm font-semibold", c.maxScore > 0 && (c.score / c.maxScore) >= 0.7 ? "text-green-700" : "text-amber-700")}>{c.score}/{c.maxScore}</span>

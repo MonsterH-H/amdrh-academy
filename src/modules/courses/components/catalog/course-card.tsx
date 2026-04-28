@@ -30,7 +30,7 @@ export function CourseCard({ course, onClick }: CourseCardProps) {
   const instructor = course.instructor as Record<string, unknown> | null;
   const courseCategory = (course.category as string) || "ARBITRAGE";
   const CategoryIcon = CATEGORY_ICON_MAP[courseCategory] || BookOpen;
-  const iconColor = CATEGORY_ICON_COLORS[courseCategory] || "text-blue-400";
+  const iconColor = CATEGORY_ICON_COLORS[courseCategory] || "text-primary";
   const gradient = CATEGORY_GRADIENTS[courseCategory] || "from-blue-500/15 to-blue-600/20";
 
   return (

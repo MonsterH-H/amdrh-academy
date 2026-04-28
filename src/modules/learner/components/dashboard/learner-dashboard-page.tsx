@@ -116,10 +116,10 @@ export function LearnerDashboardPage() {
   const recommended = (data.recommended || []) as Array<Record<string, unknown>>;
 
   const statCards = [
-    { label: "Cours en cours", value: stats.coursesEnCours, icon: BookOpen, colorClass: "text-blue-600", bgColor: "bg-blue-100" },
-    { label: "Cours terminés", value: stats.coursesTermines, icon: FileCheck, colorClass: "text-green-600", bgColor: "bg-green-100" },
-    { label: "Certificats", value: stats.certificatesCount, icon: Award, colorClass: "text-amber-600", bgColor: "bg-amber-100" },
-    { label: "Score moyen", value: `${stats.avgScore}%`, icon: TrendingUp, colorClass: "text-purple-600", bgColor: "bg-purple-100" },
+    { label: "Cours en cours", value: stats.coursesEnCours, icon: BookOpen, colorClass: "text-primary", bgColor: "bg-primary/10" },
+    { label: "Cours terminés", value: stats.coursesTermines, icon: FileCheck, colorClass: "text-emerald-600", bgColor: "bg-emerald-500/10" },
+    { label: "Certificats", value: stats.certificatesCount, icon: Award, colorClass: "text-amber-600", bgColor: "bg-amber-500/10" },
+    { label: "Score moyen", value: `${stats.avgScore}%`, icon: TrendingUp, colorClass: "text-violet-600", bgColor: "bg-violet-500/10" },
   ];
 
   return (
@@ -174,10 +174,10 @@ export function LearnerDashboardPage() {
                     onClick={() => navigate("course-detail", { id: course.id as string })}
                   >
                     <CardContent className="p-4">
-                      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center mb-3">
-                        <BookOpen className="w-8 h-8 text-blue-500" />
+                      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-3">
+                        <BookOpen className="w-8 h-8 text-primary" />
                       </div>
-                      <Badge variant="secondary" className="text-[10px] mb-2 bg-blue-100 text-blue-700">
+                      <Badge variant="secondary" className="text-[10px] mb-2 bg-primary/10 text-primary">
                         {(course.difficulty as string) || "Débutant"}
                       </Badge>
                       <h4 className="font-semibold text-sm text-foreground line-clamp-2">{course.title as string}</h4>

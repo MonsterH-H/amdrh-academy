@@ -186,7 +186,7 @@ export function AdminUserDetailPage() {
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge variant="secondary" className={cn("text-[10px]", ROLE_COLORS[(userData.role as string) || "ARBITRE"])}>{ROLE_LABELS[(userData.role as string) || "ARBITRE"]}</Badge>
                   <Badge variant={userData.isActive ? "default" : "secondary"} className={cn("text-[10px]", userData.isActive ? "bg-green-100 text-green-700" : "")}>{userData.isActive ? "Actif" : "Inactif"}</Badge>
-                  {!!userData.emailVerified && <Badge variant="secondary" className="text-[10px] bg-blue-100 text-blue-700"><ShieldCheck className="w-3 h-3 mr-1" /> Vérifié</Badge>}
+                  {!!userData.emailVerified && <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary"><ShieldCheck className="w-3 h-3 mr-1" /> Vérifié</Badge>}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-1 sm:gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                   <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {userData.email as string}</span>

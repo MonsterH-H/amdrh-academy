@@ -15,7 +15,7 @@ interface User {
   region?: string | null;
   bio?: string | null;
   licenceNumber?: string | null;
-  emailVerified?: Date | string | null;
+  emailVerified?: boolean | null;
   createdAt?: Date | string | null;
   isActive?: boolean;
   lastLoginAt?: Date | string | null;
@@ -64,6 +64,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   navigate: (view, params = {}) => {
     const { currentView, viewParams: currentParams } = get();
     viewHistory.push(currentView);
+    if (viewHistory.length > 50) viewHistory.splice(0, viewHistory.length - 50);
     if (Object.keys(currentParams).length > 0) {
       // Store params for history
     }

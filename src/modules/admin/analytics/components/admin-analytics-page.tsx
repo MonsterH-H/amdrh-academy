@@ -99,7 +99,7 @@ export function AdminAnalyticsPage() {
         {PERIODS.map((p) => (
           <button key={p.value} onClick={() => setPeriod(p.value)} className={cn(
             "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-            period === p.value ? "bg-primary text-primary-foreground border-primary" : "bg-white text-muted-foreground border-border/60 hover:border-border",
+            period === p.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border/60 hover:border-border",
           )}>{p.label}</button>
         ))}
       </div>

@@ -82,7 +82,7 @@ export function CertificateCard({ cert, onOpenDetail, onDownloadPdf, onCopyLink 
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-foreground text-sm truncate">{cert.courseTitle}</h3>
             <div className="flex items-center gap-1.5 flex-wrap mb-2 mt-1">
-              <Badge variant="secondary" className={cn("text-[9px]", CERTIFICATE_TYPE_COLORS[cert.type] || "bg-blue-100 text-blue-700")}>
+              <Badge variant="secondary" className={cn("text-[9px]", CERTIFICATE_TYPE_COLORS[cert.type] || "bg-primary/10 text-primary")}>
                 {CERTIFICATE_TYPE_LABELS[cert.type] || "Certificat"}
               </Badge>
               <Badge variant="secondary" className={cn("text-[9px]", statusInfo.color)}>{statusInfo.label}</Badge>

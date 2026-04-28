@@ -74,7 +74,7 @@ export function ResourceTab({
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0",
-                RESOURCE_TYPE_COLORS[resource.fileType] || "bg-gray-100 text-gray-600",
+                RESOURCE_TYPE_COLORS[resource.fileType] || "bg-muted text-muted-foreground",
               )}>
                 <ResourceIcon type={resource.fileType} />
               </div>

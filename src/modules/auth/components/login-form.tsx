@@ -147,7 +147,7 @@ export function LoginPage() {
                 <span className="w-full border-t border-border/40" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-muted-foreground">
+                <span className="bg-card px-3 text-muted-foreground">
                   ou
                 </span>
               </div>

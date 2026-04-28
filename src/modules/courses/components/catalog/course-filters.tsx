@@ -71,7 +71,7 @@ export function CourseFilters({
                 "px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200",
                 category === c.value
                   ? "bg-primary text-white shadow-sm"
-                  : "bg-white text-muted-foreground border border-border/60 hover:border-primary/30"
+                  : "bg-card text-muted-foreground border border-border/60 hover:border-primary/30"
               )}
             >
               {c.label}
@@ -90,7 +90,7 @@ export function CourseFilters({
               "px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200",
               difficulty === d.value
                 ? "bg-secondary text-secondary-foreground shadow-sm"
-                : "bg-white text-muted-foreground border border-border/60 hover:border-border"
+                : "bg-card text-muted-foreground border border-border/60 hover:border-border"
             )}
           >
             {d.label}

@@ -210,7 +210,7 @@ export function AdminResourcesPage() {
           <h2 className="text-2xl font-bold text-foreground">Médiathèque</h2>
           <p className="text-muted-foreground mt-1">Gestion des ressources pédagogiques</p>
         </div>
-        <Button onClick={() => { resetUploadForm(); setUploadOpen(true); }} className="rounded-lg bg-[#1D4ED8] hover:bg-[#1E40AF] text-white">
+        <Button onClick={() => { resetUploadForm(); setUploadOpen(true); }} className="rounded-lg bg-primary hover:bg-primary/90 text-white">
           <Plus className="w-4 h-4 mr-2" /> Ajouter une ressource
         </Button>
       </div>
@@ -230,7 +230,7 @@ export function AdminResourcesPage() {
           <FolderOpen className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
           <h3 className="font-semibold text-foreground mb-2">Aucune ressource trouvée</h3>
           <p className="text-sm text-muted-foreground mb-4">{hasActiveFilters ? "Essayez de modifier vos filtres de recherche" : "Commencez par ajouter votre première ressource"}</p>
-          {!hasActiveFilters && <Button onClick={() => { resetUploadForm(); setUploadOpen(true); }} className="rounded-lg bg-[#1D4ED8] hover:bg-[#1E40AF] text-white"><Plus className="w-4 h-4 mr-2" /> Ajouter une ressource</Button>}
+          {!hasActiveFilters && <Button onClick={() => { resetUploadForm(); setUploadOpen(true); }} className="rounded-lg bg-primary hover:bg-primary/90 text-white"><Plus className="w-4 h-4 mr-2" /> Ajouter une ressource</Button>}
         </div>
       ) : (
         <>
@@ -263,7 +263,7 @@ export function AdminResourcesPage() {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .reduce<(number | "...")[]>((acc, p, i, arr) => { if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("..."); acc.push(p); return acc; }, [])
                   .map((p, idx) => p === "..." ? <span key={`ellipsis-${idx}`} className="px-2 text-xs text-muted-foreground">…</span> : (
-                    <Button key={p} variant={page === p ? "default" : "outline"} size="sm" onClick={() => setPage(p as number)} className={cn("rounded-lg h-9 w-9 p-0 text-sm font-medium", page === p && "bg-[#1D4ED8] hover:bg-[#1E40AF] text-white")}>{p}</Button>
+                    <Button key={p} variant={page === p ? "default" : "outline"} size="sm" onClick={() => setPage(p as number)} className={cn("rounded-lg h-9 w-9 p-0 text-sm font-medium", page === p && "bg-primary hover:bg-primary/90 text-white")}>{p}</Button>
                   ))}
               </div>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="rounded-lg h-9"><span className="hidden sm:inline mr-1">Suivant</span><ChevronRight className="w-4 h-4" /></Button>

@@ -104,7 +104,7 @@ export function NotificationCreateForm({ onCreated }: { onCreated: () => void })
             <div className="flex gap-2 flex-wrap">
               {NOTIFICATION_TYPES.map((t) => { const Icon = TYPE_ICON_MAP[t] || Bell; return (
                 <button key={t} onClick={() => setType(t)} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                  type === t ? cn("border-transparent text-white shadow-sm", TYPE_COLORS[t]) : "bg-white text-muted-foreground border-border/60 hover:border-border")}
+                  type === t ? cn("border-transparent text-white shadow-sm", TYPE_COLORS[t]) : "bg-card text-muted-foreground border-border/60 hover:border-border")}
                   style={type === t ? { backgroundColor: getBadgeBg(t), color: "#ffffff" } : undefined}>
                   <Icon className="w-3.5 h-3.5" />{NOTIFICATION_TYPE_LABELS[t]}
                 </button>);
@@ -122,7 +122,7 @@ export function NotificationCreateForm({ onCreated }: { onCreated: () => void })
               ]).map((opt) => (
                 <button key={opt.mode} onClick={() => { setTargetMode(opt.mode); setSelectedUser(null); setUserSearch(""); setUserResults([]); }}
                   className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                    targetMode === opt.mode ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border/60 hover:border-border")}>
+                    targetMode === opt.mode ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border/60 hover:border-border")}>
                   <opt.icon className="w-3.5 h-3.5" /><span className="hidden sm:inline">{opt.label}</span>
                 </button>
               ))}
@@ -140,7 +140,7 @@ export function NotificationCreateForm({ onCreated }: { onCreated: () => void })
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {ROLES_FOR_TARGET.map((role) => (
                     <label key={role} className={cn("flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all",
-                      selectedRoles.includes(role) ? "bg-primary/5 border-primary/30" : "bg-white border-border/40 hover:border-border/80")}>
+                      selectedRoles.includes(role) ? "bg-primary/5 border-primary/30" : "bg-card border-border/40 hover:border-border/80")}>
                       <Checkbox checked={selectedRoles.includes(role)} onCheckedChange={() => handleRoleToggle(role)} className="rounded" />
                       <div className="flex-1 min-w-0"><p className="text-xs font-medium">{ROLE_LABELS[role]}</p></div>
                       <Badge variant="secondary" className={cn("text-[9px]", ROLE_COLORS[role])}>{ROLE_LABELS[role]}</Badge>
@@ -204,9 +204,9 @@ export function NotificationCreateForm({ onCreated }: { onCreated: () => void })
         <CardContent>
           {showPreview ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg border border-border/60 bg-white">
+              <div className="p-4 rounded-lg border border-border/60 bg-card">
                 <div className="flex items-start gap-3">
-                  <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", TYPE_COLORS[type] || "bg-gray-100 text-gray-700")}>
+                  <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", TYPE_COLORS[type] || "bg-muted text-muted-foreground")}>
                     {(() => { const Icon = TYPE_ICON_MAP[type] || Bell; return <Icon className="w-5 h-5" />; })()}
                   </div>
                   <div className="flex-1 min-w-0">

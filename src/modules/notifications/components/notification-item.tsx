@@ -31,12 +31,12 @@ const typeIcons: Record<string, typeof BookOpen> = {
 };
 
 const typeColors: Record<string, string> = {
-  COURS: "bg-blue-100 text-blue-600",
-  CERTIFICAT: "bg-amber-100 text-amber-600",
-  MESSAGE: "bg-green-100 text-green-600",
-  QUIZ: "bg-purple-100 text-purple-600",
-  BADGE: "bg-pink-100 text-pink-600",
-  SYSTEME: "bg-gray-100 text-gray-600",
+  COURS: "bg-primary/10 text-primary",
+  CERTIFICAT: "bg-amber-500/10 text-amber-600",
+  MESSAGE: "bg-emerald-500/10 text-emerald-600",
+  QUIZ: "bg-violet-500/10 text-violet-600",
+  BADGE: "bg-pink-500/10 text-pink-600",
+  SYSTEME: "bg-muted text-muted-foreground",
 };
 
 // ──────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ export function NotificationItem({
   const Icon = typeIcons[(notif.type as string) || "SYSTEME"] || Bell;
   const colorClass =
     typeColors[(notif.type as string) || "SYSTEME"] ||
-    "bg-gray-100 text-gray-600";
+    "bg-muted text-muted-foreground";
   const isRead = notif.isRead as boolean;
   const type = (notif.type as string) || "SYSTEME";
 

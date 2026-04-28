@@ -64,9 +64,9 @@ export interface CourseDetail extends CourseItem {
 // ─── Constants ─────────────────────────────────
 
 export const STATUS_COLORS: Record<string, string> = {
-  BROUILLON: "bg-gray-100 text-gray-700",
+  BROUILLON: "bg-muted text-muted-foreground",
   EN_REVISION: "bg-amber-100 text-amber-700",
-  VALIDE: "bg-blue-100 text-blue-700",
+  VALIDE: "bg-primary/10 text-primary",
   PUBLIE: "bg-green-100 text-green-700",
   ARCHIVE: "bg-red-100 text-red-600",
 };
@@ -139,7 +139,7 @@ export function CourseRow({
           {/* Category icon */}
           <div className={cn(
             "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-lg",
-            course.category === "ARBITRAGE" && "bg-blue-50",
+            course.category === "ARBITRAGE" && "bg-primary/10",
             course.category === "ENTRAINEMENT" && "bg-emerald-50",
             course.category === "JOUEURS" && "bg-amber-50",
             course.category === "ADMINISTRATION" && "bg-violet-50",

@@ -149,7 +149,7 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-white border-r border-border/60 z-40 transition-all duration-300 ease-out",
+          "hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-card border-r border-border/60 z-40 transition-all duration-300 ease-out",
           sidebarCollapsed ? "w-[72px]" : "w-[280px]"
         )}
       >
@@ -162,7 +162,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-2.5 sm:top-3 left-3 z-50 bg-white shadow-sm border border-border/50 rounded-lg"
+            className="lg:hidden fixed top-2.5 sm:top-3 left-3 z-50 bg-card shadow-sm border border-border/50 rounded-lg"
           >
             <Menu className="w-5 h-5" />
           </Button>

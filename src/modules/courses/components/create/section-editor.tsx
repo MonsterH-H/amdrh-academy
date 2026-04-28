@@ -39,7 +39,7 @@ export function SectionEditor({
       {/* Section header */}
       <div className="flex items-center gap-3 p-4 bg-muted/40">
         <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
-        <span className="text-xs font-bold text-[#1D4ED8] uppercase tracking-wide shrink-0">
+        <span className="text-xs font-bold text-primary uppercase tracking-wide shrink-0">
           Section {sectionIdx + 1}
         </span>
         <Input
@@ -87,7 +87,7 @@ export function SectionEditor({
         {/* Add lesson button */}
         <button
           onClick={() => onAddLesson(sectionIdx)}
-          className="flex items-center gap-1.5 text-xs text-[#1D4ED8] hover:text-[#1D4ED8]/80 font-medium py-1.5 px-3 rounded-lg hover:bg-[#1D4ED8]/5 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium py-1.5 px-3 rounded-lg hover:bg-primary/5 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Ajouter une leçon

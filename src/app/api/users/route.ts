@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
   try {
