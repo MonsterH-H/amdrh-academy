@@ -47,7 +47,9 @@ export function AdminQuizzesPage() {
       setCourses(data.courses || []);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotal(data.pagination?.total || 0);
-    } catch { /* silently fail */ } finally { setLoading(false); }
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de charger les quiz.", variant: "destructive" });
+    } finally { setLoading(false); }
   }, [courseFilter, page, search, user?.role, user?.id]);
 
   useEffect(() => {

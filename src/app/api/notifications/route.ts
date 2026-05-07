@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { pushToUser, updateNotificationCount } from "@/lib/realtime";
+import { getUserFromRequest, requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userId = userInfo.userId;
     const type = searchParams.get("type");
     const unreadOnly = searchParams.get("unreadOnly") === "true";
-
-    if (!userId) {
-      return NextResponse.json({ error: "Utilisateur requis" }, { status: 400 });
-    }
 
     const where: Record<string, unknown> = { userId };
     if (type) where.type = type;
@@ -46,15 +46,8 @@ export async function POST(req: NextRequest) {
     // ──────────────────────────────────────────────
     if (action === "create") {
       // Require ADMIN role to create notifications
-      const { searchParams } = new URL(req.url);
-      const callerRole = searchParams.get("role");
-      const callerId = searchParams.get("userId");
-      if (callerRole !== "ADMIN" || !callerId) {
-        return NextResponse.json(
-          { error: "Seuls les administrateurs peuvent créer des notifications" },
-          { status: 403 }
-        );
-      }
+      const auth = await requireRole(req, ["ADMIN"]);
+      if (!auth.authorized) return auth.response;
 
       if (!userId) {
         return NextResponse.json(

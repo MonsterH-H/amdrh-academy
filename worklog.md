@@ -633,3 +633,34 @@ Stage Summary:
 - viewHistory capped at 50 entries
 - emailVerified type fixed in store
 
+
+---
+Task ID: 2
+Agent: Main Agent (with 4 sub-agents)
+Task: Analyse module par module + correction qualité dev professionnelle
+
+Work Log:
+- Audit exhaustif de 40+ fichiers source dans src/
+- Identifié 43 problèmes (3 CRITIQUE, 14 HAUT, 16 MOYEN, 10 BAS)
+- Fix auth.ts: supprimé les casts unsafe `(user as unknown as Record<string,string>)`
+- Fix next-auth.d.ts: role requis dans User (pas optionnel)
+- Fix auth-helpers.ts: interface AuthUser typée, remplacement Record<string,unknown>
+- Fix store/app.ts: viewHistory stocke les params, goBack restaure le contexte
+- Fix navigation.ts: getViewTitle prend AppView (pas string)
+- Fix ViewParams: propriétés explicites au lieu d'index signature
+- Créé src/lib/certificate-utils.ts: génération de code certificat avec retry
+- Remplacé 3 duplications de génération de code certificat
+- Fix certificate PDF: échappement HTML de toutes les données utilisateur (XSS)
+- Sécurisé 16 routes API sans auth: messages, notifications, profile, quiz, courses, dashboard, certificates, badges, learning-paths, resources, realtime/push
+- Vérification ownership: profile/password/progress limités à l'utilisateur connecté
+- Vérification participation: messages limités aux participants de la conversation
+- Activé rate-limiting sur login, register, forgot-password (10 req/min)
+- Fix swallowed errors: 4 dans course-detail, 1 dans admin-quizzes → toasts
+- Ajouté aria-hidden="true" aux composants skeleton
+
+Stage Summary:
+- 43 problèmes identifiés, 38 corrigés
+- 16 routes API sécurisées avec auth
+- 5 nouveaux fichiers créés/modifiés (certificate-utils.ts, auth.ts, auth-helpers.ts, store/app.ts, types)
+- 0 erreurs ESLint, 0 erreurs TypeScript dans src/
+- ZIP final: 417 fichiers, 491 Ko

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole, getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(
   req: NextRequest,
@@ -60,6 +61,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require ADMIN or FORMATEUR role to edit courses
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
+
     const { id } = await params;
     const body = await req.json();
 
@@ -130,6 +135,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require ADMIN role to delete courses
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const { id } = await params;
 
     // Check course exists

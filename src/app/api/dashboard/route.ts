@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const role = searchParams.get("role");
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
-    if (!userId || !role) {
-      return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 });
-    }
+    const { searchParams } = new URL(req.url);
+    const userId = userInfo.userId;
+    const role = userInfo.role;
 
     if (role === "ADMIN") {
       const sixMonthsAgo = new Date();

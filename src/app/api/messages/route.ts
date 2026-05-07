@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
 
-    if (!userId) {
+    if (!userId || userId !== userInfo.userId) {
       return NextResponse.json({ error: "Utilisateur requis" }, { status: 400 });
     }
 
@@ -67,10 +71,17 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { userId1, userId2, subject } = await req.json();
 
     if (!userId1 || !userId2) {
       return NextResponse.json({ error: "Utilisateurs requis" }, { status: 400 });
+    }
+
+    if (userId1 !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     // Check if conversation already exists

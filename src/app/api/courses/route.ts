@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { courseCreateSchema } from "@/lib/validations";
+import { getUserFromRequest, requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const admin = searchParams.get("admin") === "true";
+
+    // Admin mode requires authentication
+    if (admin) {
+      const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+      if (!auth.authorized) return auth.response;
+    }
+
+    // For non-admin public catalog, still require auth if userId/role params are provided
+    const userInfo = getUserFromRequest(req);
     const category = searchParams.get("category");
     const difficulty = searchParams.get("difficulty");
     const search = searchParams.get("search");
     const userId = searchParams.get("userId");
     const status = searchParams.get("status");
-    const admin = searchParams.get("admin") === "true";
     const enrolledOnly = searchParams.get("enrolled") === "true";
     const userRole = searchParams.get("role") || "";
     const instructorId = searchParams.get("instructorId") || "";
@@ -119,6 +129,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Require authentication for course creation
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
+
     const body = await req.json();
 
     const parsed = courseCreateSchema.safeParse(body);

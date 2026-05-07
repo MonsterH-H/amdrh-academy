@@ -1,18 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { id } = await params;
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
 
-    if (!userId) {
+    if (!userId || userId !== userInfo.userId) {
       return NextResponse.json({ error: "Utilisateur requis" }, { status: 400 });
     }
+
+    // Verify user is a participant in this conversation
+    const participant = await db.conversationParticipant.findFirst({
+      where: { conversationId: id, userId: userInfo.userId },
+    });
+    if (!participant) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
 
     const messages = await db.message.findMany({
       where: { conversationId: id },
@@ -50,12 +60,25 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { id } = await params;
     const { senderId, content } = await req.json();
 
     if (!senderId || !content) {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
     }
+
+    if (senderId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
+
+    // Verify user is a participant in this conversation
+    const participant = await db.conversationParticipant.findFirst({
+      where: { conversationId: id, userId: userInfo.userId },
+    });
+    if (!participant) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
 
     const message = await db.message.create({
       data: {
@@ -66,14 +89,14 @@ export async function POST(
     });
 
     // Create notification for receiver
-    const participant = await db.conversationParticipant.findFirst({
+    const receiver = await db.conversationParticipant.findFirst({
       where: { conversationId: id, userId: { not: senderId } },
     });
 
-    if (participant) {
+    if (receiver) {
       await db.notification.create({
         data: {
-          userId: participant.userId,
+          userId: receiver.userId,
           type: "MESSAGE",
           title: "Nouveau message",
           message: content.substring(0, 100),

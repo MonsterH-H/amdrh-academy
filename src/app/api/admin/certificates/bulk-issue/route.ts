@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
+import { generateUniqueCertCode } from "@/lib/certificate-utils";
 
 // POST /api/admin/certificates/bulk-issue — bulk issue certificates
 export async function POST(req: NextRequest) {
@@ -24,7 +25,6 @@ export async function POST(req: NextRequest) {
 
     const results: Array<{ userId: string; success: boolean; code?: string; error?: string }> = [];
     const year = new Date().getFullYear();
-    let baseCount = await db.certificate.count();
 
     for (const userId of userIds) {
       try {
@@ -67,16 +67,7 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        baseCount++;
-        let certCode = `AMDRH-${year}-${String(baseCount).padStart(5, "0")}`;
-        let exists = await db.certificate.findUnique({ where: { code: certCode } });
-        let retry = 2;
-        while (exists && retry < 100) {
-          baseCount++;
-          certCode = `AMDRH-${year}-${String(baseCount).padStart(5, "0")}`;
-          exists = await db.certificate.findUnique({ where: { code: certCode } });
-          retry++;
-        }
+        const certCode = await generateUniqueCertCode(year);
 
         const certificate = await db.certificate.create({
           data: {

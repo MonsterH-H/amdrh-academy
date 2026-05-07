@@ -1,17 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const { userId } = await req.json();
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
-    if (!userId) {
+    const { id } = await params;
+    const bodyUserId = await req.json().then(b => b.userId).catch(() => null);
+
+    if (!bodyUserId) {
       return NextResponse.json({ error: "Utilisateur requis" }, { status: 400 });
     }
+
+    if (bodyUserId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
+
+    const userId = bodyUserId;
 
     const existing = await db.enrollment.findUnique({
       where: { userId_courseId: { userId, courseId: id } },

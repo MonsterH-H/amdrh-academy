@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/auth-helpers";
+import { requireRole, getUserFromRequest } from "@/lib/auth-helpers";
 const RESOURCE_TYPES = ["VIDEO", "PDF", "IMAGE", "DOCUMENT", "AUDIO", "ARCHIVE", "AUTRE"] as const;
 const RESOURCE_CATEGORIES = ["SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", "MEDIA_COURS", "AUTRE"] as const;
 
@@ -9,6 +9,9 @@ const RESOURCE_CATEGORIES = ["SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", 
 // ─────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
 
     const courseId = searchParams.get("courseId");

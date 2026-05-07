@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { profileUpdateSchema } from "@/lib/validations";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function PUT(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const body = await req.json();
     const validated = profileUpdateSchema.safeParse(body);
 
@@ -14,6 +18,10 @@ export async function PUT(req: NextRequest) {
     }
 
     const { userId, prenom, nom, telephone, club, region, bio } = validated.data;
+
+    if (userId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
 
     const existingUser = await db.user.findUnique({
       where: { id: userId },

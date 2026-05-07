@@ -7,9 +7,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { pushToUser, pushToRole, pushToAll } from "@/lib/realtime";
+import { requireRole } from "@/lib/auth-helpers";
 
 export async function POST(request: NextRequest) {
   try {
+    // Only admins can push real-time events
+    const auth = await requireRole(request, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const body = await request.json();
     const { type, userId, role, event, data } = body;
 

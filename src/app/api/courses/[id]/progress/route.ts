@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(
   req: NextRequest,
@@ -106,7 +107,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { id } = await params;
+    const body = await req.json();
     const {
       userId,
       lessonId,
@@ -116,13 +121,17 @@ export async function POST(
       watchPercentage,
       scrollPercentage,
       completionTrigger,
-    } = await req.json();
+    } = body;
 
     if (!userId || !lessonId) {
       return NextResponse.json(
         { error: "Données manquantes" },
         { status: 400 }
       );
+    }
+
+    if (userId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     const enrollment = await db.enrollment.findUnique({

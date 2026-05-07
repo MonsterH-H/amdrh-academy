@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { registerStep1Schema, registerStep2Schema } from "@/lib/validations";
+import { authLimiter } from "@/lib/api-rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit check
+    const rateResult = authLimiter(req);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques instants." },
+        { status: 429, headers: rateResult.headers }
+      );
+    }
+
     const body = await req.json();
     const { step1, step2 } = body;
 

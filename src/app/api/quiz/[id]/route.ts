@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
+import { generateUniqueCertCode } from "@/lib/certificate-utils";
 
 export async function GET(
   req: NextRequest,
@@ -43,11 +45,18 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { id } = await params;
     const { userId, answers, attemptId } = await req.json();
 
     if (!userId) {
       return NextResponse.json({ error: "Utilisateur requis" }, { status: 400 });
+    }
+
+    if (userId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     const quiz = await db.quiz.findUnique({
@@ -172,23 +181,9 @@ export async function POST(
         });
 
         if (!existingCert) {
-          // Generate sequential certificate code: AMDRH-YYYY-XXXXX
+          // Generate unique certificate code
           const year = new Date().getFullYear();
-          const count = await db.certificate.count();
-          let certCode = `AMDRH-${year}-${String(count + 1).padStart(5, "0")}`;
-
-          // Ensure uniqueness with retry loop
-          let existing = await db.certificate.findUnique({
-            where: { code: certCode },
-          });
-          let retry = 2;
-          while (existing && retry < 100) {
-            certCode = `AMDRH-${year}-${String(count + retry).padStart(5, "0")}`;
-            existing = await db.certificate.findUnique({
-              where: { code: certCode },
-            });
-            retry++;
-          }
+          const certCode = await generateUniqueCertCode(year);
 
           // Fetch user to get proper name and licence
           const user = await db.user.findUnique({ where: { id: userId } });

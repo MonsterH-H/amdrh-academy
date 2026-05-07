@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 // POST /api/profile/password — Change user password
 export async function POST(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { userId, currentPassword, newPassword } = await req.json();
 
     if (!userId || !currentPassword || !newPassword) {
@@ -12,6 +16,10 @@ export async function POST(req: NextRequest) {
         { error: "Tous les champs sont requis" },
         { status: 400 }
       );
+    }
+
+    if (userId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     if (newPassword.length < 8) {
@@ -23,13 +31,20 @@ export async function POST(req: NextRequest) {
 
     const user = await db.user.findUnique({
       where: { id: userId },
-      select: { id: true, passwordHash: true },
+      select: { id: true, isActive: true, passwordHash: true },
     });
 
     if (!user) {
       return NextResponse.json(
         { error: "Utilisateur introuvable" },
         { status: 404 }
+      );
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: "Compte désactivé" },
+        { status: 403 }
       );
     }
 

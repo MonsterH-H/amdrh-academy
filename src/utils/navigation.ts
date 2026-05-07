@@ -6,7 +6,7 @@ import type { AppView } from "@/types/navigation";
  * @param view - The AppView identifier
  * @returns French page title string
  */
-export function getViewTitle(view: string): string {
+export function getViewTitle(view: AppView): string {
   const titles: Record<string, string> = {
     landing: "Académie AMDRH",
     login: "Connexion",

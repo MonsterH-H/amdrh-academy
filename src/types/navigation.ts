@@ -34,5 +34,6 @@ export interface ViewParams {
   lessonId?: string;
   courseId?: string;
   quizId?: string;
-  [key: string]: string | undefined;
+  q?: string;
+  tab?: string;
 }

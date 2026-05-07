@@ -72,7 +72,9 @@ export function CourseDetailPage() {
           setLessonProgressMap(map);
         }
         if (initialLessonId) setActiveLessonId(initialLessonId);
-      } catch { /* silently fail */ } finally { setLoading(false); }
+      } catch {
+        toast({ title: "Erreur", description: "Impossible de charger le cours.", variant: "destructive" });
+      } finally { setLoading(false); }
     };
     fetchCourse();
   }, [courseId, user, initialLessonId]);
@@ -86,7 +88,9 @@ export function CourseDetailPage() {
         if (!res.ok) throw new Error("Erreur");
         const data = await res.json();
         setResources((data.resources || []) as ResourceData[]);
-      } catch { /* silently fail */ } finally { setResourcesLoading(false); }
+      } catch {
+        toast({ title: "Erreur", description: "Impossible de charger les ressources.", variant: "destructive" });
+      } finally { setResourcesLoading(false); }
     };
     fetchResources();
   }, [courseId]);
@@ -143,7 +147,9 @@ export function CourseDetailPage() {
       const data = await res.json();
       if (res.ok) { setEnrollment(data.enrollment); }
       else { toast({ title: "Erreur", description: data.error || "Impossible de s'inscrire", variant: "destructive" }); }
-    } catch { /* silently fail */ } finally { setEnrolling(false); }
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de s'inscrire au cours.", variant: "destructive" });
+    } finally { setEnrolling(false); }
   };
 
   const refreshCourseData = useCallback(async () => {
@@ -157,7 +163,9 @@ export function CourseDetailPage() {
         for (const lp of data.enrollment.lessonProgress as unknown as LessonProgressEntry[]) map[lp.lessonId] = lp;
         setLessonProgressMap(map);
       }
-    } catch { /* silently fail */ }
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de rafraîchir les données.", variant: "destructive" });
+    }
   }, [user, courseId]);
 
   const handleMarkComplete = async (lessonId: string) => {

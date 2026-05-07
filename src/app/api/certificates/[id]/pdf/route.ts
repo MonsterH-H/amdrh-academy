@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // GET /api/certificates/[id]/pdf — Professional print-ready certificate
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -465,11 +474,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       <!-- Recipient -->
       <div class="recipient-section">
         <div class="given-to">L'apprenant</div>
-        <div class="recipient-name">${certificate.userName}</div>
+        <div class="recipient-name">${escapeHtml(certificate.userName)}</div>
         <div class="recipient-meta">
-          ${userRole ? `<span>${userRole}</span>` : ""}
+          ${userRole ? `<span>${escapeHtml(userRole)}</span>` : ""}
           ${userRole && certificate.userLicence ? '<span class="sep"></span>' : ""}
-          ${certificate.userLicence ? `<span>Licence n° ${certificate.userLicence}</span>` : ""}
+          ${certificate.userLicence ? `<span>Licence n° ${escapeHtml(certificate.userLicence)}</span>` : ""}
         </div>
       </div>
 
@@ -477,7 +486,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       <div class="body-section">
         <div class="body-text">
           a satisfait aux exigences du cours certifiant
-          <span class="course-title">« ${certificate.courseTitle} »</span>
+          <span class="course-title">« ${escapeHtml(certificate.courseTitle)} »</span>
           de l'Académie AMDRH, partenaire académique officiel de la
           Fédération Royale Marocaine de Handball.
         </div>

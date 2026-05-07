@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const role = searchParams.get("role");
+    const userId = userInfo.userId;
+    const role = userInfo.role;
 
     const where: Record<string, unknown> = {};
     if (role && role !== "ADMIN") {
@@ -62,6 +66,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const userInfo = getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const body = await req.json();
     const { userId, learningPathId } = body;
 
@@ -70,6 +77,10 @@ export async function POST(req: NextRequest) {
         { error: "Utilisateur et parcours requis" },
         { status: 400 }
       );
+    }
+
+    if (userId !== userInfo.userId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     // Check if the learning path exists

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
+import { generateUniqueCertCode } from "@/lib/certificate-utils";
 
 // GET /api/admin/certificates — list all certificates
 export async function GET(req: NextRequest) {
@@ -128,19 +129,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
     }
 
-    // Generate sequential certificate code: AMDRH-YYYY-XXXXX
-    const year = new Date().getFullYear();
-    const count = await db.certificate.count();
-    let certCode = `AMDRH-${year}-${String(count + 1).padStart(5, "0")}`;
-
-    // Ensure uniqueness with retry loop
-    let existing = await db.certificate.findUnique({ where: { code: certCode } });
-    let retry = 2;
-    while (existing && retry < 100) {
-      certCode = `AMDRH-${year}-${String(count + retry).padStart(5, "0")}`;
-      existing = await db.certificate.findUnique({ where: { code: certCode } });
-      retry++;
-    }
+    // Generate unique certificate code
+    const certCode = await generateUniqueCertCode();
 
     const certificate = await db.certificate.create({
       data: {

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function AdminCoursesSkeleton() {
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div aria-hidden="true" className="space-y-6 animate-fadeIn">
       <div><Skeleton className="h-7 w-56" /><Skeleton className="h-4 w-32 mt-2" /></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+interface AuthUser {
+  id: string;
+  role: string;
+  isActive: boolean;
+}
+
 /**
  * Check if the requesting user has the required role(s).
  * Expects `role` and optionally `userId` query params.
@@ -9,7 +15,7 @@ import { db } from "@/lib/db";
 export async function checkRole(
   req: NextRequest,
   allowedRoles: string[] = ["ADMIN", "FORMATEUR"]
-): Promise<{ authorized: boolean; role?: string; userId?: string; user?: Record<string, unknown> }> {
+): Promise<{ authorized: boolean; role?: string; userId?: string; user?: AuthUser }> {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId") || "";
   const role = searchParams.get("role") || "";
@@ -36,7 +42,7 @@ export async function checkRole(
     return { authorized: false, role: user.role, userId: user.id };
   }
 
-  return { authorized: true, role: user.role, userId: user.id, user: user as unknown as Record<string, unknown> };
+  return { authorized: true, role: user.role, userId: user.id, user };
 }
 
 /**
@@ -48,7 +54,7 @@ export async function checkRole(
 export async function requireRole(
   req: NextRequest,
   allowedRoles: string[] = ["ADMIN"]
-): Promise<{ authorized: true; role: string; userId: string; user: Record<string, unknown> } | { authorized: false; response: NextResponse }> {
+): Promise<{ authorized: true; role: string; userId: string; user: AuthUser } | { authorized: false; response: NextResponse }> {
   const result = await checkRole(req, allowedRoles);
   if (!result.authorized) {
     return {
@@ -63,7 +69,7 @@ export async function requireRole(
     authorized: true,
     role: result.role!,
     userId: result.userId!,
-    user: result.user || { id: result.userId!, role: result.role! },
+    user: result.user || { id: result.userId!, role: result.role!, isActive: true },
   };
 }
 
@@ -75,7 +81,7 @@ export async function requireRole(
  */
 export async function requireRoleOrInstructor(
   req: NextRequest,
-): Promise<{ authorized: true; role: string; userId: string; user: Record<string, unknown> } | { authorized: false; response: NextResponse }> {
+): Promise<{ authorized: true; role: string; userId: string; user: AuthUser } | { authorized: false; response: NextResponse }> {
   return requireRole(req, ["ADMIN", "FORMATEUR"]);
 }
 

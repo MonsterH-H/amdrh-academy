@@ -49,7 +49,8 @@ interface AppState {
   setGlobalLoading: (loading: boolean) => void;
 }
 
-const viewHistory: AppView[] = ["landing"];
+interface HistoryEntry { view: AppView; params: Record<string, string> }
+const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }];
 
 export const useAppStore = create<AppState>((set, get) => ({
   // Auth
@@ -63,11 +64,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   viewParams: {},
   navigate: (view, params = {}) => {
     const { currentView, viewParams: currentParams } = get();
-    viewHistory.push(currentView);
+    viewHistory.push({ view: currentView, params: currentParams });
     if (viewHistory.length > 50) viewHistory.splice(0, viewHistory.length - 50);
-    if (Object.keys(currentParams).length > 0) {
-      // Store params for history
-    }
     set({ currentView: view, viewParams: params });
     window.scrollTo(0, 0);
   },
@@ -75,7 +73,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (viewHistory.length > 1) {
       viewHistory.pop();
       const prev = viewHistory[viewHistory.length - 1];
-      set({ currentView: prev, viewParams: {} });
+      set({ currentView: prev.view, viewParams: prev.params });
     }
   },
 

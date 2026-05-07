@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import crypto from "crypto";
+import { authLimiter } from "@/lib/api-rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit check
+    const rateResult = authLimiter(req);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques instants." },
+        { status: 429, headers: rateResult.headers }
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email || typeof email !== "string") {
