@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import type { TargetMode } from "../types";
 // ─── Notification Create Form ───────────────────────────────────────────────
 
 export function NotificationCreateForm({ onCreated }: { onCreated: () => void }) {
+  const user = useAppStore((s) => s.user);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [type, setType] = useState<string>("MESSAGE");
@@ -64,13 +66,14 @@ export function NotificationCreateForm({ onCreated }: { onCreated: () => void })
     if (!title.trim() || !message.trim()) { toast({ title: "Champs requis", description: "Le titre et le message sont obligatoires", variant: "destructive" }); return; }
     if (targetMode === "roles" && selectedRoles.length === 0) { toast({ title: "Rôle requis", description: "Sélectionnez au moins un rôle", variant: "destructive" }); return; }
     if (targetMode === "user" && !selectedUser) { toast({ title: "Utilisateur requis", description: "Sélectionnez un utilisateur", variant: "destructive" }); return; }
+    if (!user) return;
     setSending(true);
     try {
       const body: Record<string, unknown> = { title, message, type };
       if (targetMode === "all") body.targetAll = true;
       if (targetMode === "roles") body.targetRoles = selectedRoles;
       if (targetMode === "user") body.userId = (selectedUser as Record<string, string>)?.id;
-      const res = await fetch("/api/admin/notifications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await fetch(`/api/admin/notifications?userId=${user.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) { toast({ title: "Erreur", description: data.error || "Impossible d'envoyer la notification", variant: "destructive" }); return; }
       toast({ title: "Notification envoyée", description: data.message || `${data.count} notification(s) créée(s)` });

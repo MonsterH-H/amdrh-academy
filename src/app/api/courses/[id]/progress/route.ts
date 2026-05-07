@@ -107,7 +107,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
     const { id } = await params;

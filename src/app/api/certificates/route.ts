@@ -4,7 +4,7 @@ import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
     const certificates = await db.certificate.findMany({

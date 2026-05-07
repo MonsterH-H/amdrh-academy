@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,7 @@ export function BadgesSkeleton() {
 // ─── Badges Tab ─────────────────────────────────────────────────────
 
 export function BadgesTab() {
+  const user = useAppStore((s) => s.user);
   const [badges, setBadges] = useState<BadgeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -55,21 +57,23 @@ export function BadgesTab() {
   const [badgeUsersLoading, setBadgeUsersLoading] = useState(false);
 
   const fetchBadges = useCallback(async () => {
+    if (!user) return;
     try {
-      const res = await fetch("/api/admin/badges");
+      const res = await fetch(`/api/admin/badges?userId=${user.id}`);
       const data = await res.json();
       setBadges(data.badges || []);
     } catch {
       toast({ title: "Erreur", description: "Impossible de charger les badges.", variant: "destructive" });
     } finally { setLoading(false); }
-  }, []);
+  }, [user]);
 
   useEffect(() => { fetchBadges(); }, [fetchBadges]);
 
   const handleViewUsers = async (badge: BadgeItem) => {
+    if (!user) return;
     setSelectedBadge(badge); setBadgeUsersOpen(true); setBadgeUsersLoading(true);
     try {
-      const res = await fetch(`/api/admin/badges/${badge.id}`);
+      const res = await fetch(`/api/admin/badges/${badge.id}?userId=${user.id}`);
       const data = await res.json();
       setBadgeUsers(data.badge?.userBadges || []);
     } catch {
@@ -81,9 +85,9 @@ export function BadgesTab() {
   const handleDelete = (badge: BadgeItem) => { setSelectedBadge(badge); setDeleteOpen(true); };
 
   const confirmDelete = async () => {
-    if (!selectedBadge) return;
+    if (!selectedBadge || !user) return;
     try {
-      const res = await fetch(`/api/admin/badges/${selectedBadge.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/badges/${selectedBadge.id}?userId=${user.id}`, { method: "DELETE" });
       if (res.ok) { toast({ title: "Badge supprimé", description: `"${selectedBadge.name}" a été supprimé.` }); fetchBadges(); }
       else { toast({ title: "Erreur", variant: "destructive" }); }
     } catch { toast({ title: "Erreur serveur", variant: "destructive" }); }

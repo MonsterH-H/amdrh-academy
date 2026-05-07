@@ -19,8 +19,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/store/app";
 
 export function DataManagementCard() {
+  const user = useAppStore((s) => s.user);
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
@@ -29,7 +31,7 @@ export function DataManagementCard() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "export-data" }),
@@ -68,7 +70,7 @@ export function DataManagementCard() {
   const handleClearCache = async () => {
     setClearing(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "clear-cache" }),
@@ -92,7 +94,7 @@ export function DataManagementCard() {
   const handleBackup = async () => {
     setBackingUp(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "backup" }),

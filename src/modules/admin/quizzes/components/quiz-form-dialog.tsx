@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -118,6 +119,7 @@ export function CreateQuizDialog({
   courses: CourseOption[];
   onCreated: () => void;
 }) {
+  const { user } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<QuizFormState>(defaultFormState);
@@ -127,7 +129,7 @@ export function CreateQuizDialog({
     if (!form.title || !form.courseId) { setError("Titre et cours sont requis"); return; }
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/quizzes", {
+      const res = await fetch(`/api/admin/quizzes?userId=${user?.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -182,6 +184,7 @@ export function EditSettingsDialog({
   onOpenChange: (v: boolean) => void;
   onUpdated: () => void;
 }) {
+  const { user } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<QuizFormState>({
     ...defaultFormState,
@@ -196,7 +199,7 @@ export function EditSettingsDialog({
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/quizzes/${quiz.id}`, {
+      const res = await fetch(`/api/admin/quizzes/${quiz.id}?userId=${user?.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

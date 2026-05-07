@@ -33,7 +33,7 @@ import type { NavItem, BottomNavItem } from "../types";
 
 export const adminNavItems: NavItem[] = [
   // Principal
-  { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+  { view: "admin-dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
   { view: "profile", label: "Mon Profil", icon: User, section: "Principal" },
 
   // Gestion Utilisateurs
@@ -178,7 +178,7 @@ export const arbitreBottomNav: BottomNavItem[] = [
 ];
 
 export const adminBottomNav: BottomNavItem[] = [
-  { view: "dashboard", label: "Accueil", icon: LayoutDashboard },
+  { view: "admin-dashboard", label: "Accueil", icon: LayoutDashboard },
   { view: "admin-courses", label: "Cours", icon: BookOpen },
   { view: "admin-users", label: "Utilis.", icon: UserPlus },
   { view: "messages", label: "Messages", icon: MessageSquare },

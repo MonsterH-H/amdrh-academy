@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ function QuestionRow({
   onReorder: () => void;
   onDelete: () => void;
 }) {
+  const { user } = useAppStore();
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [reorderLoading, setReorderLoading] = useState(false);
 
@@ -41,7 +43,7 @@ function QuestionRow({
   const handleMove = async (newOrder: number) => {
     setReorderLoading(true);
     try {
-      await fetch(`/api/admin/quizzes/${quizId}/questions`, {
+      await fetch(`/api/admin/quizzes/${quizId}/questions?userId=${user?.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionId: question.id, order: newOrder }),
@@ -55,7 +57,7 @@ function QuestionRow({
     setDeleteLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/quizzes/${quizId}/questions?questionId=${question.id}`,
+        `/api/admin/quizzes/${quizId}/questions?questionId=${question.id}&userId=${user?.id}`,
         { method: "DELETE" }
       );
       if (res.ok) { toast({ title: "Question supprimée" }); onDelete(); }

@@ -21,6 +21,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, Mail, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/store/app";
 import type { EmailSettings as EmailSettingsType } from "../types";
 
 interface Props {
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export function EmailSettingsCard({ initial }: Props) {
+  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [form, setForm] = useState<EmailSettingsType>({ ...initial });
@@ -40,7 +42,7 @@ export function EmailSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "email", data: form }),
@@ -64,7 +66,7 @@ export function EmailSettingsCard({ initial }: Props) {
   const handleTestEmail = async () => {
     setTesting(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "test-email" }),

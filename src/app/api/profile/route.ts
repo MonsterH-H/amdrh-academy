@@ -5,7 +5,7 @@ import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function PUT(req: NextRequest) {
   try {
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
     const body = await req.json();

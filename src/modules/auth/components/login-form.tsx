@@ -42,7 +42,11 @@ export function LoginPage() {
       }
 
       setUser(data.user);
-      navigate("dashboard");
+      // Navigate to role-specific dashboard
+      const role = data.user.role;
+      if (role === "ADMIN") navigate("admin-dashboard");
+      else if (role === "FORMATEUR") navigate("formateur-dashboard");
+      else navigate("dashboard");
     } catch {
       setError("Erreur de connexion au serveur");
     } finally {

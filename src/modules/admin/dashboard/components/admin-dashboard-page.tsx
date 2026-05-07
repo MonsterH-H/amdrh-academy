@@ -65,7 +65,8 @@ export function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/dashboard");
+      if (!user) return;
+      const res = await fetch(`/api/admin/dashboard?userId=${user.id}`);
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const json = await res.json();
       setData(json);

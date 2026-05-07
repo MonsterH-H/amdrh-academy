@@ -85,3 +85,30 @@ Stage Summary:
 - Database fully seeded with realistic Moroccan handball data
 - All core APIs verified working with 200 status codes
 - Production zip ready at /home/z/my-project/amdrh-academy.zip
+
+---
+Task ID: 4
+Agent: Main Agent + 6 Subagents
+Task: Deep runtime audit — find and fix all remaining issues making the project non-functional
+
+Work Log:
+- **CRITICAL BUG: 20 missing `await`** — `getUserFromRequest()` is async but 20 call sites across 16 files forgot `await`, causing ALL authenticated API endpoints to receive Promise objects instead of user data
+- **CRITICAL BUG: 36+ missing `userId`** — All admin module components were calling API endpoints without passing `userId` in query params, causing ALL admin pages to return 403
+- **CRITICAL BUG: Admin dashboard navigation** — ADMIN sidebar pointed to `dashboard` instead of `admin-dashboard`
+- **CRITICAL BUG: No session persistence** — Zustand store purely in-memory; page refresh = logout. Added `persist` middleware
+- **Missing `/api/upload` route** — Created complete upload API with file type detection and Resource creation
+- **Login navigation** — Fixed to redirect ADMIN → admin-dashboard, FORMATEUR → formateur-dashboard
+- **NEXTAUTH_SECRET** — Added to .env
+- **Missing view titles** — Added 4 entries in getViewTitle()
+
+Files modified: 50+ edits across 30+ files
+- 16 API route files: added missing await
+- 16 admin component files: added userId to all fetch calls
+- 1 new file: src/app/api/upload/route.ts
+- 3 config files, 3 navigation files
+
+Stage Summary:
+- Root cause: async without await (20 routes) + userId never sent from frontend (36+ calls)
+- These two bugs made essentially NO authenticated API call work
+- All fixes applied, lint 0 errors
+- Production zip: amdrh-academy.zip (7.2 MB, 857 files)

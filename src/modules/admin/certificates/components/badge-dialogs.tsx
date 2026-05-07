@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,7 @@ import type { BadgeItem } from "../types";
 export function CreateBadgeDialog({ open, onOpenChange, onCreated }: {
   open: boolean; onOpenChange: (v: boolean) => void; onCreated: () => void;
 }) {
+  const user = useAppStore((s) => s.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", description: "", level: "BRONZE", icon: "🏆", criteria: "" });
@@ -31,9 +33,10 @@ export function CreateBadgeDialog({ open, onOpenChange, onCreated }: {
   const handleSubmit = async () => {
     setError("");
     if (!form.name || !form.description || !form.level) { setError("Nom, description et niveau sont requis"); return; }
+    if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/badges", {
+      const res = await fetch(`/api/admin/badges?userId=${user.id}`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error || "Erreur lors de la création"); return; }
@@ -99,6 +102,7 @@ export function CreateBadgeDialog({ open, onOpenChange, onCreated }: {
 export function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: {
   open: boolean; onOpenChange: (v: boolean) => void; badge: BadgeItem; onUpdated: () => void;
 }) {
+  const user = useAppStore((s) => s.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -113,9 +117,10 @@ export function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: {
   const handleSubmit = async () => {
     setError("");
     if (!form.name || !form.description) { setError("Nom et description sont requis"); return; }
+    if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/badges/${badge.id}`, {
+      const res = await fetch(`/api/admin/badges/${badge.id}?userId=${user.id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error || "Erreur lors de la modification"); return; }
@@ -181,6 +186,7 @@ export function EditBadgeDialog({ open, onOpenChange, badge, onUpdated }: {
 export function AwardBadgeDialog({ open, onOpenChange, badges }: {
   open: boolean; onOpenChange: (v: boolean) => void; badges: BadgeItem[];
 }) {
+  const user = useAppStore((s) => s.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [users, setUsers] = useState<Array<{ id: string; nom: string; prenom: string; email: string }>>([]);
@@ -196,9 +202,10 @@ export function AwardBadgeDialog({ open, onOpenChange, badges }: {
   const handleSubmit = async () => {
     setError("");
     if (!form.badgeId || !form.userId) { setError("Badge et utilisateur sont requis"); return; }
+    if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/badges/award", {
+      const res = await fetch(`/api/admin/badges/award?userId=${user.id}`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error || "Erreur lors de l'attribution"); return; }

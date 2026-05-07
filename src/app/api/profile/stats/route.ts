@@ -5,7 +5,7 @@ import { getUserFromRequest } from "@/lib/auth-helpers";
 // GET /api/profile/stats?userId=xxx — Profile statistics + activity timeline
 export async function GET(req: NextRequest) {
   try {
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);

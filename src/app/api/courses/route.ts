@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     }
 
     // For non-admin public catalog, still require auth if userId/role params are provided
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     const category = searchParams.get("category");
     const difficulty = searchParams.get("difficulty");
     const search = searchParams.get("search");

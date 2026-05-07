@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -21,6 +22,7 @@ export function AddQuestionDialog({
   onOpenChange: (v: boolean) => void;
   onCreated: () => void;
 }) {
+  const { user } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<QuestionFormState>(defaultQuestionForm());
@@ -41,7 +43,7 @@ export function AddQuestionDialog({
     if (form.correctAnswer.length === 0) { setError("Sélectionnez au moins une réponse correcte"); return; }
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/quizzes/${quizId}/questions`, {
+      const res = await fetch(`/api/admin/quizzes/${quizId}/questions?userId=${user?.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -90,6 +92,7 @@ export function EditQuestionDialog({
   questions: QuestionItem[];
   onUpdated: () => void;
 }) {
+  const { user } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<QuestionFormState>(defaultQuestionForm());
@@ -117,7 +120,7 @@ export function EditQuestionDialog({
     if (form.correctAnswer.length === 0) { setError("Sélectionnez au moins une réponse correcte"); return; }
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/quizzes/${quizId}/questions`, {
+      const res = await fetch(`/api/admin/quizzes/${quizId}/questions?userId=${user?.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

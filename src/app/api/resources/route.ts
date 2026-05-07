@@ -9,7 +9,7 @@ const RESOURCE_CATEGORIES = ["SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", 
 // ─────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);

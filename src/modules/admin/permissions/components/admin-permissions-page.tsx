@@ -67,7 +67,7 @@ export function AdminPermissionsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/permissions");
+      const res = await fetch(`/api/admin/permissions?userId=${user?.id}`);
       if (!res.ok) throw new Error("Erreur de chargement");
       const data = await res.json();
       const builtModules = buildModules();
@@ -137,7 +137,7 @@ export function AdminPermissionsPage() {
     if (!roleData) return;
     setSaving(role);
     try {
-      const res = await fetch("/api/admin/permissions", {
+      const res = await fetch(`/api/admin/permissions?userId=${user?.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role, permissions: roleData.permissions }),

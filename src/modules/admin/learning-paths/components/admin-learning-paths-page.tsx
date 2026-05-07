@@ -58,10 +58,12 @@ export function AdminLearningPathsPage() {
   const [courseSearch, setCourseSearch] = useState("");
 
   const fetchPaths = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const params = new URLSearchParams({ page: String(page), limit: "50" });
       if (roleFilter !== "ALL") params.set("targetRole", roleFilter);
+      params.set("userId", user.id);
       const res = await fetch(`/api/admin/learning-paths?${params}`);
       const data = await res.json();
       setPaths(data.paths || []);
@@ -70,7 +72,7 @@ export function AdminLearningPathsPage() {
     } catch {
       toast({ title: "Erreur", description: "Impossible de charger les parcours", variant: "destructive" });
     } finally { setLoading(false); }
-  }, [page, roleFilter]);
+  }, [page, roleFilter, user]);
 
   useEffect(() => { if (!user) return; fetchPaths(); }, [user, fetchPaths]);
 
@@ -110,12 +112,13 @@ export function AdminLearningPathsPage() {
     setFormError("");
     if (!form.title.trim() || !form.description.trim()) { setFormError("Titre et description sont requis"); return; }
     if (formCourses.length === 0) { setFormError("Ajoutez au moins un cours au parcours"); return; }
+    if (!user) return;
     setFormLoading(true);
     try {
       const payload = { ...form, courses: formCourses.map((fc, i) => ({ courseId: fc.courseId, order: fc.order ?? i, isRequired: fc.isRequired, minScore: fc.minScore })) };
       let res: Response;
-      if (editingId) { res = await fetch(`/api/admin/learning-paths/${editingId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); }
-      else { res = await fetch("/api/admin/learning-paths", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); }
+      if (editingId) { res = await fetch(`/api/admin/learning-paths/${editingId}?userId=${user.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); }
+      else { res = await fetch(`/api/admin/learning-paths?userId=${user.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); }
       if (!res.ok) { const data = await res.json(); setFormError(data.error || "Erreur lors de l'enregistrement"); return; }
       toast({ title: editingId ? "Parcours mis à jour" : "Parcours créé", description: editingId ? `"${form.title}" a été mis à jour.` : `"${form.title}" a été créé avec succès.` });
       setFormOpen(false);
@@ -124,8 +127,9 @@ export function AdminLearningPathsPage() {
   };
 
   const handleDelete = async (pathId: string) => {
+    if (!user) return;
     try {
-      const res = await fetch(`/api/admin/learning-paths/${pathId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/learning-paths/${pathId}?userId=${user.id}`, { method: "DELETE" });
       if (!res.ok) { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de supprimer", variant: "destructive" }); return; }
       toast({ title: "Parcours supprimé", description: "Le parcours a été supprimé avec succès." });
       fetchPaths();
@@ -133,10 +137,11 @@ export function AdminLearningPathsPage() {
   };
 
   const openDetail = async (path: LearningPathItem) => {
+    if (!user) return;
     setDetailPath(path);
     setDetailLoading(true);
     try {
-      const res = await fetch(`/api/admin/learning-paths/${path.id}`);
+      const res = await fetch(`/api/admin/learning-paths/${path.id}?userId=${user.id}`);
       const data = await res.json();
       setDetailEnrollments(data.enrollments || []);
     } catch { setDetailEnrollments([]); } finally { setDetailLoading(false); }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAppStore } from "@/store/app";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,12 +30,13 @@ export function QuizCard({
   onView: () => void;
   onRefresh: () => void;
 }) {
+  const { user } = useAppStore();
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleDelete = async () => {
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/admin/quizzes/${quiz.id}`, {
+      const res = await fetch(`/api/admin/quizzes/${quiz.id}?userId=${user?.id}`, {
         method: "DELETE",
       });
       if (res.ok) {

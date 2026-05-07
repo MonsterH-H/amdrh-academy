@@ -36,6 +36,10 @@ export function getViewTitle(view: AppView): string {
     "admin-analytics": "Analytique",
     "admin-resources": "Médiathèque",
     "admin-traceability": "Traçabilité",
+    "admin-dashboard": "Tableau de bord Admin",
+    "admin-permissions": "Gestion des Permissions",
+    "admin-settings": "Paramètres",
+    "formateur-dashboard": "Tableau de bord Formateur",
     profile: "Mon profil",
   };
   return titles[view] || view;

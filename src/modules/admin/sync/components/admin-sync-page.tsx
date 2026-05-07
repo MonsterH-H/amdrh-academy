@@ -29,7 +29,7 @@ export function AdminSyncPage() {
   const fetchSyncs = async () => {
     try {
       setFetchError(null);
-      const res = await fetch("/api/sync");
+      const res = await fetch(`/api/sync?userId=${user?.id}`);
       if (!res.ok) throw new Error(`Erreur ${res.status}: ${res.statusText}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);

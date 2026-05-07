@@ -6,7 +6,7 @@ import { getUserFromRequest } from "@/lib/auth-helpers";
 // POST /api/profile/password — Change user password
 export async function POST(req: NextRequest) {
   try {
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
 
     const { userId, currentPassword, newPassword } = await req.json();

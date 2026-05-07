@@ -39,6 +39,7 @@ export function AdminQuizzesPage() {
       const params = new URLSearchParams({ page: String(page), limit: "12" });
       if (user?.role) params.set("role", user.role);
       if (user?.id) params.set("instructorId", user.id);
+      if (user?.id) params.set("userId", user.id);
       if (courseFilter !== "ALL") params.set("courseId", courseFilter);
       if (search) params.set("search", search);
       const res = await fetch(`/api/admin/quizzes?${params}`);
@@ -156,6 +157,7 @@ function AdminQuizDetailPage({
   quizId: string;
   onBack: () => void;
 }) {
+  const { user } = useAppStore();
   const [quiz, setQuiz] = useState<Record<string, unknown> | null>(null);
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,21 +165,21 @@ function AdminQuizDetailPage({
   const [addQuestionOpen, setAddQuestionOpen] = useState(false);
   const [editQuestionId, setEditQuestionId] = useState<string | null>(null);
 
-  const fetchQuiz = useCallback(async () => {
+  const fetchQuiz = async () => {
     try {
-      const res = await fetch(`/api/admin/quizzes/${quizId}`);
+      const res = await fetch(`/api/admin/quizzes/${quizId}?userId=${user?.id}`);
       const data = await res.json();
       setQuiz(data.quiz);
       setQuestions((data.quiz.questions as QuestionItem[]) || []);
       setLoading(false);
     } catch { setLoading(false); }
-  }, [quizId]);
+  };
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch(`/api/admin/quizzes/${quizId}`);
+        const res = await fetch(`/api/admin/quizzes/${quizId}?userId=${user?.id}`);
         const data = await res.json();
         if (!res.ok || !data.quiz) {
           toast({ title: "Erreur", description: "Impossible de charger le quiz.", variant: "destructive" });

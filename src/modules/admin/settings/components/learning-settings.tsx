@@ -23,6 +23,7 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/store/app";
 import type { LearningSettings } from "../types";
 
 interface Props {
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export function LearningSettingsCard({ initial }: Props) {
+  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<LearningSettings>({ ...initial });
   const { toast } = useToast();
@@ -41,7 +43,7 @@ export function LearningSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "learning", data: form }),

@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, Palette } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/store/app";
 import type { AppearanceSettings } from "../types";
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function AppearanceSettingsCard({ initial }: Props) {
+  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<AppearanceSettings>({ ...initial });
   const { toast } = useToast();
@@ -33,7 +35,7 @@ export function AppearanceSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "appearance", data: form }),

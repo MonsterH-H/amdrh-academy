@@ -19,6 +19,7 @@ import { SecuritySettingsCard } from "./security-settings";
 import { LearningSettingsCard } from "./learning-settings";
 import { NotificationSettingsCard } from "./notification-settings";
 import { DataManagementCard } from "./data-management";
+import { useAppStore } from "@/store/app";
 import type { AllSettings } from "../types";
 
 const DEFAULT_SETTINGS: AllSettings = {
@@ -86,12 +87,13 @@ function SettingsSkeleton() {
 }
 
 export function AdminSettingsPage() {
+  const user = useAppStore((s) => s.user);
   const [settings, setSettings] = useState<AllSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchSettings = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/settings");
+      const res = await fetch(`/api/admin/settings?userId=${user?.id}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setSettings(data.settings || DEFAULT_SETTINGS);

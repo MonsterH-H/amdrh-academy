@@ -115,7 +115,7 @@ export async function PATCH(
     const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
     if (!auth.authorized) {
       // Check if user is the original uploader (any role)
-      const user = getUserFromRequest(req);
+      const user = await getUserFromRequest(req);
       if (!user) {
         return NextResponse.json(
           { error: "Accès non autorisé" },

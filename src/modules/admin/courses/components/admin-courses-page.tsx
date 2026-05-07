@@ -80,7 +80,7 @@ export function AdminCoursesPage() {
 
   const handleStatusChange = async (courseId: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/courses/${courseId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newStatus }) });
+      const res = await fetch(`/api/courses/${courseId}?userId=${user?.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newStatus }) });
       if (res.ok) { toast({ title: "Statut mis à jour", description: `Le cours est maintenant "${COURSE_STATUS_LABELS[newStatus]}".` }); fetchCourses(); }
       else { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de modifier le statut", variant: "destructive" }); }
     } catch { toast({ title: "Erreur", description: "Erreur serveur", variant: "destructive" }); }
@@ -90,7 +90,7 @@ export function AdminCoursesPage() {
     if (!deleteCourse) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/courses/${deleteCourse.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/courses/${deleteCourse.id}?userId=${user?.id}`, { method: "DELETE" });
       if (res.ok) { toast({ title: "Cours supprimé", description: `"${deleteCourse.title}" a été supprimé définitivement.` }); setDeleteCourse(null); fetchCourses(); }
       else { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de supprimer le cours", variant: "destructive" }); }
     } catch { toast({ title: "Erreur serveur", variant: "destructive" }); }
@@ -100,7 +100,7 @@ export function AdminCoursesPage() {
   const openDetail = useCallback(async (courseId: string) => {
     setDetailOpen(true); setDetailLoading(true); setDetailCourse(null);
     try {
-      const res = await fetch(`/api/courses/${courseId}`);
+      const res = await fetch(`/api/courses/${courseId}?userId=${user?.id}`);
       const data = await res.json();
       setDetailCourse(data.course);
     } catch { toast({ title: "Erreur", description: "Impossible de charger les détails", variant: "destructive" }); }
@@ -110,7 +110,7 @@ export function AdminCoursesPage() {
   const refreshDetail = useCallback(async () => {
     if (!detailCourse?.id) return;
     try {
-      const res = await fetch(`/api/courses/${detailCourse.id}`);
+      const res = await fetch(`/api/courses/${detailCourse.id}?userId=${user?.id}`);
       const data = await res.json();
       setDetailCourse(data.course);
     } catch { /* silent */ }
@@ -130,7 +130,7 @@ export function AdminCoursesPage() {
     setEditLoading(true);
     try {
       const payload: Record<string, unknown> = { title: editForm.title, description: editForm.description, category: editForm.category, difficulty: editForm.difficulty, duration: Number(editForm.duration) || 0, isCertifying: Boolean(editForm.isCertifying), passingScore: Number(editForm.passingScore) || 70, maxAttempts: Number(editForm.maxAttempts) || 3 };
-      const res = await fetch(`/api/courses/${editCourse.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const res = await fetch(`/api/courses/${editCourse.id}?userId=${user?.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       if (res.ok) { toast({ title: "Cours mis à jour", description: `"${editForm.title}" a été enregistré.` }); setEditOpen(false); fetchCourses(); }
       else { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de sauvegarder", variant: "destructive" }); }
     } catch { toast({ title: "Erreur serveur", variant: "destructive" }); }

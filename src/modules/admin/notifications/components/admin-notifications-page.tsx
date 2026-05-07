@@ -24,11 +24,13 @@ export function AdminNotificationsPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchHistory = useCallback(async () => {
+    if (!user) return;
     setHistoryLoading(true);
     try {
       const params = new URLSearchParams({ page: String(page), limit: "15" });
       if (typeFilter !== "ALL") params.set("type", typeFilter);
       if (searchQuery) params.set("search", searchQuery);
+      params.set("userId", user.id);
       const res = await fetch(`/api/admin/notifications?${params}`);
       const data = await res.json();
       setStats(data.stats || null);
@@ -37,7 +39,7 @@ export function AdminNotificationsPage() {
     } catch {
       toast({ title: "Erreur", description: "Impossible de charger les notifications", variant: "destructive" });
     } finally { setHistoryLoading(false); }
-  }, [typeFilter, searchQuery, page]);
+  }, [typeFilter, searchQuery, page, user]);
 
   useEffect(() => { fetchHistory(); }, [fetchHistory]);
 

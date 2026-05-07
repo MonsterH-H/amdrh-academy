@@ -169,7 +169,7 @@ export function AdminResourcesPage() {
     setEditLoading(true);
     try {
       const payload: Record<string, unknown> = { title: editTitle, description: editDescription || null, category: editCategory, courseId: editCourseId === "NONE" ? null : editCourseId, isDownloadable: editDownloadable };
-      const res = await fetch(`/api/resources/${editResource.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const res = await fetch(`/api/resources/${editResource.id}?userId=${user?.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       if (res.ok) { toast({ title: "Ressource mise à jour", description: `"${editTitle}" a été enregistré.` }); setEditOpen(false); fetchResources(); }
       else { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de sauvegarder", variant: "destructive" }); }
     } catch { toast({ title: "Erreur serveur", variant: "destructive" }); } finally { setEditLoading(false); }
@@ -179,7 +179,7 @@ export function AdminResourcesPage() {
   const handleDelete = async () => {
     if (!deleteResource) return; setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/resources/${deleteResource.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/resources/${deleteResource.id}?userId=${user?.id}`, { method: "DELETE" });
       if (res.ok) { toast({ title: "Ressource supprimée", description: `"${deleteResource.title}" a été supprimé définitivement.` }); setDeleteResource(null); fetchResources(); }
       else { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de supprimer la ressource", variant: "destructive" }); }
     } catch { toast({ title: "Erreur serveur", variant: "destructive" }); } finally { setDeleteLoading(false); }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useAppStore } from "@/store/app";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -129,6 +130,7 @@ const PAGE_SIZE = 10;
 export function QuizAttemptsView({
   quizId, questionCount, totalPoints, stats, duration, passingScore, maxAttempts, shuffleQuestions,
 }: QuizAttemptsViewProps) {
+  const { user } = useAppStore();
   const [attempts, setAttempts] = useState<AttemptRow[]>([]);
   const [loadingAttempts, setLoadingAttempts] = useState(true);
   const [page, setPage] = useState(1);
@@ -143,6 +145,7 @@ export function QuizAttemptsView({
         page: String(p),
         limit: String(PAGE_SIZE),
       });
+      if (user?.id) params.set("userId", user.id);
       const res = await fetch(`/api/admin/quiz-attempts?${params}`);
       const data = await res.json();
       setAttempts(data.attempts || []);

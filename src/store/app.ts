@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { AppView } from "@/types/navigation";
 import { ROLE_PERMISSIONS } from "@/lib/constants";
 
@@ -71,49 +72,62 @@ function canAccessView(view: string, role: string): boolean {
   return allowed.includes(view);
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
-  // Auth
-  user: null,
-  isAuthenticated: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  logout: () => set({ user: null, isAuthenticated: false, currentView: "landing" }),
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      // Auth
+      user: null,
+      isAuthenticated: false,
+      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      logout: () => set({ user: null, isAuthenticated: false, currentView: "landing" }),
 
-  // Navigation with role guard
-  currentView: "landing",
-  viewParams: {},
-  navigate: (view, params = {}) => {
-    const { currentView, viewParams: currentParams, user } = get();
+      // Navigation with role guard
+      currentView: "landing",
+      viewParams: {},
+      navigate: (view, params = {}) => {
+        const { currentView, viewParams: currentParams, user } = get();
 
-    // Role-based access control
-    if (user?.role && !canAccessView(view, user.role)) {
-      console.warn(`[Navigation] Access denied: ${user.role} cannot access "${view}"`);
-      return; // Silently block navigation
+        // Role-based access control
+        if (user?.role && !canAccessView(view, user.role)) {
+          console.warn(`[Navigation] Access denied: ${user.role} cannot access "${view}"`);
+          return; // Silently block navigation
+        }
+
+        viewHistory.push({ view: currentView, params: currentParams });
+        if (viewHistory.length > 50) viewHistory.splice(0, viewHistory.length - 50);
+        set({ currentView: view, viewParams: params });
+        window.scrollTo(0, 0);
+      },
+      goBack: () => {
+        if (viewHistory.length > 1) {
+          viewHistory.pop();
+          const prev = viewHistory[viewHistory.length - 1];
+          set({ currentView: prev.view, viewParams: prev.params });
+        }
+      },
+
+      // Sidebar
+      sidebarOpen: false,
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
+      sidebarCollapsed: false,
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+
+      // Notifications
+      unreadCount: 0,
+      setUnreadCount: (count) => set({ unreadCount: count }),
+
+      // Loading
+      globalLoading: false,
+      setGlobalLoading: (loading) => set({ globalLoading: loading }),
+    }),
+    {
+      name: 'amdrh-session',
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        currentView: state.currentView,
+        sidebarCollapsed: state.sidebarCollapsed,
+      }),
     }
-
-    viewHistory.push({ view: currentView, params: currentParams });
-    if (viewHistory.length > 50) viewHistory.splice(0, viewHistory.length - 50);
-    set({ currentView: view, viewParams: params });
-    window.scrollTo(0, 0);
-  },
-  goBack: () => {
-    if (viewHistory.length > 1) {
-      viewHistory.pop();
-      const prev = viewHistory[viewHistory.length - 1];
-      set({ currentView: prev.view, viewParams: prev.params });
-    }
-  },
-
-  // Sidebar
-  sidebarOpen: false,
-  setSidebarOpen: (open) => set({ sidebarOpen: open }),
-  sidebarCollapsed: false,
-  setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
-
-  // Notifications
-  unreadCount: 0,
-  setUnreadCount: (count) => set({ unreadCount: count }),
-
-  // Loading
-  globalLoading: false,
-  setGlobalLoading: (loading) => set({ globalLoading: loading }),
-}));
+  )
+);
