@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
   try {
+    // Auth required: only ADMIN can list users
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const { searchParams } = new URL(req.url);
     const role = searchParams.get("role");
     const status = searchParams.get("status");
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
 
     const where: Record<string, unknown> = {};
     if (role && role !== "ALL") where.role = role;
@@ -96,10 +99,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password if provided, otherwise generate a temporary one
-    const passwordHash = password
-      ? await bcrypt.hash(password, 12)
-      : await bcrypt.hash(crypto.randomUUID().slice(0, 16), 12);
+    // Hash password if provided, otherwise generate a temporary one (no crypto.randomUUID)
+    const tempPassword = password || `Temp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
 
     const user = await db.user.create({
       data: {

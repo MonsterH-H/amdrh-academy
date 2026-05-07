@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth-helpers";
 import { userUpdateSchema } from "@/lib/validations";
 
 export async function GET(
@@ -7,6 +8,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
+
     const { id } = await params;
     const user = await db.user.findUnique({
       where: { id },
@@ -54,7 +58,7 @@ export async function GET(
       return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
     }
 
-    // Fetch learning path enrollments separately (no direct User relation in schema)
+    // Fetch learning path enrollments separately
     const learningPathEnrollments = await db.learningPathEnrollment.findMany({
       where: { userId: id },
       include: {
@@ -76,6 +80,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const { id } = await params;
     const body = await req.json();
     const validated = userUpdateSchema.safeParse(body);
@@ -102,12 +109,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const { id } = await params;
+    // Soft delete: deactivate the user instead of hard delete
     await db.user.update({
       where: { id },
       data: { isActive: false },
     });
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: "Utilisateur désactivé" });
   } catch (error) {
     console.error("User delete error:", error);
     return NextResponse.json({ error: "Erreur" }, { status: 500 });

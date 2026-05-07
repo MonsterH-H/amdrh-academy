@@ -96,9 +96,14 @@ export async function POST(req: NextRequest) {
     }
 
     // ──────────────────────────────────────────────
-    // MARK ALL notifications as read
+    // MARK ALL notifications as read (auth required)
     // ──────────────────────────────────────────────
     if (markAll && userId) {
+      const auth = getUserFromRequest(req);
+      if (!auth || (auth.userId !== userId && auth.role !== "ADMIN")) {
+        return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+      }
+
       const unreadBefore = await db.notification.count({
         where: { userId, isRead: false },
       });
@@ -123,9 +128,14 @@ export async function POST(req: NextRequest) {
     }
 
     // ──────────────────────────────────────────────
-    // MARK SINGLE notification as read
+    // MARK SINGLE notification as read (auth required)
     // ──────────────────────────────────────────────
     if (notificationId) {
+      const auth = getUserFromRequest(req);
+      if (!auth) {
+        return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+      }
+
       // Get notification to know the userId for push
       const notification = await db.notification.findUnique({
         where: { id: notificationId },

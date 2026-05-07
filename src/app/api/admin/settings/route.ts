@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { requireRole } from "@/lib/auth-helpers";
 
 const SETTINGS_FILE = join(process.cwd(), "db", "admin-settings.json");
 
@@ -58,8 +59,11 @@ async function ensureSettingsFile(): Promise<void> {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const auth = await requireRole(req, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     await ensureSettingsFile();
     const raw = await readFile(SETTINGS_FILE, "utf-8");
     const settings = JSON.parse(raw);
@@ -75,6 +79,9 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireRole(request, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     await ensureSettingsFile();
     const body = await request.json();
     const { section, data } = body;
@@ -124,11 +131,13 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireRole(request, ["ADMIN"]);
+    if (!auth.authorized) return auth.response;
+
     const body = await request.json();
     const { action } = body;
 
     if (action === "test-email") {
-      // Simulate sending a test email
       return NextResponse.json({
         success: true,
         message: "E-mail de test envoyé avec succès",

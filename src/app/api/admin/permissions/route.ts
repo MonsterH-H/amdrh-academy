@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/auth-helpers";
+import { db } from "@/lib/db";
 import { ROLES, ROLE_LABELS, DEFAULT_ROLE_PERMISSIONS, PERMISSION_MODULES, ALL_PERMISSIONS } from "@/lib/permissions";
 
 /**
@@ -23,11 +24,25 @@ export async function GET(req: NextRequest) {
       })),
     }));
 
-    const roles = ROLES.map((role) => ({
-      role,
-      roleLabel: ROLE_LABELS[role],
-      permissions: [...(DEFAULT_ROLE_PERMISSIONS[role] || [])],
-    }));
+    // Build role permissions from DB (RolePermission table) or fall back to defaults
+    const roles = await Promise.all(
+      ROLES.map(async (role) => {
+        const storedPerms = await db.rolePermission.findMany({
+          where: { role },
+          include: { permission: { select: { name: true } } },
+        });
+
+        const permissions = storedPerms.length > 0
+          ? storedPerms.map((rp) => rp.permission.name)
+          : [...(DEFAULT_ROLE_PERMISSIONS[role] || [])];
+
+        return {
+          role,
+          roleLabel: ROLE_LABELS[role],
+          permissions,
+        };
+      })
+    );
 
     return NextResponse.json({ modules, roles });
   } catch (error) {
@@ -41,7 +56,7 @@ export async function GET(req: NextRequest) {
 
 /**
  * PUT /api/admin/permissions
- * Sauvegarde les permissions pour un rôle donné.
+ * Sauvegarde les permissions pour un rôle donné en base de données.
  * Body: { role: string, permissions: string[] }
  */
 export async function PUT(req: NextRequest) {
@@ -76,15 +91,59 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // In production, this would save to database.
-    // For now, we update the in-memory defaults and return success.
-    // The defaults are used as fallback when no DB storage exists.
+    // Ensure all Permission records exist in DB
+    for (const permId of permissions) {
+      const parts = permId.split(".");
+      const modName = parts[0];
+      const action = parts.slice(1).join(".");
+      const existing = await db.permission.findUnique({ where: { name: permId } });
+      if (!existing) {
+        await db.permission.create({
+          data: {
+            name: permId,
+            module: modName,
+            action: action,
+            description: `${modName} — ${action}`,
+          },
+        });
+      }
+    }
+
+    // Delete existing role permissions and recreate
+    await db.rolePermission.deleteMany({ where: { role } });
+
+    // Create new role permissions
+    await db.rolePermission.createMany({
+      data: permissions.map((permId: string) => {
+        // Find the permission record
+        return { role, permissionId: permId };
+      }),
+      skipDuplicates: true,
+    });
+
+    // Actually we need to link by the permission's DB id, not the name
+    // Let's do this properly
+    const permRecords = await db.permission.findMany({
+      where: { name: { in: permissions } },
+      select: { id: true, name: true },
+    });
+
+    // Delete and recreate with proper foreign keys
+    await db.rolePermission.deleteMany({ where: { role } });
+    if (permRecords.length > 0) {
+      await db.rolePermission.createMany({
+        data: permRecords.map((p) => ({
+          role,
+          permissionId: p.id,
+        })),
+      });
+    }
 
     return NextResponse.json({
       success: true,
       role,
       roleLabel: ROLE_LABELS[role],
-      permissionsCount: permissions.length,
+      permissionsCount: permRecords.length,
     });
   } catch (error) {
     console.error("[Permissions PUT]", error);
