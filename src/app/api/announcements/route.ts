@@ -7,10 +7,10 @@ const VALID_TYPES = ["INFO", "URGENT", "EVENEMENT", "FORMATION", "RESULTAT"];
 export async function GET(req: NextRequest) {
   try {
     // Get user info from query params (lightweight auth check)
-    const userInfo = getUserFromRequest(req);
+    const userInfo = await getUserFromRequest(req);
     if (!userInfo) {
       return NextResponse.json(
-        { error: "Paramètres utilisateur manquants" },
+        { error: "Paramètre userId requis" },
         { status: 400 }
       );
     }
@@ -47,14 +47,13 @@ export async function GET(req: NextRequest) {
     });
 
     // Filter by target roles on the server side
-    // If targetRoles is empty array or not parseable, it's visible to everyone
     const filteredAnnouncements = allAnnouncements.filter((announcement) => {
       try {
         const targetRoles: string[] = JSON.parse(announcement.targetRoles);
-        if (targetRoles.length === 0) return true; // Visible to all roles
+        if (targetRoles.length === 0) return true;
         return targetRoles.includes(userRole);
       } catch {
-        return true; // If can't parse, visible to all
+        return true;
       }
     });
 

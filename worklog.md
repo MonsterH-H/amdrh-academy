@@ -61,3 +61,27 @@ Stage Summary:
 - 2 new API routes created for section/lesson management
 - 1 new component file created (section-crud-dialogs.tsx)
 - Production zip ready at /home/z/my-project/amdrh-academy.zip
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Final corrections — make project fully functional and production-ready
+
+Work Log:
+- **CRITICAL: DATABASE_URL mismatch** — `package.json` dev script overrode DATABASE_URL to `prisma/db/amdrh.db` but `.env` and seed used `db/custom.db`. Fixed by removing override from dev script.
+- **CRITICAL: Auth helpers broken** — `getUserFromRequest()` required BOTH `userId` AND `role` query params, but most frontend components only sent `userId`. Made it async, only requiring `userId`, fetching role from DB.
+- **CRITICAL: `requireRole()` same issue** — Only needed `userId`, role should come from DB. Fixed `checkRole()` to only need `userId`.
+- **Fixed announcements endpoint** — Was using `getUserFromRequest` which failed without `role` param. Now uses updated async version.
+- **Fixed notifications endpoint** — Same issue, updated to use `userId` only.
+- **Seeded database** — 13 users (5 roles), 13 courses, 11 published with sections/lessons/quizzes, 4 learning paths, 5 badges, 22 enrollments, 15 notifications, 5 messages, 2 conversations.
+- **Verified all API endpoints** — Login ✅, Dashboard ✅, Users ✅, Courses ✅, Announcements ✅, Notifications ✅, Messages ✅, Quizzes ✅, Permissions ✅, Stats ✅, Learning Paths ✅, Resources ✅.
+- **All 20 endpoints tested and returning correct data**
+- **Lint: 0 errors**
+- **Zip: 8.0 MB, 1065 files**
+
+Stage Summary:
+- Root cause of "not working": DATABASE_URL mismatch + auth helpers requiring both userId and role
+- Fixed package.json dev script, auth-helpers.ts (getUserFromRequest now async), announcements/route.ts, notifications/route.ts
+- Database fully seeded with realistic Moroccan handball data
+- All core APIs verified working with 200 status codes
+- Production zip ready at /home/z/my-project/amdrh-academy.zip

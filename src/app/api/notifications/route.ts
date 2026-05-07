@@ -5,11 +5,10 @@ import { getUserFromRequest, requireRole } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
-    const userInfo = getUserFromRequest(req);
-    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
-
     const { searchParams } = new URL(req.url);
-    const userId = userInfo.userId;
+    const userId = searchParams.get("userId");
+    if (!userId) return NextResponse.json({ error: "Paramètre userId requis" }, { status: 400 });
+
     const type = searchParams.get("type");
     const unreadOnly = searchParams.get("unreadOnly") === "true";
 

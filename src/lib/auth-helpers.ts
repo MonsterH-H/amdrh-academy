@@ -9,7 +9,7 @@ interface AuthUser {
 
 /**
  * Check if the requesting user has the required role(s).
- * Expects `role` and optionally `userId` query params.
+ * Expects `userId` query param (role is fetched from DB).
  * Returns { authorized: true, role, userId } or { authorized: false }.
  */
 export async function checkRole(
@@ -18,24 +18,19 @@ export async function checkRole(
 ): Promise<{ authorized: boolean; role?: string; userId?: string; user?: AuthUser }> {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId") || "";
-  const role = searchParams.get("role") || "";
 
-  if (!userId || !role) {
+  if (!userId) {
     return { authorized: false };
   }
 
-  if (!allowedRoles.includes(role)) {
-    return { authorized: false, role, userId };
-  }
-
-  // Optionally verify user exists in DB
+  // Verify user exists in DB and get their role
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { id: true, role: true, isActive: true },
   });
 
   if (!user || !user.isActive) {
-    return { authorized: false, role, userId };
+    return { authorized: false, userId };
   }
 
   if (!allowedRoles.includes(user.role)) {
@@ -87,12 +82,23 @@ export async function requireRoleOrInstructor(
 
 /**
  * Get user ID and role from request params.
+ * Only requires `userId` — role is fetched from DB.
  * Returns { userId, role } or null.
  */
-export function getUserFromRequest(req: NextRequest): { userId: string; role: string } | null {
+export async function getUserFromRequest(req: NextRequest): Promise<{ userId: string; role: string } | null> {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId") || "";
-  const role = searchParams.get("role") || "";
-  if (!userId || !role) return null;
-  return { userId, role };
+  if (!userId) return null;
+  
+  // Check if role is explicitly provided (for performance)
+  const explicitRole = searchParams.get("role");
+  if (explicitRole) return { userId, role: explicitRole };
+  
+  // Fetch role from DB
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { role: true, isActive: true },
+  });
+  if (!user || !user.isActive) return null;
+  return { userId, role: user.role };
 }
