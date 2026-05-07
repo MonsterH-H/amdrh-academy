@@ -13,7 +13,7 @@ import { useAppStore } from "@/store/app";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface RecentEnrollment {
+export interface RecentEnrollment {
   id: string;
   userName: string;
   userEmail: string;
@@ -22,7 +22,7 @@ interface RecentEnrollment {
   createdAt: string;
 }
 
-interface RecentQuiz {
+export interface RecentQuiz {
   id: string;
   userName: string;
   quizTitle: string;
@@ -31,24 +31,52 @@ interface RecentQuiz {
   submittedAt: string | null;
 }
 
-interface RecentCert {
+export interface RecentCert {
   id: string;
   userName: string;
   courseTitle: string;
   issuedAt: string;
 }
 
+// ─── Props ───────────────────────────────────────────────────────────────────
+
+interface RecentActivitySectionProps {
+  /** Pre-fetched enrollment data from parent. If provided, skips internal fetch. */
+  enrollments?: RecentEnrollment[];
+  /** Pre-fetched quiz attempts data from parent. */
+  quizAttempts?: RecentQuiz[];
+  /** Pre-fetched certificates data from parent. */
+  certificates?: RecentCert[];
+  /** External loading state from parent. Used when data is provided. */
+  loading?: boolean;
+}
+
 // ─── Recent Activity Section ─────────────────────────────────────────────────
 
-export function RecentActivitySection() {
+export function RecentActivitySection({
+  enrollments: enrollmentsProp,
+  quizAttempts: quizAttemptsProp,
+  certificates: certificatesProp,
+  loading: loadingProp,
+}: RecentActivitySectionProps) {
   const { user } = useAppStore();
   const [activeTab, setActiveTab] = useState("enrollments");
-  const [enrollments, setEnrollments] = useState<RecentEnrollment[]>([]);
-  const [quizAttempts, setQuizAttempts] = useState<RecentQuiz[]>([]);
-  const [certificates, setCertificates] = useState<RecentCert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [internalEnrollments, setInternalEnrollments] = useState<RecentEnrollment[]>([]);
+  const [internalQuizAttempts, setInternalQuizAttempts] = useState<RecentQuiz[]>([]);
+  const [internalCertificates, setInternalCertificates] = useState<RecentCert[]>([]);
+  const [internalLoading, setInternalLoading] = useState(true);
 
+  // Use parent-provided data if available, otherwise fall back to internal state
+  const hasExternalData = enrollmentsProp !== undefined || quizAttemptsProp !== undefined || certificatesProp !== undefined;
+  const enrollments = hasExternalData ? (enrollmentsProp ?? []) : internalEnrollments;
+  const quizAttempts = hasExternalData ? (quizAttemptsProp ?? []) : internalQuizAttempts;
+  const certificates = hasExternalData ? (certificatesProp ?? []) : internalCertificates;
+  const loading = hasExternalData ? !!loadingProp : internalLoading;
+
+  // Internal fetch — only runs when no external data is provided
   useEffect(() => {
+    if (hasExternalData) return;
+
     const fetchData = async () => {
       try {
         const [enrollRes, quizRes, certRes] = await Promise.all([
@@ -58,29 +86,29 @@ export function RecentActivitySection() {
         ]);
         if (enrollRes?.ok) {
           const d = await enrollRes.json();
-          setEnrollments((d.enrollments || []).slice(0, 20).map((e: Record<string, unknown>) => ({
+          setInternalEnrollments((d.enrollments || []).slice(0, 20).map((e: Record<string, unknown>) => ({
             id: e.id as string, userName: e.userName as string, userEmail: e.userEmail as string,
             courseTitle: (e.courseTitle as string) || "Cours", status: (e.status as string) || "en_cours", createdAt: e.createdAt as string,
           })));
         }
         if (quizRes?.ok) {
           const d = await quizRes.json();
-          setQuizAttempts((d.attempts || []).slice(0, 20).map((a: Record<string, unknown>) => ({
+          setInternalQuizAttempts((d.attempts || []).slice(0, 20).map((a: Record<string, unknown>) => ({
             id: a.id as string, userName: a.userName as string, quizTitle: a.quizTitle as string,
             score: a.score as number, status: a.status as string, submittedAt: a.submittedAt as string | null,
           })));
         }
         if (certRes?.ok) {
           const d = await certRes.json();
-          setCertificates(((d.certificates || d) || []).slice(0, 20).map((c: Record<string, unknown>) => ({
+          setInternalCertificates(((d.certificates || d) || []).slice(0, 20).map((c: Record<string, unknown>) => ({
             id: c.id as string, userName: (c.userName as string) || "Utilisateur",
             courseTitle: (c.courseTitle as string) || "Cours", issuedAt: c.issuedAt as string,
           })));
         }
-      } catch { /* silently fail */ } finally { setLoading(false); }
+      } catch { /* silently fail */ } finally { setInternalLoading(false); }
     };
     fetchData();
-  }, [user]);
+  }, [user, hasExternalData]);
 
   return (
     <Card className="border-border/60">

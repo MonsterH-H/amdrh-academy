@@ -102,7 +102,7 @@ function CertificatesContent() {
 
   const handleCopyLink = (code: string) => {
     try {
-      navigator.clipboard.writeText(`https://academie.amdrh.ma/verify/${code}`);
+      navigator.clipboard.writeText(`${window.location.origin}/verify/${code}`);
       toast({ title: "Copié", description: "Le lien de vérification a été copié." });
     } catch {
       toast({ title: "Erreur", description: "Impossible de copier", variant: "destructive" });

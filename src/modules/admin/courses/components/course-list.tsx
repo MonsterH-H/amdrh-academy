@@ -47,6 +47,7 @@ export interface CourseDetail extends CourseItem {
       id: string;
       title: string;
       type: string;
+      content: string;
       duration: number;
       order: number;
     }>;

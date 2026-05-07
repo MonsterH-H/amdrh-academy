@@ -249,6 +249,7 @@ function AdminQuizDetailPage({
 
       {/* Stats & Settings */}
       <QuizAttemptsView
+        quizId={quizId}
         questionCount={questions.length}
         totalPoints={(quiz.totalPoints as number) || 0}
         stats={stats}

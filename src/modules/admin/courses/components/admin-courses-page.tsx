@@ -97,7 +97,7 @@ export function AdminCoursesPage() {
     finally { setDeleteLoading(false); }
   };
 
-  const openDetail = async (courseId: string) => {
+  const openDetail = useCallback(async (courseId: string) => {
     setDetailOpen(true); setDetailLoading(true); setDetailCourse(null);
     try {
       const res = await fetch(`/api/courses/${courseId}`);
@@ -105,7 +105,16 @@ export function AdminCoursesPage() {
       setDetailCourse(data.course);
     } catch { toast({ title: "Erreur", description: "Impossible de charger les détails", variant: "destructive" }); }
     finally { setDetailLoading(false); }
-  };
+  }, []);
+
+  const refreshDetail = useCallback(async () => {
+    if (!detailCourse?.id) return;
+    try {
+      const res = await fetch(`/api/courses/${detailCourse.id}`);
+      const data = await res.json();
+      setDetailCourse(data.course);
+    } catch { /* silent */ }
+  }, [detailCourse?.id]);
 
   const openEdit = (course: CourseItem) => {
     setEditCourse(course);
@@ -235,7 +244,7 @@ export function AdminCoursesPage() {
           {detailLoading ? (
             <div className="space-y-4 py-4"><Skeleton className="h-6 w-3/4" /><Skeleton className="h-4 w-1/2" /><Skeleton className="h-32 w-full" /><Skeleton className="h-24 w-full" /></div>
           ) : detailCourse ? (
-            <CourseDetailContent course={detailCourse} />
+            <CourseDetailContent course={detailCourse} onRefresh={refreshDetail} />
           ) : (
             <div className="text-center py-10"><AlertTriangle className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" /><p className="text-sm text-muted-foreground">Cours introuvable</p></div>
           )}

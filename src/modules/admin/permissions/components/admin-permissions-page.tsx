@@ -243,7 +243,7 @@ export function AdminPermissionsPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <>
                 {modules.map((mod) => {
                   const modulePermIds = mod.permissions.map((p) => p.id);
                   return (
@@ -317,7 +317,7 @@ export function AdminPermissionsPage() {
                     </tbody>
                   );
                 })}
-              </tbody>
+              </>
             </table>
           </div>
         </CardContent>

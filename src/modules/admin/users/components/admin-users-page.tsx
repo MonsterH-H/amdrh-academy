@@ -53,7 +53,7 @@ export function AdminUsersPage() {
       setUsers(data.users || []);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotal(data.pagination?.total || 0);
-    } catch { /* silently fail */ } finally { setLoading(false); }
+    } catch { toast({ title: "Erreur de chargement", description: "Impossible de charger la liste des utilisateurs.", variant: "destructive" }); } finally { setLoading(false); }
   }, [roleFilter, page, search]);
 
   useEffect(() => { if (!user) return; fetchUsers(); }, [user, fetchUsers]);

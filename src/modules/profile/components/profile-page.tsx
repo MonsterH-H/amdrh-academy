@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   Award, HelpCircle, Star, BookOpen, Mail, MapPin, Phone, User, Lock,
   Bell, Clock, CheckCircle2, Circle, Shield, Activity,
@@ -55,7 +56,24 @@ export function ProfilePage() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [extendedUser, setExtendedUser] = useState<ExtendedUser>({});
-  const [notif, setNotif] = useState<Record<string, boolean>>({ "notif-course": true, "notif-quiz": true, "notif-certificate": true, "notif-message": true });
+  const defaultNotif = { "notif-course": true, "notif-quiz": true, "notif-certificate": true, "notif-message": true };
+  const [notif, setNotif] = useState<Record<string, boolean>>(defaultNotif);
+
+  // Load notification preferences from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("amdrh-notif-prefs");
+      if (saved) setNotif({ ...defaultNotif, ...JSON.parse(saved) });
+    } catch { /* ignore parse errors */ }
+  }, []);
+
+  const handleNotifToggle = (key: string, checked: boolean) => {
+    setNotif((prev) => {
+      const next = { ...prev, [key]: checked };
+      try { localStorage.setItem("amdrh-notif-prefs", JSON.stringify(next)); } catch { /* storage full or unavailable */ }
+      return next;
+    });
+  };
 
   const fetchStats = useCallback(async () => {
     if (!user?.id) return;
@@ -66,7 +84,7 @@ export function ProfilePage() {
         setStats(d.stats); setCompleteness(d.completeness); setActivity(d.recentActivity || []);
         if (d.user) setExtendedUser({ emailVerified: d.user.emailVerified, createdAt: d.user.createdAt });
       }
-    } catch { /* silent */ } finally { setLoadingStats(false); }
+    } catch { toast.error("Erreur de chargement", { description: "Impossible de charger les statistiques du profil." }); } finally { setLoadingStats(false); }
   }, [user?.id]);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
@@ -207,7 +225,7 @@ export function ProfilePage() {
                     <label htmlFor={p.id} className="text-sm font-medium text-foreground cursor-pointer">{p.label}</label>
                     <p className="text-xs text-muted-foreground">{p.desc}</p>
                   </div>
-                  <Switch id={p.id} checked={notif[p.id] ?? true} onCheckedChange={() => setNotif((n) => ({ ...n, [p.id]: !n[p.id] }))} />
+                  <Switch id={p.id} checked={notif[p.id] ?? true} onCheckedChange={(checked) => handleNotifToggle(p.id, checked)} />
                 </div>
               ))}
             </CardContent>

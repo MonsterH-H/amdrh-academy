@@ -119,14 +119,15 @@ export async function GET(req: NextRequest) {
         totalCertificates, recentCertificates,
         totalQuizAttempts, passedQuizAttempts, totalBadges, earnedBadges,
         totalResources, totalMessages, unreadMessages, unverifiedUsers,
-        totalAnnouncements: 0, learningPathCount, mandatoryPaths,
+        totalAnnouncements: await db.announcement.count({ where: { isPublished: true } }),
+        learningPathCount, mandatoryPaths,
         completionRate, quizPassRate,
       },
       charts: { enrollmentsByMonth, usersByMonth, certificatesByMonth },
       usersByRole: usersByRole.map((g) => ({ role: g.role, count: (g._count as unknown as number) })),
       recentUsers, recentEnrollments, recentQuizAttempts,
       topPerformers, topCourses,
-      pinnedAnnouncements: [],
+      pinnedAnnouncements: await db.announcement.findMany({ where: { isPublished: true, isPinned: true }, take: 5, orderBy: { createdAt: "desc" } }),
       lastSync: lastSync ?? null,
     });
   } catch (error) {

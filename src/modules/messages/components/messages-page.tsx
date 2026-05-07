@@ -6,6 +6,7 @@ import { useRealtime } from "@/hooks/use-realtime";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Wifi, WifiOff, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ConversationList } from "./conversation-list";
 import { NewConversationDialog } from "./new-conversation-dialog";
@@ -65,7 +66,7 @@ export function MessagesPage() {
         const data = await res.json();
         setConversations(data.conversations || []);
       } catch {
-        // silently fail
+        toast.error("Erreur de chargement", { description: "Impossible de charger les conversations." });
       } finally {
         setLoading(false);
       }

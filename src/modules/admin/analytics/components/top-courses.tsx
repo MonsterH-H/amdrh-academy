@@ -12,7 +12,7 @@ import { CATEGORY_LABELS } from "@/lib/constants";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface TopCourse {
+export interface TopCourse {
   id: string;
   title: string;
   category: string;
@@ -22,14 +22,31 @@ interface TopCourse {
   passRate: number;
 }
 
+// ─── Props ───────────────────────────────────────────────────────────────────
+
+interface TopCoursesSectionProps {
+  /** Pre-fetched course data from parent. If provided, skips internal fetch. */
+  courses?: TopCourse[];
+  /** External loading state from parent. Used when courses are provided. */
+  loading?: boolean;
+}
+
 // ─── Top Courses Section ─────────────────────────────────────────────────────
 
-export function TopCoursesSection() {
+export function TopCoursesSection({ courses: coursesProp, loading: loadingProp }: TopCoursesSectionProps) {
   const { user } = useAppStore();
-  const [courses, setCourses] = useState<TopCourse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [internalCourses, setInternalCourses] = useState<TopCourse[]>([]);
+  const [internalLoading, setInternalLoading] = useState(true);
 
+  // Use parent-provided data if available, otherwise fall back to internal state
+  const hasExternalData = coursesProp !== undefined;
+  const courses = hasExternalData ? coursesProp : internalCourses;
+  const loading = hasExternalData ? !!loadingProp : internalLoading;
+
+  // Internal fetch — only runs when no external data is provided
   useEffect(() => {
+    if (hasExternalData) return;
+
     const fetchCourses = async () => {
       try {
         const res = await fetch(`/api/admin/course-stats?userId=${user?.id}&role=${user?.role}`);
@@ -46,15 +63,15 @@ export function TopCoursesSection() {
             passRate: (c.passRate as number) || 0,
           }),
         );
-        setCourses(courseList);
+        setInternalCourses(courseList);
       } catch {
         // silently fail
       } finally {
-        setLoading(false);
+        setInternalLoading(false);
       }
     };
     fetchCourses();
-  }, [user]);
+  }, [user, hasExternalData]);
 
   return (
     <Card className="border-border/60">

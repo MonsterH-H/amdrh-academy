@@ -32,3 +32,32 @@ Stage Summary:
 - 16 items in admin sidebar (was 15, added Annonces + Paramètres)
 - Prisma schema updated with Announcement model
 - Total: 25 modules, 30+ views, 50+ API routes, 20 Prisma models
+
+---
+Task ID: 2
+Agent: Main Agent + Subagents
+Task: Comprehensive audit and quality fixes for production delivery
+
+Work Log:
+- **Full audit of all 25+ modules** across 5 parallel subagent audits covering: dashboards, auth, users, courses, learning paths, quiz, certificates, badges, messages, notifications, profile, analytics, permissions, sync, traceability
+- **11 fixes applied** based on audit findings:
+  1. ✅ Hidden demo accounts behind `process.env.NODE_ENV === 'development'` guard in login-form.tsx
+  2. ✅ Fixed Tailwind dynamic class bug in dashboard-kpi-cards.tsx (ACCENT_MAP restructured with static classes)
+  3. ✅ Added full section/lesson CRUD API routes (POST/PATCH/DELETE) + enhanced section-manager.tsx with add/edit/delete/reorder
+  4. ✅ Rewrote quiz-attempts-view.tsx with individual learner attempts table + pagination
+  5. ✅ Connected analytics page sub-components (TopCoursesSection, RecentActivitySection) to parent data
+  6. ✅ Fixed invalid HTML in permissions page (nested tbody → React Fragment)
+  7. ✅ Replaced 6+ silent catch blocks with toast error notifications across 4 modules
+  8. ✅ Fixed hardcoded certificate URL (academie.amdrh.ma → window.location.origin)
+  9. ✅ Persisted notification preferences via localStorage in profile page
+  10. ✅ Wired totalAnnouncements + pinnedAnnouncements in admin dashboard API
+  11. ✅ Added quiz-specific attempts to API with pagination
+- **Verification**: bun run lint → 0 errors, bun run db:push → schema in sync
+- **Generated production zip**: amdrh-academy.zip (8.0 MB, 1064 files)
+
+Stage Summary:
+- All 25 modules audited with honest grading (range: B to A)
+- 11 concrete fixes applied addressing the most impactful issues
+- 2 new API routes created for section/lesson management
+- 1 new component file created (section-crud-dialogs.tsx)
+- Production zip ready at /home/z/my-project/amdrh-academy.zip

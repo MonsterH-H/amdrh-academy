@@ -57,17 +57,17 @@ const KPI_CARDS: KpiCardDef[] = [
   { key: "unverifiedUsers", label: "En attente vérif.", subtitle: "À vérifier", icon: Clock, color: "red", suffix: "", decimals: 0 },
 ];
 
-const ACCENT_MAP: Record<string, string> = {
-  sky: "bg-sky-500/10 text-sky-600 border-t-sky-500",
-  emerald: "bg-emerald-500/10 text-emerald-600 border-t-emerald-500",
-  violet: "bg-violet-500/10 text-violet-600 border-t-violet-500",
-  green: "bg-green-500/10 text-green-600 border-t-green-500",
-  amber: "bg-amber-500/10 text-amber-600 border-t-amber-500",
-  lime: "bg-lime-500/10 text-lime-600 border-t-lime-500",
-  orange: "bg-orange-500/10 text-orange-600 border-t-orange-500",
-  rose: "bg-rose-500/10 text-rose-600 border-t-rose-500",
-  indigo: "bg-indigo-500/10 text-indigo-600 border-t-indigo-500",
-  red: "bg-red-500/10 text-red-600 border-t-red-500",
+const ACCENT_MAP: Record<string, { classes: string; borderClass: string }> = {
+  sky: { classes: "bg-sky-500/10 text-sky-600", borderClass: "border-t-sky-500" },
+  emerald: { classes: "bg-emerald-500/10 text-emerald-600", borderClass: "border-t-emerald-500" },
+  violet: { classes: "bg-violet-500/10 text-violet-600", borderClass: "border-t-violet-500" },
+  green: { classes: "bg-green-500/10 text-green-600", borderClass: "border-t-green-500" },
+  amber: { classes: "bg-amber-500/10 text-amber-600", borderClass: "border-t-amber-500" },
+  lime: { classes: "bg-lime-500/10 text-lime-600", borderClass: "border-t-lime-500" },
+  orange: { classes: "bg-orange-500/10 text-orange-600", borderClass: "border-t-orange-500" },
+  rose: { classes: "bg-rose-500/10 text-rose-600", borderClass: "border-t-rose-500" },
+  indigo: { classes: "bg-indigo-500/10 text-indigo-600", borderClass: "border-t-indigo-500" },
+  red: { classes: "bg-red-500/10 text-red-600", borderClass: "border-t-red-500" },
 };
 
 export function DashboardKPICards({ kpi }: { kpi: AdminKpi }) {
@@ -75,12 +75,12 @@ export function DashboardKPICards({ kpi }: { kpi: AdminKpi }) {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {KPI_CARDS.map((card) => {
         const Icon = card.icon;
-        const colors = ACCENT_MAP[card.color];
+        const accent = ACCENT_MAP[card.color];
         return (
           <Card key={card.key} className="border-border/60 overflow-hidden py-0 gap-0">
-            <div className={cn("h-0.5 border-t-2", `border-t-${card.color}-500`)} />
+            <div className={cn("h-0.5 border-t-2", accent.borderClass)} />
             <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-              <div className={cn("p-2 rounded-full", colors.split(" ").slice(0, 2).join(" "))}>
+              <div className={cn("p-2 rounded-full", accent.classes)}>
                 <Icon className="h-5 w-5" />
               </div>
               <AnimatedNumber

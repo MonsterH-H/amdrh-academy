@@ -141,45 +141,49 @@ export function LoginPage() {
               </Button>
             </form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/40" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-card px-3 text-muted-foreground">
-                  ou
-                </span>
-              </div>
-            </div>
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border/40" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-card px-3 text-muted-foreground">
+                      ou
+                    </span>
+                  </div>
+                </div>
 
-            {/* Quick test accounts (dev only) */}
-            <div className="bg-muted/40 rounded-lg p-3 sm:p-4">
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2 sm:mb-3">
-                Comptes de démonstration
-              </p>
-              <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
-                {([
-                  { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN" },
-                  { label: "Formateur", email: "formateur@amdrh.ma", role: "FORMATEUR" },
-                  { label: "Arbitre", email: "arbitre1@amdrh.ma", role: "ARBITRE" },
-                  { label: "Entraîneur", email: "entraineur1@amdrh.ma", role: "ENTRAINEUR" },
-                  { label: "Joueur", email: "joueur1@amdrh.ma", role: "JOUEUR" },
-                ] as DemoAccount[]).map((account) => (
-                  <button
-                    key={account.email}
-                    onClick={() => { setEmail(account.email); setPassword("Password123!"); }}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs hover:bg-muted/80 transition-colors group"
-                  >
-                    <span className="font-medium text-foreground group-hover:text-primary transition-colors">{account.label}</span>
-                    <span className="text-muted-foreground">{account.email}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-3 text-center">
-                Mot de passe : <span className="font-mono font-medium">Password123!</span>
-              </p>
-            </div>
+                {/* Quick test accounts (dev only) */}
+                <div className="bg-muted/40 rounded-lg p-3 sm:p-4">
+                  <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2 sm:mb-3">
+                    Comptes de démonstration
+                  </p>
+                  <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
+                    {([
+                      { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN" },
+                      { label: "Formateur", email: "formateur@amdrh.ma", role: "FORMATEUR" },
+                      { label: "Arbitre", email: "arbitre1@amdrh.ma", role: "ARBITRE" },
+                      { label: "Entraîneur", email: "entraineur1@amdrh.ma", role: "ENTRAINEUR" },
+                      { label: "Joueur", email: "joueur1@amdrh.ma", role: "JOUEUR" },
+                    ] as DemoAccount[]).map((account) => (
+                      <button
+                        key={account.email}
+                        onClick={() => { setEmail(account.email); setPassword("Password123!"); }}
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs hover:bg-muted/80 transition-colors group"
+                      >
+                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">{account.label}</span>
+                        <span className="text-muted-foreground">{account.email}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-3 text-center">
+                    Mot de passe : <span className="font-mono font-medium">Password123!</span>
+                  </p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

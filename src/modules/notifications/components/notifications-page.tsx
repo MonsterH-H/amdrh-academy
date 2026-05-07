@@ -15,6 +15,7 @@ import {
   Settings,
   CheckCheck,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { NOTIFICATION_TYPE_LABELS } from "@/lib/constants";
 import { NotificationItem } from "./notification-item";
@@ -91,7 +92,7 @@ export function NotificationsPage() {
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch {
-      // silently fail
+      toast.error("Erreur de chargement", { description: "Impossible de charger les notifications." });
     } finally {
       setLoading(false);
     }
@@ -112,7 +113,7 @@ export function NotificationsPage() {
       });
       fetchNotifications(activeType);
     } catch {
-      // silent fail
+      toast.error("Erreur", { description: "Impossible de marquer comme lu." });
     }
   };
 
@@ -126,7 +127,7 @@ export function NotificationsPage() {
       });
       fetchNotifications(activeType);
     } catch {
-      // silent fail
+      toast.error("Erreur", { description: "Impossible de tout marquer comme lu." });
     }
   };
 
