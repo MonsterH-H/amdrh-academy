@@ -5,6 +5,7 @@ export type AppView =
   | "forgot-password"
   | "reset-password"
   | "dashboard"
+  | "admin-dashboard"
   | "courses"
   | "course-detail"
   | "learning-paths"
@@ -14,6 +15,7 @@ export type AppView =
   | "messages"
   | "conversation"
   | "notifications"
+  | "profile"
   | "admin-users"
   | "admin-user-detail"
   | "admin-courses"
@@ -25,9 +27,9 @@ export type AppView =
   | "admin-sync"
   | "admin-resources"
   | "admin-traceability"
+  | "admin-permissions"
   | "course-create"
-  | "learner-traceability"
-  | "profile";
+  | "learner-traceability";
 
 export interface ViewParams {
   id?: string;

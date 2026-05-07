@@ -40,10 +40,14 @@ const AdminAnalyticsPage = lazyLoad(() => import("@/modules/admin/analytics").th
 const AdminQuizzesPage = lazyLoad(() => import("@/modules/admin/quizzes").then(m => ({ default: m.AdminQuizzesPage as ComponentType })));
 const AdminResourcesPage = lazyLoad(() => import("@/modules/admin/resources").then(m => ({ default: m.AdminResourcesPage as ComponentType })));
 const AdminTraceabilityPage = lazyLoad(() => import("@/modules/admin/traceability").then(m => ({ default: m.AdminTraceabilityPage as ComponentType })));
+const AdminPermissionsPage = lazyLoad(() => import("@/modules/admin/permissions").then(m => ({ default: m.AdminPermissionsPage as ComponentType })));
+const AdminDashboardPage = lazyLoad(() => import("@/modules/admin/dashboard").then(m => ({ default: m.AdminDashboardPage as ComponentType })));
+const FormateurDashboardPage = lazyLoad(() => import("@/modules/learner").then(m => ({ default: m.LearnerDashboardPage as ComponentType })));
 const SidebarLazy = lazyLoad(() => import("@/modules/shared/layout").then(m => ({ default: m.Sidebar as ComponentType })));
 
 const viewComponentMap: Record<string, ComponentType> = {
   dashboard: DashboardPage,
+  "admin-dashboard": AdminDashboardPage,
   courses: CourseCatalogPage,
   "course-detail": CourseDetailPage,
   "learning-paths": LearningPathsPage,
@@ -64,6 +68,7 @@ const viewComponentMap: Record<string, ComponentType> = {
   "admin-quizzes": AdminQuizzesPage,
   "admin-resources": AdminResourcesPage,
   "admin-traceability": AdminTraceabilityPage,
+  "admin-permissions": AdminPermissionsPage,
   "course-create": CourseCreatePage,
   "learner-traceability": LearnerTraceabilityPage,
   profile: ProfilePage,
@@ -183,6 +188,15 @@ function AppContent() {
     if (currentView === "forgot-password") return <ForgotPasswordPage />;
     if (currentView === "reset-password") return <ResetPasswordPage />;
     if (!isAuthenticated) return <LandingPage />;
+
+    // Route admin dashboard: ADMIN sees admin-dashboard, FORMATEUR sees learner dashboard
+    if (currentView === "dashboard" && user?.role === "ADMIN") {
+      return (
+        <ErrorBoundary key="admin-dashboard" onError={setViewError}>
+          <Suspense fallback={<PageLoader />}><AdminDashboardPage /></Suspense>
+        </ErrorBoundary>
+      );
+    }
 
     const Component = viewComponentMap[currentView];
     if (Component) {

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { AppView } from "@/types/navigation";
+import { ROLE_PERMISSIONS } from "@/lib/constants";
 
 export type { AppView };
 
@@ -52,18 +53,43 @@ interface AppState {
 interface HistoryEntry { view: AppView; params: Record<string, string> }
 const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }];
 
+/**
+ * Check if a user with a given role can access a specific view.
+ * Uses ROLE_PERMISSIONS from constants.ts.
+ */
+function canAccessView(view: string, role: string): boolean {
+  // Public views — always accessible
+  const publicViews = [
+    "landing", "login", "register", "forgot-password", "reset-password",
+    "conversation", // Can access any conversation they're part of
+  ];
+  if (publicViews.includes(view)) return true;
+
+  // Check role permissions
+  const allowed = ROLE_PERMISSIONS[role];
+  if (!allowed) return false;
+  return allowed.includes(view);
+}
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Auth
   user: null,
   isAuthenticated: false,
   setUser: (user) => set({ user, isAuthenticated: !!user }),
-  logout: () => set({ user: null, isAuthenticated: false }),
+  logout: () => set({ user: null, isAuthenticated: false, currentView: "landing" }),
 
-  // Navigation
+  // Navigation with role guard
   currentView: "landing",
   viewParams: {},
   navigate: (view, params = {}) => {
-    const { currentView, viewParams: currentParams } = get();
+    const { currentView, viewParams: currentParams, user } = get();
+
+    // Role-based access control
+    if (user?.role && !canAccessView(view, user.role)) {
+      console.warn(`[Navigation] Access denied: ${user.role} cannot access "${view}"`);
+      return; // Silently block navigation
+    }
+
     viewHistory.push({ view: currentView, params: currentParams });
     if (viewHistory.length > 50) viewHistory.splice(0, viewHistory.length - 50);
     set({ currentView: view, viewParams: params });

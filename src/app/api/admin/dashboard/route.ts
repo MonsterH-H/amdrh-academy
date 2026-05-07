@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
 
-function groupByMonth(items: Array<{ dateField: Date }>, field: "dateField") {
+function groupByMonth(items: Array<{ dateField: Date | null }>, field: "dateField") {
   const map = new Map<string, number>();
   for (const item of items) {
-    const key = item[field].toISOString().slice(0, 7);
+    const val = item[field];
+    if (!val) continue;
+    const key = val.toISOString().slice(0, 7);
     map.set(key, (map.get(key) || 0) + 1);
   }
   return Array.from(map, ([month, count]) => ({ month, count })).sort((a, b) => a.month.localeCompare(b.month));
@@ -102,7 +104,9 @@ export async function GET(req: NextRequest) {
 
     const enrollmentsByMonth = groupByMonth(enrollmentsAll as unknown as Array<{ dateField: Date }>, "dateField").map((e) => ({ month: e.month, count: e.count }));
     const usersByMonth = groupByMonth(usersAll as unknown as Array<{ dateField: Date }>, "dateField").map((e) => ({ month: e.month, count: e.count }));
-    const certsByMonth = (certificatesAll as Array<{ issuedAt: Date }>).map((c) => ({ month: c.issuedAt.toISOString().slice(0, 7), count: 1 }));
+    const certsByMonth = (certificatesAll as Array<{ issuedAt: Date | null }>)
+      .filter((c) => c.issuedAt)
+      .map((c) => ({ month: (c.issuedAt as Date).toISOString().slice(0, 7), count: 1 }));
     const certMap = new Map<string, number>();
     for (const c of certsByMonth) certMap.set(c.month, (certMap.get(c.month) || 0) + 1);
     const certificatesByMonth = Array.from(certMap, ([month, count]) => ({ month, count })).sort((a, b) => a.month.localeCompare(b.month));

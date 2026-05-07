@@ -17,25 +17,40 @@ import {
   Star,
   Compass,
   Activity,
+  Shield,
+  Settings,
 } from "lucide-react";
 import type { NavItem, BottomNavItem } from "../types";
 
 // ──────────────────────────────────────────────────────────
-// ADMIN: Platform management
+// ADMIN: Platform management — COMPLET avec tous les modules
 // ──────────────────────────────────────────────────────────
 
 export const adminNavItems: NavItem[] = [
+  // Principal
   { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+  { view: "profile", label: "Mon Profil", icon: User, section: "Principal" },
+
+  // Gestion Utilisateurs
   { view: "admin-users", label: "Utilisateurs", icon: UserPlus, section: "Gestion Utilisateurs" },
+
+  // Gestion Contenu
   { view: "admin-courses", label: "Gestion Cours", icon: BookOpen, section: "Gestion Contenu" },
   { view: "admin-quizzes", label: "Gestion Quiz", icon: ClipboardList, section: "Gestion Contenu" },
   { view: "admin-learning-paths", label: "Parcours Formation", icon: GraduationCap, section: "Gestion Contenu" },
   { view: "admin-resources", label: "Médiathèque", icon: FolderOpen, section: "Gestion Contenu" },
+
+  // Certification
   { view: "admin-certificates", label: "Certificats & Badges", icon: Award, section: "Certification" },
+
+  // Communication
   { view: "messages", label: "Messagerie", icon: MessageSquare, section: "Communication" },
   { view: "admin-notifications", label: "Gestion Notifications", icon: BellRing, section: "Communication" },
+
+  // Système
   { view: "admin-analytics", label: "Analyses", icon: BarChart3, section: "Système" },
   { view: "admin-traceability", label: "Traçabilité", icon: Activity, section: "Système" },
+  { view: "admin-permissions", label: "Gestion Permissions", icon: Shield, section: "Système" },
   { view: "admin-sync", label: "Sync Fédération", icon: RefreshCw, section: "Système" },
 ];
 
@@ -45,9 +60,11 @@ export const adminNavItems: NavItem[] = [
 
 export const formateurNavItems: NavItem[] = [
   { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+  { view: "profile", label: "Mon Profil", icon: User, section: "Principal" },
   { view: "course-create", label: "Créer une formation", icon: Plus, section: "Mes Formations" },
   { view: "admin-courses", label: "Mes Cours", icon: BookOpen, section: "Mes Formations" },
   { view: "admin-quizzes", label: "Mes Quiz", icon: ClipboardList, section: "Mes Formations" },
+  { view: "admin-learning-paths", label: "Parcours", icon: GraduationCap, section: "Mes Formations" },
   { view: "courses", label: "Catalogue Cours", icon: Compass, section: "Explorer" },
   { view: "admin-resources", label: "Médiathèque", icon: FolderOpen, section: "Ressources" },
   { view: "messages", label: "Messagerie", icon: MessageSquare, section: "Communication" },
@@ -60,6 +77,7 @@ export const formateurNavItems: NavItem[] = [
 
 export const learnerNavItems: NavItem[] = [
   { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+  { view: "profile", label: "Mon Profil", icon: User, section: "Principal" },
   { view: "courses", label: "Catalogue Cours", icon: BookOpen, section: "Formation" },
   { view: "learning-paths", label: "Parcours Formation", icon: GraduationCap, section: "Formation" },
   { view: "learner-traceability", label: "Ma Progression", icon: TrendingUp, section: "Suivi" },

@@ -684,3 +684,33 @@ Stage Summary:
 - Server: Stable with consecutive requests ✅
 - Caddy proxy: Working via port 81 → 3000 ✅
 - App title: "Académie AMDRH — Formation Handball" ✅
+
+---
+Task ID: 3
+Agent: Main Orchestrator
+Task: Correction complète — dashboard admin, module permissions, sidebar, gardes de navigation
+
+Work Log:
+- Audit honnête de l'état réel : dashboard admin codé mais PAS branché, permissions = 0 fichiers, sidebar incomplet
+- Créé src/lib/permissions.ts : 12 modules, 48 permissions granulaires, defaults par rôle
+- Créé src/modules/admin/permissions/ : types.ts + components/admin-permissions-page.tsx + index.ts
+- Créé src/app/api/admin/permissions/route.ts : GET (matrice) + PUT (sauvegarde par rôle)
+- Ajouté "admin-dashboard" et "admin-permissions" au type AppView
+- Branché AdminDashboardPage dans page.tsx : les admins voient le dashboard admin (pas celui des apprenants)
+- Complété sidebar admin : + "Gestion Permissions" (Shield) + "Mon Profil" (User) = 15 items
+- Complété sidebar FORMATEUR : + "Mon Profil" + "Parcours" = 10 items
+- Complété sidebar apprenants : + "Mon Profil" = 9 items
+- Ajouté gardes de navigation dans store/app.ts : canAccessView() avec ROLE_PERMISSIONS
+- Mis à jour ROLE_PERMISSIONS dans constants.ts : + admin-dashboard, admin-permissions, course-detail, quiz, certificates, badges
+- Corrigé dashboard API : null safety sur dates dans groupByMonth et certsByMonth
+- Corrigé DATABASE_URL : dev script pointait vers db/amdrh.db (inexistant) → prisma/db/amdrh.db
+- Relancé seed avec la bonne DB : 13 utilisateurs, 13 cours, 4 parcours, 5 badges, 30 inscriptions
+
+Stage Summary:
+- ESLint: 0 erreurs ✅
+- TypeScript src/: 0 erreurs ✅
+- Permissions API: 200, 12 modules, 5 rôles ✅
+- Dashboard API: 200, données réelles (13 users, 13 courses, 30 enrollments) ✅
+- Dev server: Stable, pas de crash ✅
+- Sidebar admin: 15 items complets (permissions, profil, tous les modules) ✅
+- Gardes de navigation: ROLE_PERMISSIONS appliqué dans navigate() ✅

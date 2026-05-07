@@ -311,16 +311,22 @@ export const COMPLETION_TRIGGER_LABELS: Record<string, string> = {
 
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
   ADMIN: [
-    "dashboard", "admin-users", "admin-courses", "admin-quizzes",
-    "admin-learning-paths", "admin-resources", "admin-certificates",
-    "admin-notifications", "admin-analytics", "admin-sync",
-    "admin-traceability", "messages", "notifications", "profile",
-    "courses", "course-create", "learning-paths",
+    "dashboard", "admin-dashboard", "admin-users", "admin-user-detail",
+    "admin-courses", "admin-quizzes", "admin-learning-paths",
+    "admin-resources", "admin-certificates", "admin-notifications",
+    "admin-analytics", "admin-sync", "admin-traceability",
+    "admin-permissions",
+    "messages", "notifications", "profile",
+    "courses", "course-detail", "course-create", "learning-paths",
+    "quiz", "certificates", "badges", "learner-traceability",
   ],
   FORMATEUR: [
-    "dashboard", "courses", "course-create", "admin-courses",
-    "admin-quizzes", "admin-resources", "learning-paths",
+    "dashboard", "courses", "course-detail", "course-create",
+    "admin-courses", "admin-quizzes", "admin-learning-paths",
+    "admin-resources",
+    "learning-paths",
     "messages", "notifications", "profile",
+    "quiz", "certificates", "badges",
   ],
   ARBITRE: [
     "dashboard", "courses", "course-detail", "learning-paths",
