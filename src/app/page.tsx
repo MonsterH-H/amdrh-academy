@@ -29,6 +29,7 @@ const NotificationsPage = lazyLoad(() => import("@/modules/notifications").then(
 const ProfilePage = lazyLoad(() => import("@/modules/profile").then(m => ({ default: m.ProfilePage as ComponentType })));
 const LearnerTraceabilityPage = lazyLoad(() => import("@/modules/learner").then(m => ({ default: m.LearnerTraceabilityPage as ComponentType })));
 const CourseCreatePage = lazyLoad(() => import("@/modules/courses").then(m => ({ default: m.CourseCreatePage as ComponentType })));
+const AnnouncementsPage = lazyLoad(() => import("@/modules/announcements").then(m => ({ default: m.AnnouncementsPage as ComponentType })));
 const AdminUsersPage = lazyLoad(() => import("@/modules/admin/users").then(m => ({ default: m.AdminUsersPage as ComponentType })));
 const AdminUserDetailPage = lazyLoad(() => import("@/modules/admin/users").then(m => ({ default: m.AdminUserDetailPage as ComponentType })));
 const AdminCertificatesPage = lazyLoad(() => import("@/modules/admin/certificates").then(m => ({ default: m.AdminCertificatesPage as ComponentType })));
@@ -41,13 +42,16 @@ const AdminQuizzesPage = lazyLoad(() => import("@/modules/admin/quizzes").then(m
 const AdminResourcesPage = lazyLoad(() => import("@/modules/admin/resources").then(m => ({ default: m.AdminResourcesPage as ComponentType })));
 const AdminTraceabilityPage = lazyLoad(() => import("@/modules/admin/traceability").then(m => ({ default: m.AdminTraceabilityPage as ComponentType })));
 const AdminPermissionsPage = lazyLoad(() => import("@/modules/admin/permissions").then(m => ({ default: m.AdminPermissionsPage as ComponentType })));
+const AdminAnnouncementsPage = lazyLoad(() => import("@/modules/admin/announcements").then(m => ({ default: m.AdminAnnouncementsPage as ComponentType })));
+const AdminSettingsPage = lazyLoad(() => import("@/modules/admin/settings").then(m => ({ default: m.AdminSettingsPage as ComponentType })));
 const AdminDashboardPage = lazyLoad(() => import("@/modules/admin/dashboard").then(m => ({ default: m.AdminDashboardPage as ComponentType })));
-const FormateurDashboardPage = lazyLoad(() => import("@/modules/learner").then(m => ({ default: m.LearnerDashboardPage as ComponentType })));
+const FormateurDashboardPage = lazyLoad(() => import("@/modules/formateur").then(m => ({ default: m.FormateurDashboardPage as ComponentType })));
 const SidebarLazy = lazyLoad(() => import("@/modules/shared/layout").then(m => ({ default: m.Sidebar as ComponentType })));
 
 const viewComponentMap: Record<string, ComponentType> = {
   dashboard: DashboardPage,
   "admin-dashboard": AdminDashboardPage,
+  "formateur-dashboard": FormateurDashboardPage,
   courses: CourseCatalogPage,
   "course-detail": CourseDetailPage,
   "learning-paths": LearningPathsPage,
@@ -69,9 +73,12 @@ const viewComponentMap: Record<string, ComponentType> = {
   "admin-resources": AdminResourcesPage,
   "admin-traceability": AdminTraceabilityPage,
   "admin-permissions": AdminPermissionsPage,
+  "admin-announcements": AdminAnnouncementsPage,
+  "admin-settings": AdminSettingsPage,
   "course-create": CourseCreatePage,
   "learner-traceability": LearnerTraceabilityPage,
   profile: ProfilePage,
+  announcements: AnnouncementsPage,
 };
 
 function PageLoader() {
@@ -188,15 +195,6 @@ function AppContent() {
     if (currentView === "forgot-password") return <ForgotPasswordPage />;
     if (currentView === "reset-password") return <ResetPasswordPage />;
     if (!isAuthenticated) return <LandingPage />;
-
-    // Route admin dashboard: ADMIN sees admin-dashboard, FORMATEUR sees learner dashboard
-    if (currentView === "dashboard" && user?.role === "ADMIN") {
-      return (
-        <ErrorBoundary key="admin-dashboard" onError={setViewError}>
-          <Suspense fallback={<PageLoader />}><AdminDashboardPage /></Suspense>
-        </ErrorBoundary>
-      );
-    }
 
     const Component = viewComponentMap[currentView];
     if (Component) {

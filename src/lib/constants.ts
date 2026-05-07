@@ -201,10 +201,6 @@ export const LEARNING_PATH_MODE_COLORS: Record<string, string> = {
   HYBRIDE: "bg-purple-100 text-purple-700",
 };
 
-// ────────────────────────────────────────────
-// Resource (Médiathèque) constants
-// ────────────────────────────────────────────
-
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   VIDEO: "Vidéo",
   PDF: "PDF",
@@ -251,10 +247,6 @@ export const RESOURCE_CATEGORY_COLORS: Record<string, string> = {
   AUTRE: "bg-gray-100 text-gray-700",
 };
 
-// ────────────────────────────────────────────
-// Certificate types
-// ────────────────────────────────────────────
-
 export const CERTIFICATE_TYPE_LABELS: Record<string, string> = {
   ATTESTATION: "Attestation",
   CERTIFICAT_COMPLETION: "Certificat",
@@ -281,10 +273,6 @@ export const CERTIFICATE_STATUS_COLORS: Record<string, string> = {
   SUSPENDED: "bg-amber-100 text-amber-700",
 };
 
-// ────────────────────────────────────────────
-// Enrollment status
-// ────────────────────────────────────────────
-
 export const ENROLLMENT_STATUS_LABELS: Record<string, string> = {
   en_cours: "En cours",
   termine: "Terminé",
@@ -297,12 +285,27 @@ export const ENROLLMENT_STATUS_COLORS: Record<string, string> = {
   abandonne: "bg-red-100 text-red-700",
 };
 
-// Completion trigger labels
 export const COMPLETION_TRIGGER_LABELS: Record<string, string> = {
   manual: "Manuel",
   auto_video: "Auto vidéo",
   auto_scroll: "Auto lecture",
   auto_time: "Auto temps",
+};
+
+export const ANNOUNCEMENT_TYPE_LABELS: Record<string, string> = {
+  INFO: "Information",
+  URGENT: "Urgent",
+  EVENEMENT: "Événement",
+  FORMATION: "Formation",
+  RESULTAT: "Résultat",
+};
+
+export const ANNOUNCEMENT_TYPE_COLORS: Record<string, string> = {
+  INFO: "bg-blue-100 text-blue-700",
+  URGENT: "bg-red-100 text-red-700",
+  EVENEMENT: "bg-emerald-100 text-emerald-700",
+  FORMATION: "bg-purple-100 text-purple-700",
+  RESULTAT: "bg-amber-100 text-amber-700",
 };
 
 // ────────────────────────────────────────────
@@ -315,32 +318,33 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     "admin-courses", "admin-quizzes", "admin-learning-paths",
     "admin-resources", "admin-certificates", "admin-notifications",
     "admin-analytics", "admin-sync", "admin-traceability",
-    "admin-permissions",
+    "admin-permissions", "admin-announcements", "admin-settings",
     "messages", "notifications", "profile",
     "courses", "course-detail", "course-create", "learning-paths",
     "quiz", "certificates", "badges", "learner-traceability",
+    "formateur-dashboard", "announcements",
   ],
   FORMATEUR: [
-    "dashboard", "courses", "course-detail", "course-create",
+    "formateur-dashboard", "courses", "course-detail", "course-create",
     "admin-courses", "admin-quizzes", "admin-learning-paths",
     "admin-resources",
-    "learning-paths",
+    "learning-paths", "announcements",
     "messages", "notifications", "profile",
     "quiz", "certificates", "badges",
   ],
   ARBITRE: [
     "dashboard", "courses", "course-detail", "learning-paths",
     "learner-traceability", "certificates", "badges", "quiz",
-    "messages", "notifications", "profile",
+    "messages", "notifications", "profile", "announcements",
   ],
   ENTRAINEUR: [
     "dashboard", "courses", "course-detail", "learning-paths",
     "learner-traceability", "certificates", "badges", "quiz",
-    "messages", "notifications", "profile",
+    "messages", "notifications", "profile", "announcements",
   ],
   JOUEUR: [
     "dashboard", "courses", "course-detail", "learning-paths",
-    "learner-traceability", "certificates", "badges", "quiz",
-    "messages", "notifications", "profile",
+    "learner-traceability", "badges", "quiz",
+    "messages", "notifications", "profile", "announcements",
   ],
 };

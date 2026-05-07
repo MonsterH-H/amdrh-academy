@@ -148,6 +148,18 @@ export async function GET(req: NextRequest) {
       const pendingReviews = myCourses.filter((c) => c.status === "EN_REVISION").length;
 
       // Quiz statistics
+      const totalQuizzes = myCourseIds.length > 0
+        ? await db.quiz.count({
+            where: { courseId: { in: myCourseIds } },
+          })
+        : 0;
+
+      const totalResources = myCourseIds.length > 0
+        ? await db.resource.count({
+            where: { courseId: { in: myCourseIds } },
+          })
+        : 0;
+
       const passedQuizzes = myCourseIds.length > 0
         ? await db.quizAttempt.count({
             where: {
@@ -281,6 +293,8 @@ export async function GET(req: NextRequest) {
           totalCourses: myCourses.length,
           totalEnrollments,
           avgCompletion,
+          totalQuizzes,
+          totalResources,
           passedQuizzes,
           avgScore,
           avgPassRate,

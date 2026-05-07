@@ -28,8 +28,12 @@ export type AppView =
   | "admin-resources"
   | "admin-traceability"
   | "admin-permissions"
+  | "admin-announcements"
+  | "admin-settings"
   | "course-create"
-  | "learner-traceability";
+  | "learner-traceability"
+  | "formateur-dashboard"
+  | "announcements";
 
 export interface ViewParams {
   id?: string;

@@ -420,6 +420,25 @@ model VerificationToken {
 }
 
 // ============================================
+// ANNONCES
+// ============================================
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  type        String   @default("INFO") // INFO, URGENT, EVENEMENT, FORMATION, RESULTAT
+  targetRoles String   @default("[]")   // JSON array of roles who should see this
+  isPinned    Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished])
+}
+
+// ============================================
 // PERMISSIONS
 // ============================================
 
