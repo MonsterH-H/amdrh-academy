@@ -664,3 +664,23 @@ Stage Summary:
 - 5 nouveaux fichiers créés/modifiés (certificate-utils.ts, auth.ts, auth-helpers.ts, store/app.ts, types)
 - 0 erreurs ESLint, 0 erreurs TypeScript dans src/
 - ZIP final: 417 fichiers, 491 Ko
+
+---
+Task ID: hotfix-proxy-crash
+Agent: Main Orchestrator
+Task: Fix app not displaying — dev server crash caused by proxy.ts
+
+Work Log:
+- Diagnosed that the Next.js 16 Turbopack dev server was crashing on every request
+- Isolated the issue by testing with minimal proxy.ts → server survived
+- Identified root cause: `crypto.randomUUID()` in proxy.ts crashes Turbopack dev server
+- Replaced with safe `generateRequestId()` function using Date + Math.random
+- Verified fix: server now handles multiple consecutive requests without crashing
+- All 4 tests passed: direct HTTP 200, Caddy proxy HTTP 200, title "Académie AMDRH — Formation Handball"
+
+Stage Summary:
+- Root cause: `crypto.randomUUID()` in src/proxy.ts crashes Turbopack dev server
+- Fix: Replaced with `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+- Server: Stable with consecutive requests ✅
+- Caddy proxy: Working via port 81 → 3000 ✅
+- App title: "Académie AMDRH — Formation Handball" ✅

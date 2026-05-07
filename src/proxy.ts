@@ -33,6 +33,14 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   : [];
 
 /**
+ * Generate a unique request ID without using crypto.randomUUID()
+ * (crypto.randomUUID() crashes Turbopack dev server in some environments)
+ */
+function generateRequestId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
+/**
  * Security headers applied to ALL responses
  */
 function getSecurityHeaders(): HeadersInit {
@@ -131,7 +139,7 @@ export function proxy(request: NextRequest) {
     "unknown";
 
   response.headers.set("X-Client-IP", clientIP);
-  response.headers.set("X-Request-ID", crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  response.headers.set("X-Request-ID", generateRequestId());
 
   return response;
 }
