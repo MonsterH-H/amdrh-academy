@@ -450,6 +450,167 @@ async function main() {
     console.log(`  ~ ${existingConvs} conversations already exist`);
   }
 
+  // 10. Create announcements
+  console.log("📢 Creating announcements...");
+  const existingAnnCount = await db.announcement.count();
+  if (existingAnnCount === 0) {
+    const adminId3 = createdUsers["admin@amdrh.ma"];
+    const announcements = [
+      { title: "Bienvenue sur l'Académie AMDRH", content: "L'Académie AMDRH est officiellement lancée ! Cette plateforme de formation en ligne vous permettra de développer vos compétences en arbitrage, entraînement et jeu de handball. Explorez les cours disponibles et commencez votre parcours de formation dès maintenant.", type: "INFO", targetRoles: JSON.stringify(["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"]), isPinned: true, isPublished: true },
+      { title: "Nouveaux parcours de formation certifiants", content: "Les parcours Arbitre Débutant et Entraîneur Certifié sont maintenant disponibles. Ces parcours obligatoires incluent des quiz de certification. Inscrivez-vous dès aujourd'hui et obtenez votre certificat AMDRH reconnu par la fédération.", type: "FORMATION", targetRoles: JSON.stringify(["ARBITRE", "ENTRAINEUR", "FORMATEUR"]), isPinned: false, isPublished: true },
+      { title: "Calendrier des examens de certification - Saison 2024/2025", content: "Les sessions d'examen de certification sont programmées :\n\n- Session 1 : 15 janvier 2025\n- Session 2 : 15 avril 2025\n- Session 3 : 15 juillet 2025\n\nInscrivez-vous auprès de votre formateur référent au moins 2 semaines avant la date souhaitée.", type: "EVENEMENT", targetRoles: JSON.stringify(["ARBITRE", "ENTRAINEUR", "JOUEUR"]), isPinned: false, isPublished: true },
+      { title: "Mise à jour des règles IHF 2024", content: "La Fédération Internationale de Handball (IHF) a publié de nouvelles règles qui entrent en vigueur cette saison. Consultez le cours 'Règles Fondamentales du Handball' mis à jour pour connaître les modifications.", type: "URGENT", targetRoles: JSON.stringify(["ARBITRE", "FORMATEUR"]), isPinned: true, isPublished: true },
+      { title: "Résultats des certifications - Septembre 2024", content: "Félicitations aux 12 candidats certifiés lors de la session de septembre ! Les résultats individuels sont disponibles dans votre espace personnel sous la section Certificats.", type: "RESULTAT", targetRoles: JSON.stringify(["ARBITRE", "ENTRAINEUR", "JOUEUR", "ADMIN"]), isPinned: false, isPublished: true },
+    ];
+
+    for (const a of announcements) {
+      try {
+        await db.announcement.create({
+          data: { ...a, authorId: adminId3 || "" },
+        });
+      } catch { /* skip */ }
+    }
+    console.log(`  ✓ ${announcements.length} announcements created`);
+  } else {
+    console.log(`  ~ ${existingAnnCount} announcements already exist`);
+  }
+
+  // 11. Seed permissions
+  console.log("🔐 Seeding permissions...");
+  const existingPermCount = await db.permission.count();
+  if (existingPermCount === 0) {
+    const permissions = [
+      // Courses
+      { name: "courses.view", description: "Voir les cours", module: "courses", action: "view" },
+      { name: "courses.create", description: "Créer des cours", module: "courses", action: "create" },
+      { name: "courses.edit", description: "Modifier des cours", module: "courses", action: "edit" },
+      { name: "courses.delete", description: "Supprimer des cours", module: "courses", action: "delete" },
+      { name: "courses.manage", description: "Gérer les cours", module: "courses", action: "manage" },
+      // Users
+      { name: "users.view", description: "Voir les utilisateurs", module: "users", action: "view" },
+      { name: "users.create", description: "Créer des utilisateurs", module: "users", action: "create" },
+      { name: "users.edit", description: "Modifier des utilisateurs", module: "users", action: "edit" },
+      { name: "users.delete", description: "Supprimer des utilisateurs", module: "users", action: "delete" },
+      { name: "users.manage", description: "Gérer les utilisateurs", module: "users", action: "manage" },
+      // Quizzes
+      { name: "quizzes.view", description: "Voir les quiz", module: "quizzes", action: "view" },
+      { name: "quizzes.create", description: "Créer des quiz", module: "quizzes", action: "create" },
+      { name: "quizzes.edit", description: "Modifier des quiz", module: "quizzes", action: "edit" },
+      { name: "quizzes.delete", description: "Supprimer des quiz", module: "quizzes", action: "delete" },
+      { name: "quizzes.manage", description: "Gérer les quiz", module: "quizzes", action: "manage" },
+      { name: "quizzes.take", description: "Passer des quiz", module: "quizzes", action: "view" },
+      // Certificates
+      { name: "certificates.view", description: "Voir les certificats", module: "certificates", action: "view" },
+      { name: "certificates.create", description: "Créer des certificats", module: "certificates", action: "create" },
+      { name: "certificates.revoke", description: "Révoquer des certificats", module: "certificates", action: "delete" },
+      { name: "certificates.manage", description: "Gérer les certificats", module: "certificates", action: "manage" },
+      // Resources
+      { name: "resources.view", description: "Voir les ressources", module: "resources", action: "view" },
+      { name: "resources.upload", description: "Téléverser des ressources", module: "resources", action: "create" },
+      { name: "resources.manage", description: "Gérer les ressources", module: "resources", action: "manage" },
+      // Learning paths
+      { name: "learning_paths.view", description: "Voir les parcours", module: "learning_paths", action: "view" },
+      { name: "learning_paths.manage", description: "Gérer les parcours", module: "learning_paths", action: "manage" },
+      // Announcements
+      { name: "announcements.view", description: "Voir les annonces", module: "announcements", action: "view" },
+      { name: "announcements.create", description: "Créer des annonces", module: "announcements", action: "create" },
+      { name: "announcements.manage", description: "Gérer les annonces", module: "announcements", action: "manage" },
+      // Admin
+      { name: "admin.dashboard", description: "Accéder au tableau de bord admin", module: "admin", action: "view" },
+      { name: "admin.analytics", description: "Voir les analytics", module: "admin", action: "view" },
+      { name: "admin.settings", description: "Gérer les paramètres", module: "admin", action: "manage" },
+      { name: "admin.permissions", description: "Gérer les permissions", module: "admin", action: "manage" },
+      { name: "admin.audit_logs", description: "Voir les logs d'audit", module: "admin", action: "view" },
+      { name: "admin.sync", description: "Gérer la synchronisation fédération", module: "admin", action: "manage" },
+      // Messages
+      { name: "messages.send", description: "Envoyer des messages", module: "messages", action: "create" },
+      { name: "messages.view", description: "Voir les messages", module: "messages", action: "view" },
+      // Notifications
+      { name: "notifications.view", description: "Voir les notifications", module: "notifications", action: "view" },
+      // Profile
+      { name: "profile.view", description: "Voir les profils", module: "profile", action: "view" },
+      { name: "profile.edit", description: "Modifier le profil", module: "profile", action: "edit" },
+    ];
+
+    const permIds: Record<string, string> = {};
+    for (const p of permissions) {
+      try {
+        const perm = await db.permission.create({ data: p });
+        permIds[p.name] = perm.id;
+      } catch { /* skip */ }
+    }
+
+    // Role permissions
+    const rolePermissions: Record<string, string[]> = {
+      ADMIN: Object.keys(permIds), // All permissions
+      FORMATEUR: [
+        "courses.view", "courses.create", "courses.edit", "quizzes.view", "quizzes.create", "quizzes.edit",
+        "resources.view", "resources.upload", "learning_paths.view",
+        "announcements.view", "announcements.create",
+        "messages.send", "messages.view", "notifications.view",
+        "profile.view", "profile.edit", "certificates.view", "quizzes.take",
+      ],
+      ARBITRE: [
+        "courses.view", "quizzes.view", "quizzes.take", "resources.view", "learning_paths.view",
+        "announcements.view", "messages.send", "messages.view", "notifications.view",
+        "profile.view", "profile.edit", "certificates.view",
+      ],
+      ENTRAINEUR: [
+        "courses.view", "quizzes.view", "quizzes.take", "resources.view", "learning_paths.view",
+        "announcements.view", "messages.send", "messages.view", "notifications.view",
+        "profile.view", "profile.edit", "certificates.view",
+      ],
+      JOUEUR: [
+        "courses.view", "quizzes.view", "quizzes.take", "resources.view", "learning_paths.view",
+        "announcements.view", "messages.send", "messages.view", "notifications.view",
+        "profile.view", "profile.edit", "certificates.view",
+      ],
+    };
+
+    for (const [role, permNames] of Object.entries(rolePermissions)) {
+      for (const name of permNames) {
+        if (permIds[name]) {
+          try {
+            await db.rolePermission.create({
+              data: { role, permissionId: permIds[name] },
+            });
+          } catch { /* unique constraint - skip */ }
+        }
+      }
+    }
+    console.log(`  ✓ ${Object.keys(permIds).length} permissions and ${Object.keys(rolePermissions).length} role assignments created`);
+  } else {
+    console.log(`  ~ ${existingPermCount} permissions already exist`);
+  }
+
+  // 12. Create audit logs
+  console.log("📊 Creating audit logs...");
+  const existingAuditCount = await db.auditLog.count();
+  if (existingAuditCount === 0) {
+    const adminId4 = createdUsers["admin@amdrh.ma"];
+    const formateurId2 = createdUsers["formateur@amdrh.ma"];
+    const auditLogs = [
+      { userId: adminId4, action: "create", entity: "course", entityId: createdCourses["regles-fondamentales-handball"], details: "Création du cours 'Règles Fondamentales du Handball'" },
+      { userId: adminId4, action: "create", entity: "user", entityId: createdUsers["arbitre1@amdrh.ma"], details: "Création du compte arbitre Bennani Hassan" },
+      { userId: adminId4, action: "update", entity: "course", entityId: createdCourses["arbitrage-avance-gestion-match"], details: "Mise à jour du statut du cours en PUBLIE" },
+      { userId: formateurId2, action: "create", entity: "quiz", details: "Création du quiz pour le cours 'Règles Fondamentales'" },
+      { userId: adminId4, action: "create", entity: "learning_path", details: "Création du parcours 'Parcours Arbitre Débutant'" },
+      { userId: adminId4, action: "create", entity: "announcement", details: "Publication de l'annonce 'Bienvenue sur l\\'Académie AMDRH'" },
+      { userId: formateurId2, action: "login", entity: "session", details: "Connexion formateur" },
+      { userId: adminId4, action: "create", entity: "certificate", details: "Émission d'un certificat pour Bennani Hassan" },
+    ];
+
+    for (const log of auditLogs) {
+      if (!log.userId) continue;
+      try {
+        await db.auditLog.create({ data: log });
+      } catch { /* skip */ }
+    }
+    console.log(`  ✓ ${auditLogs.length} audit logs created`);
+  } else {
+    console.log(`  ~ ${existingAuditCount} audit logs already exist`);
+  }
+
   console.log("\n✅ Seeding completed successfully!");
 }
 

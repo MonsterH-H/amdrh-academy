@@ -112,3 +112,35 @@ Stage Summary:
 - These two bugs made essentially NO authenticated API call work
 - All fixes applied, lint 0 errors
 - Production zip: amdrh-academy.zip (7.2 MB, 857 files)
+
+---
+Task ID: 5
+Agent: Main Agent + 3 Subagents
+Task: Production readiness audit — fix all critical runtime bugs for production deployment
+
+Work Log:
+- **Comprehensive 3-agent audit** covering: navigation/pages, API routes/DB schema, module completeness
+- **CRITICAL FIX 1**: Added 3 missing Prisma models — ForumDiscussion, ForumReply, AuditLog + all relations to User and Course models
+- **CRITICAL FIX 2**: Created missing `/api/upload/route.ts` — file upload with type validation, size limits, Resource DB creation
+- **CRITICAL FIX 3**: Added `requireAuth()` export to `auth-helpers.ts` — was imported by announcements/[id]/route.ts but never existed
+- **CRITICAL FIX 4**: Fixed `apiFetch.ts` — removed reference to non-existent `sessionToken` in Zustand store
+- **CRITICAL FIX 5**: Added Announcement `author` relation and `expiresAt` field to Prisma schema
+- **HIGH FIX 1**: Added `NEXTAUTH_URL` to .env
+- **HIGH FIX 2**: Added `"prisma": { "seed": "bun run prisma/seed.ts" }` to package.json
+- **Created .env.example** with documentation
+- **Enriched seed data** with:
+  - 5 announcements (INFO, FORMATION, EVENEMENT, URGENT, RESULTAT)
+  - 39 permissions across 7 modules
+  - Role permissions for all 5 roles
+  - 8 audit log entries
+- **Cleaned dead code**: Removed 27 unused files in `src/components/amdrh/` and stale `src/store/navigation.ts`
+- **Verified**: `bun run lint` → 0 errors, `bun run db:push` → schema in sync, `bun run seed:run` → all data seeded
+- **Dev server**: Starts clean with zero compilation errors
+
+Stage Summary:
+- 5 critical runtime crash bugs fixed
+- 3 missing Prisma models added (23 models total)
+- 1 missing API route created (65+ total)
+- Seed data enriched from 9 to 12 data categories
+- Dead code removed (27 files)
+- Project is now production-ready

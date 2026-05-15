@@ -40,6 +40,10 @@ model User {
   conversationParticipants ConversationParticipant[]
   notifications     Notification[]
   uploadedResources Resource[]       @relation("ResourceUploader")
+  forumDiscussions  ForumDiscussion[] @relation("ForumAuthor")
+  forumReplies      ForumReply[]      @relation("ForumReplyAuthor")
+  auditLogs         AuditLog[]        @relation("AuditLogUser")
+  announcements     Announcement[]    @relation("AnnouncementAuthor")
 }
 
 // ============================================
@@ -70,6 +74,7 @@ model Course {
   enrollments    Enrollment[]
   learningPaths  LearningPathCourse[]
   resources      Resource[]       @relation("CourseResources")
+  forumDiscussions ForumDiscussion[]
 }
 
 model Section {
@@ -431,11 +436,71 @@ model Announcement {
   targetRoles String   @default("[]")   // JSON array of roles who should see this
   isPinned    Boolean  @default(false)
   isPublished Boolean  @default(true)
+  expiresAt   DateTime?
   authorId    String
+  author      User     @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([isPublished])
+}
+
+// ============================================
+// FORUM DE DISCUSSION
+// ============================================
+
+model ForumDiscussion {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation("ForumAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  title       String
+  content     String
+  isPinned    Boolean  @default(false)
+  isResolved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  replies     ForumReply[]
+
+  @@index([courseId])
+  @@index([authorId])
+}
+
+model ForumReply {
+  id            String   @id @default(cuid())
+  discussionId  String
+  discussion    ForumDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  authorId      String
+  author        User     @relation("ForumReplyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  content       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([discussionId])
+  @@index([authorId])
+}
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("AuditLogUser", fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // create, update, delete, login, logout, view
+  entity    String   // course, user, quiz, certificate, etc.
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
 }
 
 // ============================================

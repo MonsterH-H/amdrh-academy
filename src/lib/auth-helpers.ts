@@ -8,6 +8,44 @@ interface AuthUser {
 }
 
 /**
+ * Require authentication (any authenticated user).
+ * Returns { authorized: true, role, userId, user } or { authorized: false, response }.
+ */
+export async function requireAuth(
+  req: NextRequest,
+): Promise<{ authorized: true; role: string; userId: string; user: AuthUser } | { authorized: false; response: NextResponse }> {
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId") || "";
+
+  if (!userId) {
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { error: "Authentification requise" },
+        { status: 401 },
+      ),
+    };
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true, isActive: true },
+  });
+
+  if (!user || !user.isActive) {
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { error: "Utilisateur non trouvé ou inactif" },
+        { status: 401 },
+      ),
+    };
+  }
+
+  return { authorized: true, role: user.role, userId: user.id, user };
+}
+
+/**
  * Check if the requesting user has the required role(s).
  * Expects `userId` query param (role is fetched from DB).
  * Returns { authorized: true, role, userId } or { authorized: false }.
