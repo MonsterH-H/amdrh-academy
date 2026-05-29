@@ -79,10 +79,10 @@ export const useAppStore = create<AppState>()(
       user: null,
       isAuthenticated: false,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      logout: () => set({ user: null, isAuthenticated: false, currentView: "landing" }),
+      logout: () => set({ user: null, isAuthenticated: false, currentView: "login" }),
 
       // Navigation with role guard
-      currentView: "landing",
+      currentView: "login",
       viewParams: {},
       navigate: (view, params = {}) => {
         const { currentView, viewParams: currentParams, user } = get();

@@ -70,7 +70,7 @@ export function LoginPage() {
           </button>
           <h2 className="text-2xl font-bold text-foreground">Connexion</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Accédez à votre espace de formation
+            Espace réservé aux membres AMDRH-FRMHB
           </p>
         </div>
 
@@ -191,15 +191,12 @@ export function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Pas encore de compte ?{" "}
-          <button
-            onClick={() => navigate("register")}
-            className="text-primary font-semibold hover:underline"
-          >
-            Créer un compte
-          </button>
+        {/* Internal federation app — registration by admin only */}
+
+        <p className="text-center text-[11px] text-muted-foreground/60 mt-8 max-w-sm mx-auto">
+          Association Marocaine Des Arbitres de Handball — Partenaire académique officiel FRMHB
         </p>
+
       </div>
     </div>
   );
