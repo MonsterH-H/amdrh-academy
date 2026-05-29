@@ -54,13 +54,17 @@ function getSecurityHeaders(): HeadersInit {
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     "Content-Security-Policy": [
       "default-src 'self'",
-      "script-src 'self' https://cdn.jsdelivr.net",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https://*.vercel-storage.dev https://*.neon.tech https://avatars.githubusercontent.com",
-      "font-src 'self'",
-      "connect-src 'self' https://*.neon.tech wss://*",
+      // Next.js Turbopack & runtime need inline scripts + eval for HMR, chunk loading, and __webpack_chunk_loading__
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https://*.vercel-storage.dev https://*.neon.tech https://avatars.githubusercontent.com https://uploadthing.com https://utfs.io",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://*.neon.tech https://uploadthing.com https://utfs.io wss://* https://cdn.jsdelivr.net",
       "frame-src 'none'",
       "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
     ].join('; '),
   };
 }

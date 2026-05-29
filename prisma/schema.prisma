@@ -362,6 +362,7 @@ model Resource {
   description   String?
   fileName      String
   filePath      String
+  fileKey       String?                // UploadThing file key for deletion
   fileSize      Int      @default(0)
   fileType      String   @default("AUTRE") // VIDEO, PDF, IMAGE, DOCUMENT, AUDIO, ARCHIVE, AUTRE
   mimeType      String?
