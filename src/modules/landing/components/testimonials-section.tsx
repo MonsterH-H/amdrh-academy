@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Star, Quote, Landmark, Globe, Lock, MapPin } from "lucide-react";
 
@@ -44,7 +43,7 @@ const containerVariants = {
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
@@ -52,7 +51,7 @@ const cardVariants = {
 
 export function TestimonialsSection() {
   return (
-    <section id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-gray-100">
       <div className="max-w-6xl mx-auto">
         <motion.div
           className="text-center mb-12 sm:mb-16"
@@ -61,8 +60,8 @@ export function TestimonialsSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">Ils témoignent</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">Des professionnels du handball marocain partagent leur expérience.</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Ils témoignent</h2>
+          <p className="text-gray-500 max-w-lg mx-auto">Des professionnels du handball marocain partagent leur expérience.</p>
         </motion.div>
 
         <motion.div
@@ -76,7 +75,7 @@ export function TestimonialsSection() {
             <motion.div
               key={t.name}
               variants={cardVariants}
-              className="bg-[#FAFAFA] rounded-xl border border-gray-200/80 p-6 hover:shadow-lg hover:shadow-emerald-500/[0.04] hover:-translate-y-1 transition-all duration-300 ease-out relative overflow-hidden group"
+              className="bg-gray-50 rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:shadow-emerald-500/[0.04] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
             >
               {/* Emerald left accent */}
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-l-xl" />
@@ -95,16 +94,16 @@ export function TestimonialsSection() {
                 </div>
 
                 {/* Quote content */}
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">&ldquo;{t.content}&rdquo;</p>
+                <p className="text-sm text-gray-600 leading-relaxed mb-5">&ldquo;{t.content}&rdquo;</p>
 
                 {/* Author info */}
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-200/60">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
                     {t.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground text-sm">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                    <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role}</p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3 text-emerald-500" />
                       <span className="text-[11px] text-emerald-600 font-medium">{t.region}</span>
@@ -133,8 +132,8 @@ export function TrustSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">Confiance & Sécurité</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto text-sm">Votre réussite et la protection de vos données sont notre priorité.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Confiance & Sécurité</h2>
+          <p className="text-gray-500 max-w-lg mx-auto text-sm">Votre réussite et la protection de vos données sont notre priorité.</p>
         </motion.div>
 
         <motion.div
@@ -150,17 +149,13 @@ export function TrustSection() {
               <motion.div
                 key={badge.title}
                 variants={cardVariants}
-                className={cn(
-                  "flex flex-col items-center text-center bg-white rounded-xl border border-gray-200/80 p-6 sm:p-8",
-                  "hover:shadow-lg hover:shadow-emerald-500/[0.04] hover:-translate-y-1 hover:border-emerald-500/20",
-                  "transition-all duration-300 ease-out"
-                )}
+                className="flex flex-col items-center text-center bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-emerald-200 transition-all duration-300"
               >
-                <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-colors duration-300">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4 border border-emerald-100 hover:bg-emerald-100 transition-colors duration-300">
                   <Icon className="w-7 h-7 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-foreground mb-1">{badge.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{badge.description}</p>
+                <h3 className="font-bold text-gray-900 mb-1">{badge.title}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">{badge.description}</p>
               </motion.div>
             );
           })}

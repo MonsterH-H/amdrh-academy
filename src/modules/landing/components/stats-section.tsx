@@ -45,10 +45,7 @@ export function StatsSection() {
   return (
     <section id="stats" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-gray-900 rounded-2xl p-8 sm:p-12 relative overflow-hidden">
-          {/* Subtle gradient overlay */}
-          <div aria-hidden="true" className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at top right, rgba(16,185,129,0.15) 0%, transparent 50%), radial-gradient(ellipse at bottom left, rgba(245,158,11,0.1) 0%, transparent 50%)" }} />
-
+        <div className="bg-gray-900 rounded-2xl p-8 sm:p-12 relative overflow-hidden border border-gray-800">
           <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-6">
             {stats.map((stat, index) => (
               <motion.div
@@ -64,17 +61,6 @@ export function StatsSection() {
                 </p>
                 <p className="text-sm text-gray-400 font-medium">{stat.label}</p>
               </motion.div>
-            ))}
-          </div>
-
-          {/* Separator lines between stats (desktop) */}
-          <div className="hidden sm:block absolute top-1/4 bottom-1/4 left-1/4 right-1/4" aria-hidden="true">
-            {[33.33, 66.66].map((pos) => (
-              <div
-                key={pos}
-                className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-emerald-500/20 to-transparent"
-                style={{ left: `${pos}%` }}
-              />
             ))}
           </div>
         </div>

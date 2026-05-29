@@ -2,11 +2,12 @@
  * useRealtime - Socket.IO client hook for AMDRH platform
  * 
  * Features:
+ * - Graceful degradation when service is unavailable (no console errors)
  * - Auto-reconnect with exponential backoff
  * - Connection state management
  * - Event subscription helpers
- * - Graceful cleanup on unmount
  * - Role-based room joining
+ * - 60-second cooldown after connection failure (prevents 404 spam)
  */
 
 "use client";
@@ -41,8 +42,10 @@ function getOrCreateSocket(userId: string, role: string): Socket | null {
 
   // Clean up old socket
   if (socketInstance) {
-    socketInstance.removeAllListeners();
-    socketInstance.disconnect();
+    try {
+      socketInstance.removeAllListeners();
+      socketInstance.disconnect();
+    } catch { /* ignore cleanup errors */ }
     socketInstance = null;
   }
 
@@ -52,8 +55,8 @@ function getOrCreateSocket(userId: string, role: string): Socket | null {
       transports: ["polling", "websocket"],
       auth: { userId, role },
       reconnection: true,
-      reconnectionAttempts: 3,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 2,
+      reconnectionDelay: 3_000,
       reconnectionDelayMax: 10_000,
       timeout: 5_000,
     });
@@ -68,6 +71,7 @@ function getOrCreateSocket(userId: string, role: string): Socket | null {
     });
 
     socketInstance.on("connect_error", () => {
+      // Silently handle — don't spam console
       connectionListeners.forEach(fn => fn(false));
     });
 
@@ -109,15 +113,18 @@ export function useRealtime(): UseRealtimeReturn {
   useEffect(() => {
     if (!isAuthenticated || !user) {
       if (socketRef.current) {
-        socketRef.current.disconnect();
+        try {
+          socketRef.current.disconnect();
+        } catch { /* ignore */ }
         socketRef.current = null;
       }
-      // isConnected will naturally be stale but harmless
       return;
     }
 
     const socket = getOrCreateSocket(user.id, user.role);
     if (!socket) {
+      // Socket unavailable — clean up any existing ref, but let connected state persist naturally
+      socketRef.current = null;
       return;
     }
     socketRef.current = socket;
@@ -138,51 +145,53 @@ export function useRealtime(): UseRealtimeReturn {
 
     return () => {
       connectionListeners.delete(handleConnectionChange);
-      socket.off("notifications:count");
-      socket.off("notifications:allRead");
+      if (socketRef.current) {
+        socketRef.current.off("notifications:count");
+        socketRef.current.off("notifications:allRead");
+      }
     };
   }, [isAuthenticated, user, setUnreadCount]);
 
   const emit = useCallback((event: string, data?: unknown) => {
-    socketRef.current?.emit(event, data);
+    try { socketRef.current?.emit(event, data); } catch { /* silent */ }
   }, []);
 
   const on = useCallback((event: string, handler: (...args: unknown[]) => void) => {
-    socketRef.current?.on(event, handler);
-    return () => {
-      socketRef.current?.off(event, handler);
-    };
+    try {
+      socketRef.current?.on(event, handler);
+      return () => {
+        try { socketRef.current?.off(event, handler); } catch { /* silent */ }
+      };
+    } catch { return () => {}; }
   }, []);
 
   const subscribeNotifications = useCallback(() => {
-    socketRef.current?.emit("notifications:subscribe");
+    try { socketRef.current?.emit("notifications:subscribe"); } catch { /* silent */ }
   }, []);
 
   const subscribeConversation = useCallback((conversationId: string) => {
-    socketRef.current?.emit("messages:subscribe", { conversationId });
+    try { socketRef.current?.emit("messages:subscribe", { conversationId }); } catch { /* silent */ }
     return () => {
-      socketRef.current?.emit("messages:unsubscribe", { conversationId });
+      try { socketRef.current?.emit("messages:unsubscribe", { conversationId }); } catch { /* silent */ }
     };
   }, []);
 
   const unsubscribeConversation = useCallback((conversationId: string) => {
-    socketRef.current?.emit("messages:unsubscribe", { conversationId });
+    try { socketRef.current?.emit("messages:unsubscribe", { conversationId }); } catch { /* silent */ }
   }, []);
 
   const sendTyping = useCallback((conversationId: string, isTyping: boolean) => {
-    socketRef.current?.emit("messages:typing", { conversationId, isTyping });
+    try { socketRef.current?.emit("messages:typing", { conversationId, isTyping }); } catch { /* silent */ }
   }, []);
 
   const sendMessage = useCallback((data: { conversationId: string; messageId: string; content: string; receiverId?: string }) => {
-    socketRef.current?.emit("messages:new", data);
+    try { socketRef.current?.emit("messages:new", data); } catch { /* silent */ }
   }, []);
 
   const updateProgress = useCallback((data: { courseId: string; enrollmentId: string; progress: number; lessonId?: string }) => {
-    socketRef.current?.emit("progress:update", data);
+    try { socketRef.current?.emit("progress:update", data); } catch { /* silent */ }
   }, []);
 
-  // Return isConnected as state (not ref) — safe for render
-  // Note: socket ref is intentionally NOT returned to avoid ref-during-render lint error
   return {
     isConnected,
     emit,
