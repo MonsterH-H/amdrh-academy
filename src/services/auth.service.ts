@@ -4,7 +4,7 @@
  * Each method is typed, documented with JSDoc, and handles errors gracefully.
  */
 
-import type { User } from "@/store/auth";
+import type { User } from "@/store/app";
 
 // ─────────────────────────────────────────────────────────────
 // Types

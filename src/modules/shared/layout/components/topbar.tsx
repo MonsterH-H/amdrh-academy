@@ -9,7 +9,7 @@ import { NotificationPopover } from "./notification-popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // ──────────────────────────────────────────────────────────
-// TopBar component
+// TopBar component — premium glass header
 // ──────────────────────────────────────────────────────────
 
 export function TopBar() {
@@ -21,7 +21,9 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 bg-card/80 backdrop-blur-xl border-b border-border/40 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
+        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
+        "bg-card/60 backdrop-blur-xl border-b border-border/30",
+        "shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
         sidebarCollapsed ? "lg:left-[72px]" : "lg:left-[280px]"
       )}
     >
@@ -41,15 +43,17 @@ export function TopBar() {
 
         {/* Quick profile with realtime status indicator */}
         <div className="relative">
-          <Avatar className="w-8 h-8 cursor-pointer" onClick={() => navigate("profile")}>
+          <Avatar className="w-8 h-8 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300" onClick={() => navigate("profile")}>
             <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
               {getInitials(user.nom, user.prenom)}
             </AvatarFallback>
           </Avatar>
           <span
             className={cn(
-              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white transition-colors duration-300",
-              isConnected ? "bg-green-500" : "bg-yellow-400 animate-pulse"
+              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card transition-all duration-300",
+              isConnected
+                ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"
+                : "bg-yellow-400 animate-pulse"
             )}
             title={isConnected ? "En ligne" : "Reconnexion..."}
           />

@@ -3,7 +3,7 @@
  * @description Course-related API service — listing, detail, enrollment, progress, and creation.
  */
 
-import type { User } from "@/store/auth";
+import type { User } from "@/store/app";
 import { request } from "./auth.service";
 
 // ─────────────────────────────────────────────────────────────

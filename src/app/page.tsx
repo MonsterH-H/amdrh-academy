@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, lazy, Suspense, type Component
 import { useAppStore, type AppView } from "@/store/app";
 import { TopBar, MobileBottomNav } from "@/modules/shared/layout";
 import { useRealtime } from "@/hooks/use-realtime";
+import { motion } from "framer-motion";
 import { CircleDot, AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -84,9 +85,14 @@ const viewComponentMap: Record<string, ComponentType> = {
 function PageLoader() {
   return (
     <div className="flex items-center justify-center py-20">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground">Chargement...</p>
+      <div className="flex flex-col items-center gap-4">
+        {/* Premium emerald spinner */}
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin shadow-[0_0_12px_rgba(16,185,129,0.3)]" />
+          <div className="absolute inset-1.5 rounded-full border-2 border-transparent border-b-emerald-300/60 animate-spin [animation-direction:reverse] [animation-duration:1.5s]" />
+        </div>
+        <p className="text-sm text-muted-foreground/70 font-medium">Chargement...</p>
       </div>
     </div>
   );
@@ -95,7 +101,7 @@ function PageLoader() {
 function AppFooter() {
   const { user } = useAppStore();
   return (
-    <footer className="hidden lg:block border-t border-border/40 bg-card/60 backdrop-blur-sm mt-auto">
+    <footer className="hidden lg:block border-t-2 border-t-primary/20 border-b border-b-border/40 bg-card/60 backdrop-blur-md mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
@@ -188,26 +194,57 @@ function AppContent() {
   const handleRetry = useCallback(() => { setViewError(null); }, []);
 
   const renderView = () => {
-    if (viewError) return <ViewErrorFallback error={viewError} onRetry={handleRetry} />;
-    if (currentView === "landing") return <LandingPage />;
-    if (currentView === "login") return <LoginPage />;
-    if (currentView === "register") return <RegisterPage />;
-    if (currentView === "forgot-password") return <ForgotPasswordPage />;
-    if (currentView === "reset-password") return <ResetPasswordPage />;
-    if (!isAuthenticated) return <LandingPage />;
+    if (viewError) return (
+      <motion.div
+        key="error"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <ViewErrorFallback error={viewError} onRetry={handleRetry} />
+      </motion.div>
+    );
+    if (currentView === "landing") return <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}><LandingPage /></motion.div>;
+    if (currentView === "login") return <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><LoginPage /></motion.div>;
+    if (currentView === "register") {
+      // Registration disabled — redirect to login
+      if (typeof window !== "undefined") {
+        const { navigate } = useAppStore.getState();
+        navigate("login");
+      }
+      return null;
+    }
+    if (currentView === "forgot-password") return <motion.div key="forgot-password" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><ForgotPasswordPage /></motion.div>;
+    if (currentView === "reset-password") return <motion.div key="reset-password" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><ResetPasswordPage /></motion.div>;
+    if (!isAuthenticated) return <motion.div key="landing-fallback" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}><LandingPage /></motion.div>;
 
     const Component = viewComponentMap[currentView];
     if (Component) {
       return (
-        <ErrorBoundary key={currentView} onError={setViewError}>
-          <Suspense fallback={<PageLoader />}><Component /></Suspense>
-        </ErrorBoundary>
+        <motion.div
+          key={currentView}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          <ErrorBoundary key={currentView} onError={setViewError}>
+            <Suspense fallback={<PageLoader />}><Component /></Suspense>
+          </ErrorBoundary>
+        </motion.div>
       );
     }
     return (
-      <ErrorBoundary key={currentView} onError={setViewError}>
-        <Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>
-      </ErrorBoundary>
+      <motion.div
+        key="default"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        <ErrorBoundary key={currentView} onError={setViewError}>
+          <Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>
+        </ErrorBoundary>
+      </motion.div>
     );
   };
 

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+// Re-export unified RBAC permission functions
+export { hasPermission, hasAnyPermission, requirePermission, PermissionError } from './rbac'
+
 interface AuthUser {
   id: string;
   role: string;
@@ -127,16 +130,20 @@ export async function getUserFromRequest(req: NextRequest): Promise<{ userId: st
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId") || "";
   if (!userId) return null;
-  
-  // Check if role is explicitly provided (for performance)
-  const explicitRole = searchParams.get("role");
-  if (explicitRole) return { userId, role: explicitRole };
-  
-  // Fetch role from DB
+
+  // ALWAYS fetch role from the database — never trust client-supplied role
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { role: true, isActive: true },
   });
   if (!user || !user.isActive) return null;
+
+  // If an explicit role was provided, verify it matches the DB role.
+  // Mismatches indicate a spoofing attempt; silently use the DB role.
+  const explicitRole = searchParams.get("role");
+  if (explicitRole && explicitRole !== user.role) {
+    console.warn(`[Auth] Role mismatch for userId=${userId}: client="${explicitRole}", db="${user.role}"`);
+  }
+
   return { userId, role: user.role };
 }

@@ -1,34 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AppView } from "@/types/navigation";
+import type { User } from "@/types/user";
 import { ROLE_PERMISSIONS } from "@/lib/constants";
 
-export type { AppView };
+export type { AppView, User };
 
-export interface User {
-  id: string;
-  email: string;
-  nom: string;
-  prenom: string;
-  role: string;
-  avatar?: string | null;
-  telephone?: string | null;
-  club?: string | null;
-  region?: string | null;
-  bio?: string | null;
-  licenceNumber?: string | null;
-  emailVerified?: boolean | null;
-  createdAt?: Date | string | null;
-  isActive?: boolean;
-  lastLoginAt?: Date | string | null;
-}
+const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface AppState {
   // Auth
   user: User | null;
   isAuthenticated: boolean;
+  lastActivityAt: number;
   setUser: (user: User | null) => void;
   logout: () => void;
+  checkSessionExpiry: () => boolean;
 
   // Navigation
   currentView: AppView;
@@ -52,7 +39,7 @@ interface AppState {
 }
 
 interface HistoryEntry { view: AppView; params: Record<string, string> }
-const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }]; // Already correct
+const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }];
 
 /**
  * Check if a user with a given role can access a specific view.
@@ -61,7 +48,7 @@ const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }]; // Alread
 function canAccessView(view: string, role: string): boolean {
   // Public views — always accessible
   const publicViews = [
-    "landing", "login", "register", "forgot-password", "reset-password",
+    "landing", "login", "forgot-password", "reset-password",
     "conversation", // Can access any conversation they're part of
   ];
   if (publicViews.includes(view)) return true;
@@ -78,14 +65,37 @@ export const useAppStore = create<AppState>()(
       // Auth
       user: null,
       isAuthenticated: false,
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
-      logout: () => set({ user: null, isAuthenticated: false, currentView: "landing" }),
+      lastActivityAt: Date.now(),
+      setUser: (user) => set({
+        user,
+        isAuthenticated: !!user,
+        lastActivityAt: user ? Date.now() : 0,
+      }),
+      logout: () => set({
+        user: null,
+        isAuthenticated: false,
+        currentView: "landing",
+        lastActivityAt: 0,
+      }),
+      checkSessionExpiry: () => {
+        const { lastActivityAt, user } = get();
+        if (!user) return false;
+        if (lastActivityAt && Date.now() - lastActivityAt > SESSION_TIMEOUT_MS) {
+          get().logout();
+          console.warn("[Session] Session expired (24h inactivity), logged out");
+          return false;
+        }
+        return true;
+      },
 
       // Navigation with role guard
       currentView: "landing",
       viewParams: {},
       navigate: (view, params = {}) => {
         const { currentView, viewParams: currentParams, user } = get();
+
+        // Check session expiry before navigation
+        if (!get().checkSessionExpiry()) return;
 
         // Role-based access control
         if (user?.role && !canAccessView(view, user.role)) {
@@ -95,7 +105,7 @@ export const useAppStore = create<AppState>()(
 
         viewHistory.push({ view: currentView, params: currentParams });
         if (viewHistory.length > 50) viewHistory.splice(0, viewHistory.length - 50);
-        set({ currentView: view, viewParams: params });
+        set({ currentView: view, viewParams: params, lastActivityAt: Date.now() });
         window.scrollTo(0, 0);
       },
       goBack: () => {
@@ -124,10 +134,25 @@ export const useAppStore = create<AppState>()(
       name: 'amdrh-session',
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
+        // Do NOT persist isAuthenticated — derived from user presence on hydration
         currentView: state.currentView,
         sidebarCollapsed: state.sidebarCollapsed,
+        lastActivityAt: state.lastActivityAt,
       }),
+      // Re-derive isAuthenticated from user on hydration
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Check session expiry on hydration
+          if (state.user && state.lastActivityAt) {
+            if (Date.now() - state.lastActivityAt > SESSION_TIMEOUT_MS) {
+              state.user = null;
+              state.currentView = "landing";
+              state.lastActivityAt = 0;
+            }
+          }
+          state.isAuthenticated = !!state.user;
+        }
+      },
     }
   )
 );

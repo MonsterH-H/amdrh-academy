@@ -3,7 +3,7 @@
  * @description Profile service — fetching/updating user profile, changing password, and profile stats.
  */
 
-import type { User } from "@/store/auth";
+import type { User } from "@/store/app";
 import { request } from "./auth.service";
 
 // ─────────────────────────────────────────────────────────────

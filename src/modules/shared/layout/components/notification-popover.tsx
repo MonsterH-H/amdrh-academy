@@ -87,10 +87,10 @@ export function NotificationPopover({ unreadCount, setUnreadCount, onNavigate }:
   return (
     <Popover open={notifOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-lg">
-          <Bell className="w-5 h-5 text-muted-foreground" />
+        <Button variant="ghost" size="icon" className="relative rounded-lg hover:bg-muted/50 transition-all duration-200">
+          <Bell className={cn("w-5 h-5 text-muted-foreground transition-colors duration-200", unreadCount > 0 && "text-foreground")} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center px-1">{unreadCount}</span>
+            <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center px-1 animate-scaleIn">{unreadCount}</span>
           )}
         </Button>
       </PopoverTrigger>

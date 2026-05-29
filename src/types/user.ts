@@ -1,16 +1,30 @@
+// src/types/user.ts — Single source of truth for User type
+
+export type UserRole = 'ADMIN' | 'FORMATEUR' | 'ARBITRE' | 'ENTRAINEUR' | 'JOUEUR'
+
+export const ALL_ROLES: UserRole[] = ['ADMIN', 'FORMATEUR', 'ARBITRE', 'ENTRAINEUR', 'JOUEUR']
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN: 'Administrateur',
+  FORMATEUR: 'Formateur',
+  ARBITRE: 'Arbitre',
+  ENTRAINEUR: 'Entraîneur',
+  JOUEUR: 'Joueur',
+}
+
 export interface User {
   id: string;
   email: string;
   nom: string;
   prenom: string;
-  role: string;
+  role: UserRole;
   avatar?: string | null;
   telephone?: string | null;
   club?: string | null;
   region?: string | null;
   bio?: string | null;
   licenceNumber?: string | null;
-  emailVerified?: Date | string | null;
+  emailVerified?: boolean | null;
   createdAt?: Date | string | null;
   isActive?: boolean;
   lastLoginAt?: Date | string | null;

@@ -1,4 +1,6 @@
 export type { User, UserProfile, ProfileStats, CompletenessDetail, ProfileCompleteness } from "./user";
+export type { UserRole } from "./user";
+export { ALL_ROLES, ROLE_LABELS } from "./user";
 
 export type {
   Course,

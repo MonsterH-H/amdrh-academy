@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 // ──────────────────────────────────────────────────────────
-// Sidebar component
+// Sidebar component — premium glass-morphism design
 // ──────────────────────────────────────────────────────────
 
 export function Sidebar() {
@@ -34,16 +34,16 @@ export function Sidebar() {
 
   const navContent = (collapsed: boolean) => (
     <div className="flex flex-col h-full">
-      {/* Logo + Role badge */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-border/50 flex-shrink-0">
-        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+      {/* Logo + Role badge — cleaner branding */}
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-border/40 flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
           <CircleDot className="w-5 h-5 text-white" />
         </div>
         {!collapsed && (
           <div className="animate-fadeIn flex items-center gap-2 min-w-0">
             <div className="min-w-0">
-              <h1 className="font-bold text-sm text-foreground leading-tight">Académie</h1>
-              <p className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase">AMDRH</p>
+              <h1 className="font-bold text-sm text-foreground leading-tight tracking-tight">Académie</h1>
+              <p className="text-[10px] text-primary/70 font-semibold tracking-[0.15em] uppercase">AMDRH</p>
             </div>
             <Badge
               variant="secondary"
@@ -73,7 +73,7 @@ export function Sidebar() {
                     {i > 0 && <Separator className="my-3" />}
                     <p
                       className={cn(
-                        "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-2",
+                        "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2 px-2",
                         collapsed && "text-center"
                       )}
                     >
@@ -95,50 +95,57 @@ export function Sidebar() {
         </div>
       </ScrollArea>
 
-      {/* User section — pinned at bottom */}
-      <div className="border-t border-border/50 p-3 flex-shrink-0">
+      {/* User section — polished with emerald avatar ring */}
+      <div className="border-t border-border/40 p-3 flex-shrink-0">
         <button
           onClick={() => navigate("profile")}
           className={cn(
-            "w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted/60 transition-all duration-200",
+            "w-full flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-muted/50 transition-all duration-200 group",
             collapsed && "justify-center"
           )}
         >
-          <Avatar className="w-8 h-8 flex-shrink-0">
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-              {getInitials(user.nom, user.prenom)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative flex-shrink-0">
+            <Avatar className="w-9 h-9">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                {getInitials(user.nom, user.prenom)}
+              </AvatarFallback>
+            </Avatar>
+            {/* Emerald ring around avatar */}
+            <span className="absolute -inset-0.5 rounded-full ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all duration-300" />
+          </div>
           {!collapsed && (
             <div className="flex-1 text-left min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{user.prenom} {user.nom}</p>
-              <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0 h-4", ROLE_COLORS[user.role] || "")}>
+              <p className="text-sm font-semibold text-foreground truncate leading-tight">{user.prenom} {user.nom}</p>
+              <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0 h-4 mt-0.5", ROLE_COLORS[user.role] || "")}>
                 {ROLE_LABELS[user.role] || user.role}
               </Badge>
             </div>
           )}
         </button>
+        {/* Déconnexion button */}
         <button
           onClick={() => { logout(); navigate("landing"); }}
           className={cn(
-            "w-full flex items-center gap-3 rounded-lg px-2 py-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200 mt-1",
+            "w-full flex items-center gap-3 rounded-xl px-2 py-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200 mt-1 group",
             collapsed && "justify-center"
           )}
         >
-          <LogOut className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span className="text-xs">Déconnexion</span>}
+          <LogOut className="w-4 h-4 flex-shrink-0 group-hover:rotate-12 transition-transform duration-200" />
+          {!collapsed && <span className="text-xs font-medium">Déconnexion</span>}
         </button>
       </div>
 
       {/* Collapse toggle — desktop only */}
-      <div className="hidden lg:block border-t border-border/50 p-2 flex-shrink-0">
+      <div className="hidden lg:block border-t border-border/40 p-2 flex-shrink-0">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="w-full flex items-center justify-center"
+          className="w-full flex items-center justify-center rounded-lg hover:bg-muted/50 transition-all duration-200"
         >
-          {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          <div className={cn("transition-transform duration-300 ease-out", sidebarCollapsed && "rotate-180")}>
+            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </div>
         </Button>
       </div>
     </div>
@@ -146,10 +153,12 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — glass morphism */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-card border-r border-border/60 z-40 transition-all duration-300 ease-out",
+          "hidden lg:flex flex-col fixed left-0 top-0 bottom-0 z-40 transition-all duration-300 ease-out",
+          "bg-card/70 backdrop-blur-xl border-r border-border/40",
+          "shadow-[0_0_40px_rgba(0,0,0,0.04)]",
           sidebarCollapsed ? "w-[72px]" : "w-[280px]"
         )}
       >
@@ -162,12 +171,12 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-2.5 sm:top-3 left-3 z-50 bg-card shadow-sm border border-border/50 rounded-lg"
+            className="lg:hidden fixed top-2.5 sm:top-3 left-3 z-50 bg-card/80 backdrop-blur-md shadow-sm border border-border/40 rounded-xl hover:bg-muted/50 transition-all duration-200"
           >
             <Menu className="w-5 h-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-[280px]">
+        <SheetContent side="left" className="p-0 w-[280px] bg-card/95 backdrop-blur-xl border-border/40">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           {navContent(false)}
         </SheetContent>

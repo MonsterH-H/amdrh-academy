@@ -52,6 +52,16 @@ function getSecurityHeaders(): HeadersInit {
     "Permissions-Policy":
       "camera=(), microphone=(), geolocation=(), interest-cohort=()",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Content-Security-Policy": [
+      "default-src 'self'",
+      "script-src 'self' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https://*.vercel-storage.dev https://*.neon.tech https://avatars.githubusercontent.com",
+      "font-src 'self'",
+      "connect-src 'self' https://*.neon.tech wss://*",
+      "frame-src 'none'",
+      "frame-ancestors 'none'",
+    ].join('; '),
   };
 }
 
@@ -67,8 +77,15 @@ function getCORSHeaders(request: NextRequest): HeadersInit {
     "Access-Control-Max-Age": "86400",
   };
 
-  // Only set CORS for allowed origins or same-origin
-  if (!origin || ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin)) {
+  // Only set CORS for explicitly allowed origins or same-origin requests.
+  // When ALLOWED_ORIGINS is empty, do NOT allow wildcard with credentials.
+  if (ALLOWED_ORIGINS.length === 0) {
+    // No explicit origins configured — only allow same-origin (no origin header)
+    if (!origin) {
+      corsHeaders["Access-Control-Allow-Origin"] = "*";
+    }
+    // If an origin IS present, don't set Allow-Origin at all (blocks cross-origin)
+  } else if (!origin || ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin)) {
     corsHeaders["Access-Control-Allow-Origin"] = origin || "*";
     corsHeaders["Access-Control-Allow-Credentials"] = "true";
   }
@@ -133,12 +150,6 @@ export function proxy(request: NextRequest) {
   }
 
   // 4. Add request metadata headers
-  const clientIP =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown";
-
-  response.headers.set("X-Client-IP", clientIP);
   response.headers.set("X-Request-ID", generateRequestId());
 
   return response;
