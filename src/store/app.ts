@@ -52,7 +52,7 @@ interface AppState {
 }
 
 interface HistoryEntry { view: AppView; params: Record<string, string> }
-const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }];
+const viewHistory: HistoryEntry[] = [{ view: "landing", params: {} }]; // Already correct
 
 /**
  * Check if a user with a given role can access a specific view.
@@ -79,10 +79,10 @@ export const useAppStore = create<AppState>()(
       user: null,
       isAuthenticated: false,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      logout: () => set({ user: null, isAuthenticated: false, currentView: "login" }),
+      logout: () => set({ user: null, isAuthenticated: false, currentView: "landing" }),
 
       // Navigation with role guard
-      currentView: "login",
+      currentView: "landing",
       viewParams: {},
       navigate: (view, params = {}) => {
         const { currentView, viewParams: currentParams, user } = get();

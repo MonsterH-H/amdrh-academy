@@ -1,11 +1,30 @@
 import { PrismaClient } from '@prisma/client'
-import { Pool, neonConfig } from '@neondatabase/serverless'
-import { PrismaNeon } from '@prisma/adapter-neon'
-import ws from 'ws'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
-// Required for Neon serverless driver in Node.js environment
-if (typeof WebSocket === 'undefined') {
-  neonConfig.webSocketConstructor = ws as unknown as typeof WebSocket
+/**
+ * Load .env file manually as fallback for the NEON_DATABASE_URL.
+ * This handles cases where shell environment has a stale DATABASE_URL.
+ */
+function loadEnvValue(key: string): string | undefined {
+  const envVal = process.env[key]
+  if (envVal && envVal.startsWith('postgresql://')) return envVal
+
+  try {
+    const envPath = join(process.cwd(), '.env')
+    const content = readFileSync(envPath, 'utf-8')
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (trimmed.startsWith(`${key}=`)) {
+        let value = trimmed.slice(key.length + 1).trim()
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+          value = value.slice(1, -1)
+        }
+        if (value.startsWith('postgresql://')) return value
+      }
+    }
+  } catch { /* ignore */ }
+  return undefined
 }
 
 const globalForPrisma = globalThis as unknown as {
@@ -13,17 +32,20 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-  const databaseUrl = process.env.DATABASE_URL
-  const directUrl = process.env.DIRECT_URL
+  const neonUrl = loadEnvValue('NEON_DATABASE_URL') || loadEnvValue('DATABASE_URL')
 
-  if (databaseUrl && databaseUrl.startsWith('postgresql://')) {
-    // Neon PostgreSQL connection
-    const pool = new Pool({ connectionString: directUrl || databaseUrl })
-    const adapter = new PrismaNeon(pool)
-    return new PrismaClient({ adapter } as never)
+  if (neonUrl) {
+    // Direct PostgreSQL connection (works on Node.js server, Vercel, etc.)
+    return new PrismaClient({
+      datasources: {
+        db: {
+          url: neonUrl,
+        },
+      },
+    })
   }
 
-  // Fallback for local SQLite or other databases
+  // Fallback for local SQLite
   return new PrismaClient()
 }
 
