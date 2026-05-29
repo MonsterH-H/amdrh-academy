@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
-import { ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, ALL_ROLES } from "@/lib/permissions";
+import { ALL_PERMISSIONS_FLAT, DEFAULT_ROLE_PERMISSIONS, ALL_ROLES } from "@/lib/permissions";
 
 /**
  * POST /api/admin/permissions/seed
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     let updated = 0;
 
     // Créer/mettre à jour les permissions
-    for (const permDef of ALL_PERMISSIONS) {
+    for (const permDef of ALL_PERMISSIONS_FLAT) {
       const existing = await db.permission.findUnique({
         where: { name: permDef.name },
       });
@@ -67,8 +67,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // Supprimer les permissions orphelines (qui ne sont plus dans ALL_PERMISSIONS)
-    const allDefinedNames = ALL_PERMISSIONS.map(p => p.name);
+    // Supprimer les permissions orphelines
+    const allDefinedNames = ALL_PERMISSIONS_FLAT.map(p => p.name);
     const allDbPerms = await db.permission.findMany({ select: { id: true, name: true } });
     const orphaned = allDbPerms.filter(p => !allDefinedNames.includes(p.name));
     if (orphaned.length > 0) {

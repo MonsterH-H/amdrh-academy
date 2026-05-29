@@ -96,6 +96,16 @@ export const ALL_PERMISSIONS: Record<string, { id: string; label: string; descri
 /** Rôles de la plateforme */
 export const ROLES = ["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"] as const;
 export type Role = (typeof ROLES)[number];
+export const ALL_ROLES = ROLES;
+
+/** Permissions aplaties (flat list) pour le seed et l'itération */
+export const ALL_PERMISSIONS_FLAT = Object.values(ALL_PERMISSIONS).flat().map((p) => ({
+  name: p.id,
+  label: p.label,
+  description: p.description,
+  module: p.id.split(".")[0],
+  action: p.id.split(".")[1] || "view",
+}));
 
 export const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Administrateur",
