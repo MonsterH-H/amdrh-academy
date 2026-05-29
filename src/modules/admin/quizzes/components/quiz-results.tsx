@@ -353,7 +353,7 @@ export function QuizResults({
                                   )}
                                 </div>
                                 <span className="flex-shrink-0 text-muted-foreground">
-                                  {r.pointsEarned}/{r.maxPoints} pt{Number(r.maxPoints) > 1 ? "s" : ""}
+                                  {String(r.pointsEarned ?? 0)}/{String(r.maxPoints ?? 0)} pt{Number(r.maxPoints) > 1 ? "s" : ""}
                                 </span>
                               </div>
                             )

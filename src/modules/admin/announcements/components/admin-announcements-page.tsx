@@ -119,7 +119,7 @@ export function AdminAnnouncementsPage() {
     fetchAnnouncements();
   }, [fetchAnnouncements]);
 
-  const handleCreate = (data: AnnouncementFormData) => {
+  const handleCreate = () => {
     setEditingAnnouncement(null);
     setFormOpen(true);
   };

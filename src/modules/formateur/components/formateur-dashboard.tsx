@@ -86,6 +86,7 @@ export function FormateurDashboard() {
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
   if (loading) return <FormateurDashboardSkeleton />;
+  if (!user) return <FormateurDashboardSkeleton />;
   if (error || !data) {
     return (
       <div className="text-center py-20 animate-fadeIn">

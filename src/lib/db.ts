@@ -20,7 +20,7 @@ function createPrismaClient() {
     // Neon PostgreSQL connection
     const pool = new Pool({ connectionString: directUrl || databaseUrl })
     const adapter = new PrismaNeon(pool)
-    return new PrismaClient({ adapter } as any)
+    return new PrismaClient({ adapter } as never)
   }
 
   // Fallback for local SQLite or other databases

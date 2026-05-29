@@ -5,7 +5,7 @@ import { ROLE_PERMISSIONS } from "@/lib/constants";
 
 export type { AppView };
 
-interface User {
+export interface User {
   id: string;
   email: string;
   nom: string;

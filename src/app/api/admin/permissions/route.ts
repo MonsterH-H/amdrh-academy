@@ -112,24 +112,12 @@ export async function PUT(req: NextRequest) {
     // Delete existing role permissions and recreate
     await db.rolePermission.deleteMany({ where: { role } });
 
-    // Create new role permissions
-    await db.rolePermission.createMany({
-      data: permissions.map((permId: string) => {
-        // Find the permission record
-        return { role, permissionId: permId };
-      }),
-      skipDuplicates: true,
-    });
-
-    // Actually we need to link by the permission's DB id, not the name
-    // Let's do this properly
+    // Find permission records by name and create links with proper foreign keys
     const permRecords = await db.permission.findMany({
       where: { name: { in: permissions } },
       select: { id: true, name: true },
     });
 
-    // Delete and recreate with proper foreign keys
-    await db.rolePermission.deleteMany({ where: { role } });
     if (permRecords.length > 0) {
       await db.rolePermission.createMany({
         data: permRecords.map((p) => ({
