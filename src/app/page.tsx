@@ -156,7 +156,7 @@ function SidebarWrapper() {
 }
 
 function AppContent() {
-  const { currentView, user, isAuthenticated, sidebarCollapsed, setUnreadCount } = useAppStore();
+  const { currentView, user, isAuthenticated, sidebarCollapsed, setUnreadCount, navigate } = useAppStore();
   const { subscribeNotifications } = useRealtime();
   const [viewError, setViewError] = useState<Error | null>(null);
 
