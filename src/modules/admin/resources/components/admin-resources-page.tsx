@@ -147,7 +147,7 @@ export function AdminResourcesPage() {
     if (uploadCourseId !== "NONE") formData.append("courseId", uploadCourseId);
     const progressInterval = setInterval(() => setUploadProgress((prev) => Math.min(prev + 10, 90)), 300);
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const res = await fetch("/api/files", { method: "POST", body: formData });
       if (res.ok) {
         setUploadProgress(100);
         toast({ title: "Téléchargement réussi", description: `${uploadFiles.length} fichier${uploadFiles.length > 1 ? "s" : ""} ajouté${uploadFiles.length > 1 ? "s" : ""} avec succès.` });

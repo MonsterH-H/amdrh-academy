@@ -146,6 +146,136 @@ export async function GET(req: NextRequest) {
 }
 
 /**
+ * POST /api/files — Upload file(s) via FormData and create resource record(s)
+ *
+ * Accepts multipart/form-data with:
+ *   - file: single File (or files: multiple Files)
+ *   - userId: uploader ID (from auth)
+ *   - role: uploader role (from auth)
+ *   - title: resource title (required)
+ *   - description: optional description
+ *   - category: SUPPORT_COURS | RESSOURCE_ANNEXE | EVALUATION | MEDIA_COURS | AUTRE
+ *   - courseId: optional course ID
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
+    if (!auth.authorized) return auth.response;
+
+    const formData = await req.formData();
+
+    // Extract metadata fields
+    const title = (formData.get("title") as string) || "Ressource sans titre";
+    const description = (formData.get("description") as string) || null;
+    const category = (formData.get("category") as string) || "AUTRE";
+    const courseId = (formData.get("courseId") as string) || null;
+
+    // Validate category
+    const resolvedCategory = RESOURCE_CATEGORIES.includes(category as typeof RESOURCE_CATEGORIES[number])
+      ? category
+      : "AUTRE";
+
+    // Extract files — support both "file" (single) and "files" (multi) field names
+    const files: File[] = [];
+    const singleFile = formData.get("file");
+    if (singleFile && singleFile instanceof File) {
+      files.push(singleFile);
+    }
+    for (const [key, value] of formData.entries()) {
+      if (key === "files" && value instanceof File) {
+        files.push(value);
+      }
+    }
+
+    if (files.length === 0) {
+      return NextResponse.json(
+        { error: "Aucun fichier fourni" },
+        { status: 400 }
+      );
+    }
+
+    // Upload each file via UploadThing server-side and create resource records
+    const { getUTApi } = await import("@/lib/uploadthing/server");
+    const { getFileType, getMimeType } = await import("@/lib/uploadthing/utils");
+    const utapi = getUTApi();
+
+    const createdResources = [];
+
+    for (const file of files) {
+      try {
+        // Convert File to Buffer for server-side upload
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Upload to UploadThing
+        const uploadResult = await utapi.uploadFiles(
+          new File([buffer], file.name, { type: file.type })
+        );
+
+        const uploadedFile = uploadResult.data;
+        if (!uploadedFile) {
+          console.error(`[Files] UploadThing returned no data for ${file.name}`);
+          continue;
+        }
+
+        // Determine file type from extension
+        const fileType = getFileType(file.name);
+
+        // Create resource record in database
+        const resource = await db.resource.create({
+          data: {
+            title: files.length === 1 ? title : `${title} — ${file.name}`,
+            description,
+            fileName: file.name,
+            filePath: uploadedFile.ufsUrl || uploadedFile.url || "",
+            fileKey: uploadedFile.key || null,
+            fileSize: file.size,
+            fileType,
+            mimeType: getMimeType(file.name),
+            category: resolvedCategory,
+            isDownloadable: true,
+            downloadCount: 0,
+            order: 0,
+            courseId,
+            uploadedById: auth.userId,
+          },
+          include: {
+            uploadedBy: {
+              select: { id: true, prenom: true, nom: true, role: true },
+            },
+            course: {
+              select: { id: true, title: true },
+            },
+          },
+        });
+
+        createdResources.push(resource);
+      } catch (fileError) {
+        console.error(`[Files] Failed to upload ${file.name}:`, fileError);
+      }
+    }
+
+    if (createdResources.length === 0) {
+      return NextResponse.json(
+        { error: "Échec du téléchargement de tous les fichiers" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { resources: createdResources, count: createdResources.length },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("[Files] Upload error:", error);
+    return NextResponse.json(
+      { error: "Erreur lors du téléchargement du fichier" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * DELETE /api/files — Delete a file (both from UploadThing and DB)
  *
  * Query params:

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 
 import { LandingPage } from "@/modules/landing";
 import { LoginPage } from "@/modules/auth";
-import { RegisterPage } from "@/modules/auth";
 import { ForgotPasswordPage } from "@/modules/auth";
 import { ResetPasswordPage } from "@/modules/auth";
 
@@ -123,21 +122,6 @@ function AppFooter() {
   );
 }
 
-function ViewErrorFallback({ error, onRetry }: { error: Error | null; onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4">
-        <AlertTriangle className="w-7 h-7 text-amber-500" />
-      </div>
-      <h3 className="text-lg font-semibold mb-1">Erreur d&apos;affichage</h3>
-      <p className="text-sm text-muted-foreground mb-4 max-w-sm">Cette page n&apos;a pas pu se charger correctement.</p>
-      <Button variant="outline" size="sm" onClick={onRetry} className="gap-2 cursor-pointer">
-        <RotateCcw className="w-3.5 h-3.5" />Réessayer
-      </Button>
-    </div>
-  );
-}
-
 type EBProps = { children: React.ReactNode; onError?: (error: Error) => void };
 type EBState = { hasError: boolean; error: Error | null };
 class ErrorBoundary extends React.Component<EBProps, EBState> {
@@ -193,6 +177,13 @@ function AppContent() {
 
   const handleRetry = useCallback(() => { setViewError(null); }, []);
 
+  // Redirect register view to login (registration disabled)
+  useEffect(() => {
+    if (currentView === "register") {
+      navigate("login");
+    }
+  }, [currentView, navigate]);
+
   const renderView = () => {
     if (viewError) return (
       <motion.div
@@ -201,19 +192,20 @@ function AppContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <ViewErrorFallback error={viewError} onRetry={handleRetry} />
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+            <AlertTriangle className="w-7 h-7 text-amber-500" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">Erreur d&apos;affichage</h3>
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm">Cette page n&apos;a pas pu se charger correctement.</p>
+          <Button variant="outline" size="sm" onClick={handleRetry} className="gap-2 cursor-pointer">
+            <RotateCcw className="w-3.5 h-3.5" />Réessayer
+          </Button>
+        </div>
       </motion.div>
     );
     if (currentView === "landing") return <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}><LandingPage /></motion.div>;
     if (currentView === "login") return <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><LoginPage /></motion.div>;
-    if (currentView === "register") {
-      // Registration disabled — redirect to login
-      if (typeof window !== "undefined") {
-        const { navigate } = useAppStore.getState();
-        navigate("login");
-      }
-      return null;
-    }
     if (currentView === "forgot-password") return <motion.div key="forgot-password" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><ForgotPasswordPage /></motion.div>;
     if (currentView === "reset-password") return <motion.div key="reset-password" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><ResetPasswordPage /></motion.div>;
     if (!isAuthenticated) return <motion.div key="landing-fallback" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}><LandingPage /></motion.div>;
