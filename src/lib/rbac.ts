@@ -54,6 +54,16 @@ export class PermissionError extends Error {
   }
 }
 
+/**
+ * Invalidate the in-memory permission cache.
+ * Should be called after any permission change (PUT, seed, etc.)
+ * so that subsequent hasPermission() calls read fresh data.
+ */
+export function invalidatePermissionCache(): void {
+  permissionCache.clear();
+  lastCacheRefresh = 0;
+}
+
 async function refreshCacheIfNeeded() {
   if (Date.now() - lastCacheRefresh < CACHE_TTL && permissionCache.size > 0) return
 

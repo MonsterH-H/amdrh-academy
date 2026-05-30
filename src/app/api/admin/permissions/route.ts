@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
+import { invalidatePermissionCache } from "@/lib/rbac";
 import { ROLES, ROLE_LABELS, DEFAULT_ROLE_PERMISSIONS, PERMISSION_MODULES, ALL_PERMISSIONS } from "@/lib/permissions";
 
 /**
@@ -126,6 +127,9 @@ export async function PUT(req: NextRequest) {
         })),
       });
     }
+
+    // Invalidate RBAC cache so subsequent permission checks read fresh data
+    invalidatePermissionCache();
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
+import { invalidatePermissionCache } from "@/lib/rbac";
 import { ALL_PERMISSIONS_FLAT, DEFAULT_ROLE_PERMISSIONS, ALL_ROLES } from "@/lib/permissions";
 
 /**
@@ -8,9 +9,9 @@ import { ALL_PERMISSIONS_FLAT, DEFAULT_ROLE_PERMISSIONS, ALL_ROLES } from "@/lib
  * Initialise les permissions par défaut dans la base de données.
  * Idempotent : ne recrée pas les permissions existantes.
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const auth = await requireRole(req as unknown as Parameters<typeof requireRole>[0], ["ADMIN"]);
+    const auth = await requireRole(req, ["ADMIN"]);
     if (!auth.authorized) return auth.response;
 
     let created = 0;
@@ -79,6 +80,9 @@ export async function POST(req: Request) {
         where: { id: { in: orphaned.map(p => p.id) } },
       });
     }
+
+    // Invalidate RBAC cache so permission checks reflect the new data
+    invalidatePermissionCache();
 
     const totalPermissions = await db.permission.count();
     const totalLinks = await db.rolePermission.count();
