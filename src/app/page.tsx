@@ -204,11 +204,11 @@ function AppContent() {
         </div>
       </motion.div>
     );
-    if (currentView === "landing") return <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}><LandingPage /></motion.div>;
-    if (currentView === "login") return <motion.div key="login" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><LoginPage /></motion.div>;
-    if (currentView === "forgot-password") return <motion.div key="forgot-password" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><ForgotPasswordPage /></motion.div>;
-    if (currentView === "reset-password") return <motion.div key="reset-password" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}><ResetPasswordPage /></motion.div>;
-    if (!isAuthenticated) return <motion.div key="landing-fallback" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}><LandingPage /></motion.div>;
+    if (currentView === "landing") return <LandingPage />;
+    if (currentView === "login") return <LoginPage />;
+    if (currentView === "forgot-password") return <ForgotPasswordPage />;
+    if (currentView === "reset-password") return <ResetPasswordPage />;
+    if (!isAuthenticated) return <LandingPage />;
 
     const Component = viewComponentMap[currentView];
     if (Component) {
@@ -242,19 +242,24 @@ function AppContent() {
 
   const isAuthPage = ["landing", "login", "register", "forgot-password", "reset-password"].includes(currentView);
 
+  // Auth pages (landing, login, etc.) render full-screen without container
+  if (isAuthPage) {
+    return <>{renderView()}</>;
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] overflow-x-hidden flex flex-col">
-      {!isAuthPage && <SidebarWrapper />}
-      {!isAuthPage && <TopBar />}
-      <main className={`transition-all duration-300 min-w-0 flex-1 ${!isAuthPage ? (sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]") : ""}`}>
-        <div className={!isAuthPage ? "pt-14 sm:pt-16 pb-20 lg:pb-6" : ""}>
+      <SidebarWrapper />
+      <TopBar />
+      <main className={`transition-all duration-300 min-w-0 flex-1 ${sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]"}`}>
+        <div className="pt-14 sm:pt-16 pb-20 lg:pb-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {renderView()}
           </div>
         </div>
       </main>
-      {!isAuthPage && <AppFooter />}
-      {!isAuthPage && <MobileBottomNav />}
+      <AppFooter />
+      <MobileBottomNav />
     </div>
   );
 }

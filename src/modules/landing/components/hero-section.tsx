@@ -32,7 +32,7 @@ const trustBadges = [
 
 export function LandingHeader({ onLogin }: { onLogin: () => void }) {
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/95 border-b border-gray-200/80 z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200/60 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/20">
@@ -45,7 +45,7 @@ export function LandingHeader({ onLogin }: { onLogin: () => void }) {
         </div>
         <div className="flex items-center gap-3">
           <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg px-5 h-10 shadow-sm shadow-blue-600/20 transition-all duration-200 hover:shadow-md hover:shadow-blue-600/30"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg px-5 h-10 shadow-sm shadow-blue-600/20 transition-all duration-200 hover:shadow-md hover:shadow-blue-600/30 cursor-pointer"
             onClick={onLogin}
           >
             Connexion
@@ -60,11 +60,11 @@ export function LandingHeader({ onLogin }: { onLogin: () => void }) {
 
 export function HeroSection({ onLogin }: { onLogin: () => void }) {
   return (
-    <section className="relative pt-28 sm:pt-36 pb-24 sm:pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Deep navy gradient background */}
+    <section className="relative pt-28 sm:pt-36 pb-28 sm:pb-36 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Premium blue gradient background */}
       <div aria-hidden="true" className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#1E293B] to-[#1E3A5F]" />
-        {/* Subtle geometric grid pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0B1D3A] via-[#102B52] to-[#1E40AF]" />
+        {/* Subtle geometric grid */}
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
@@ -73,6 +73,8 @@ export function HeroSection({ onLogin }: { onLogin: () => void }) {
             backgroundSize: "64px 64px",
           }}
         />
+        {/* Radial light glow from top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.15)_0%,transparent_70%)]" />
         {/* Bottom fade to light section */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#FAFBFC] to-transparent" />
       </div>
@@ -97,7 +99,7 @@ export function HeroSection({ onLogin }: { onLogin: () => void }) {
           className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] tracking-tight mb-4 sm:mb-6"
         >
           Académie{" "}
-          <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-blue-300 via-blue-400 to-blue-200 bg-clip-text text-transparent">
             AMDRH
           </span>
         </motion.h1>
@@ -113,7 +115,7 @@ export function HeroSection({ onLogin }: { onLogin: () => void }) {
         <motion.p
           variants={fadeUp}
           transition={{ duration: 0.6 }}
-          className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="text-base sm:text-lg text-slate-300/80 max-w-2xl mx-auto mb-10 leading-relaxed"
         >
           La plateforme de formation de l&apos;Association Marocaine Des Arbitres de Handball.
           Formez-vous aux plus hauts standards avec des certifications reconnues par la FRMHB et l&apos;IHF.
@@ -123,18 +125,10 @@ export function HeroSection({ onLogin }: { onLogin: () => void }) {
         <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button
             size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl px-8 h-12 shadow-lg shadow-blue-600/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-white text-blue-700 hover:bg-blue-50 text-sm font-semibold rounded-xl px-8 h-12 shadow-lg shadow-black/10 transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             onClick={onLogin}
           >
             Se connecter <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-white/25 text-white/90 hover:text-white hover:bg-white/10 rounded-xl px-8 h-12 text-sm font-medium transition-all duration-200"
-            onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Découvrir la plateforme
           </Button>
         </motion.div>
 

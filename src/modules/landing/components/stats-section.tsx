@@ -79,7 +79,6 @@ export function StatsSection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                {/* Blue accent bar on top */}
                 <div className="absolute top-0 left-4 right-4 h-0.5 bg-blue-600 rounded-b-full" />
                 <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mx-auto mb-3 border border-blue-100">
                   <Icon className="w-5 h-5 text-blue-600" />

@@ -11,33 +11,25 @@ const roles = [
   {
     title: "Arbitres",
     icon: Scale,
-    color: "blue",
     iconBg: "bg-blue-600",
-    checkColor: "text-blue-500",
     items: ["Règles IHF", "Gestion du jeu", "Techniques d'arbitrage", "Éthique sportive"],
   },
   {
     title: "Entraîneurs",
     icon: Trophy,
-    color: "amber",
     iconBg: "bg-amber-500",
-    checkColor: "text-amber-500",
     items: ["Méthodologie", "Préparation physique", "Tactique de jeu", "Psychologie sportive"],
   },
   {
     title: "Joueurs",
     icon: Hand,
-    color: "cyan",
     iconBg: "bg-cyan-500",
-    checkColor: "text-cyan-500",
     items: ["Techniques individuelles", "Règles du jeu", "Prévention blessures", "Jeu collectif"],
   },
   {
     title: "Administrateurs",
     icon: Settings,
-    color: "violet",
     iconBg: "bg-violet-500",
-    checkColor: "text-violet-500",
     items: ["Gestion de club", "Réglementation", "Communication", "Gestion des licences"],
   },
 ];
@@ -97,7 +89,7 @@ export function RolesSection() {
                 <ul className="space-y-2.5">
                   {role.items.map((item) => (
                     <li key={item} className="flex items-center gap-2 text-sm text-slate-400">
-                      <CheckCircle2 className={`w-4 h-4 ${role.checkColor} flex-shrink-0`} />
+                      <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -133,7 +125,7 @@ export function CTASection() {
           </p>
           <Button
             size="lg"
-            className="bg-white text-blue-700 hover:bg-blue-50 rounded-xl px-8 h-12 font-semibold relative mt-6 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            className="bg-white text-blue-700 hover:bg-blue-50 rounded-xl px-8 h-12 font-semibold relative mt-6 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer"
             onClick={() => navigate("login")}
           >
             Se connecter <ArrowRight className="ml-2 w-4 h-4" />
