@@ -12,10 +12,12 @@ interface AuthUser {
 
 /**
  * Extract userId from request.
- * Checks in order: x-user-id header → userId query param → Authorization header.
+ * Checks in order: x-user-id header → userId query param.
+ * Note: The global fetch interceptor in page.tsx automatically adds x-user-id header
+ * to ALL /api/ requests (including FormData), so this covers all cases.
  */
 function extractUserId(req: NextRequest): string {
-  // Priority 1: Custom header (set by client-side fetch interceptor)
+  // Priority 1: Custom header (set by client-side fetch interceptor / apiFetch)
   const headerUserId = req.headers.get("x-user-id");
   if (headerUserId) return headerUserId;
 

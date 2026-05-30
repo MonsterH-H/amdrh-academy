@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole, getUserFromRequest } from "@/lib/auth-helpers";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { getUTApi } from "@/lib/uploadthing/server";
 
 const RESOURCE_TYPES = [
   "VIDEO", "PDF", "IMAGE", "DOCUMENT", "AUDIO", "ARCHIVE", "AUTRE",
@@ -11,8 +9,6 @@ const RESOURCE_TYPES = [
 const RESOURCE_CATEGORIES = [
   "SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", "MEDIA_COURS", "AUTRE",
 ] as const;
-
-const UPLOAD_DIR = join(process.cwd(), "uploads");
 
 function getFileType(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase() || "";
@@ -110,11 +106,19 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** POST /api/files — Upload file(s) via FormData */
+/**
+ * POST /api/files — Upload file(s) via UploadThing
+ * Accepts FormData with:
+ *   - file / files: the file(s) to upload
+ *   - title, description, category, courseId: metadata
+ * Files are uploaded to UploadThing, then a Resource record is created with the UT URL/key.
+ */
 export async function POST(req: NextRequest) {
   try {
     const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
     if (!auth.authorized) return auth.response;
+
+    const utapi = getUTApi();
 
     const formData = await req.formData();
     const title = (formData.get("title") as string) || "Ressource sans titre";
@@ -125,6 +129,7 @@ export async function POST(req: NextRequest) {
     const resolvedCategory = RESOURCE_CATEGORIES.includes(category as typeof RESOURCE_CATEGORIES[number])
       ? category : "AUTRE";
 
+    // Collect files from FormData
     const files: File[] = [];
     const singleFile = formData.get("file");
     if (singleFile && singleFile instanceof File) files.push(singleFile);
@@ -136,35 +141,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Aucun fichier fourni" }, { status: 400 });
     }
 
-    // Ensure upload directory exists
-    await mkdir(UPLOAD_DIR, { recursive: true });
-
     const createdResources = [];
 
     for (const file of files) {
       try {
+        // Convert File to Buffer and upload to UploadThing
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Generate unique file ID to avoid collisions
-        const fileId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const savedName = `${fileId}-${safeName}`;
-        const localPath = join(UPLOAD_DIR, savedName);
+        const uploadResult = await utapi.uploadFiles([
+          new File([buffer], file.name, { type: file.type }),
+        ]);
 
-        // Save to local filesystem
-        await writeFile(localPath, buffer);
+        const uploadedFile = uploadResult[0];
+        if (!uploadedFile.data) {
+          console.error(`[Files] UploadThing upload failed for ${file.name}:`, uploadedFile.error);
+          continue;
+        }
+
+        const utUrl = uploadedFile.data.url;
+        const utKey = uploadedFile.data.key;
+        const utName = uploadedFile.data.name;
+        const utSize = uploadedFile.data.size;
 
         const fileType = getFileType(file.name);
 
+        // Create Resource record in database
         const resource = await db.resource.create({
           data: {
             title: files.length === 1 ? title : `${title} — ${file.name}`,
             description,
-            fileName: file.name,
-            filePath: savedName,
-            fileKey: savedName, // Use as local file key
-            fileSize: file.size,
+            fileName: utName || file.name,
+            filePath: utUrl,
+            fileKey: utKey,
+            fileSize: utSize || file.size,
             fileType,
             mimeType: getMimeType(file.name),
             category: resolvedCategory,
@@ -197,31 +207,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** GET /api/files/serve-local — Serve locally uploaded files */
-export async function serveLocal(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const file = searchParams.get("file");
-    if (!file || file.includes("..")) {
-      return NextResponse.json({ error: "Fichier invalide" }, { status: 400 });
-    }
-    const filePath = join(UPLOAD_DIR, file);
-    if (!existsSync(filePath)) {
-      return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
-    }
-    const { readFile } = await import("fs/promises");
-    const buffer = await readFile(filePath);
-    const mimeType = getMimeType(file);
-    return new NextResponse(buffer, {
-      headers: { "Content-Type": mimeType, "Content-Disposition": `inline; filename="${file.split("-").slice(1).join("-")}"` },
-    });
-  } catch (error) {
-    console.error("[Files] Serve local error:", error);
-    return NextResponse.json({ error: "Erreur de lecture" }, { status: 500 });
-  }
-}
-
-/** DELETE /api/files — Delete a file */
+/** DELETE /api/files — Delete a file (from UploadThing + DB) */
 export async function DELETE(req: NextRequest) {
   try {
     const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
@@ -244,18 +230,15 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Vous ne pouvez supprimer que vos propres ressources" }, { status: 403 });
     }
 
-    // Delete local file if it exists
+    // Delete from UploadThing if we have a key
     if (resource.fileKey) {
-      const localPath = join(UPLOAD_DIR, resource.fileKey);
-      if (existsSync(localPath)) {
-        try { await unlink(localPath); } catch { /* ignore */ }
-      }
-      // Also try UploadThing cleanup
       try {
-        const { getUTApi } = await import("@/lib/uploadthing/server");
         const utapi = getUTApi();
         await utapi.deleteFiles(resource.fileKey);
-      } catch { /* UploadThing not configured, ignore */ }
+        console.log(`[Files] Deleted from UploadThing: ${resource.fileKey}`);
+      } catch (err) {
+        console.error("[Files] UploadThing delete error:", err);
+      }
     }
 
     await db.resource.delete({ where: { id: resourceId } });

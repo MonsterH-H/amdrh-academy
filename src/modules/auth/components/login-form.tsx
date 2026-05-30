@@ -166,15 +166,15 @@ export function LoginPage() {
                   </p>
                   <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
                     {([
-                      { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN" },
-                      { label: "Formateur", email: "formateur@amdrh.ma", role: "FORMATEUR" },
-                      { label: "Arbitre", email: "arbitre1@amdrh.ma", role: "ARBITRE" },
-                      { label: "Entraîneur", email: "entraineur1@amdrh.ma", role: "ENTRAINEUR" },
-                      { label: "Joueur", email: "joueur1@amdrh.ma", role: "JOUEUR" },
+                      { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN", password: "Admin@2024!" },
+                      { label: "Formateur", email: "formateur@amdrh.ma", role: "FORMATEUR", password: "Formateur@2024!" },
+                      { label: "Arbitre", email: "arbitre@amdrh.ma", role: "ARBITRE", password: "Arbitre@2024!" },
+                      { label: "Entraîneur", email: "entraineur@amdrh.ma", role: "ENTRAINEUR", password: "Entraineur@2024!" },
+                      { label: "Joueur", email: "joueur@amdrh.ma", role: "JOUEUR", password: "Joueur@2024!" },
                     ] as DemoAccount[]).map((account) => (
                       <button
                         key={account.email}
-                        onClick={() => { setEmail(account.email); setPassword("Password123!"); }}
+                        onClick={() => { setEmail(account.email); setPassword((account as DemoAccount).password || "Password123!"); }}
                         className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs hover:bg-muted/80 transition-colors group"
                       >
                         <span className="font-medium text-foreground group-hover:text-primary transition-colors">{account.label}</span>
@@ -183,7 +183,7 @@ export function LoginPage() {
                     ))}
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-3 text-center">
-                    Mot de passe : <span className="font-mono font-medium">Password123!</span>
+                    Mot de passe : <span className="font-mono font-medium">Rôle@2024!</span>
                   </p>
                 </div>
               </>

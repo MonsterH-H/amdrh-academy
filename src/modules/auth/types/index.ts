@@ -68,6 +68,7 @@ export interface DemoAccount {
   label: string;
   email: string;
   role: string;
+  password?: string;
 }
 
 /** Role option for registration */

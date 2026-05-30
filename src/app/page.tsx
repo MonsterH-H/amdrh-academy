@@ -160,23 +160,27 @@ function AppContent() {
   const { subscribeNotifications } = useRealtime();
   const [viewError, setViewError] = useState<Error | null>(null);
 
-  // Global fetch interceptor: auto-inject x-user-id header for all API calls
+  // Global fetch interceptor: auto-inject x-user-id header for ALL /api/ calls
+  // This ensures every authenticated API request carries the user identity.
   useEffect(() => {
     const originalFetch = window.fetch;
     window.fetch = async (input, init) => {
+      // Read fresh user from store at call time (not closure capture)
+      const state = useAppStore.getState();
+      const currentUserId = state.user?.id;
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-      // Only intercept /api/ calls
-      if (url.includes('/api/') && user?.id) {
+      // Only intercept /api/ calls from authenticated users
+      if (url.includes('/api/') && currentUserId) {
         const headers = new Headers(init?.headers || {});
         if (!headers.has('x-user-id')) {
-          headers.set('x-user-id', user.id);
+          headers.set('x-user-id', currentUserId);
         }
         return originalFetch(url, { ...init, headers });
       }
       return originalFetch(input, init);
     };
     return () => { window.fetch = originalFetch; };
-  }, [user?.id]);
+  }, [user?.id]); // re-register when user changes (including hydration)
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;

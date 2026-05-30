@@ -35,17 +35,18 @@ function createPrismaClient() {
   const neonUrl = loadEnvValue('NEON_DATABASE_URL') || loadEnvValue('DATABASE_URL')
 
   if (neonUrl) {
-    // Direct PostgreSQL connection (works on Node.js server, Vercel, etc.)
     return new PrismaClient({
       datasources: {
         db: {
           url: neonUrl,
         },
       },
+      // Reduce connection pool for serverless / dev environment
+      // Prevents connection exhaustion with Neon's pooler
+      log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
     })
   }
 
-  // Fallback for local SQLite
   return new PrismaClient()
 }
 
