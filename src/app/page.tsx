@@ -160,6 +160,24 @@ function AppContent() {
   const { subscribeNotifications } = useRealtime();
   const [viewError, setViewError] = useState<Error | null>(null);
 
+  // Global fetch interceptor: auto-inject x-user-id header for all API calls
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      // Only intercept /api/ calls
+      if (url.includes('/api/') && user?.id) {
+        const headers = new Headers(init?.headers || {});
+        if (!headers.has('x-user-id')) {
+          headers.set('x-user-id', user.id);
+        }
+        return originalFetch(url, { ...init, headers });
+      }
+      return originalFetch(input, init);
+    };
+    return () => { window.fetch = originalFetch; };
+  }, [user?.id]);
+
   useEffect(() => {
     if (!isAuthenticated || !user) return;
     const fetchUnread = async () => {

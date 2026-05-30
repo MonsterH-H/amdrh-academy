@@ -11,14 +11,30 @@ interface AuthUser {
 }
 
 /**
+ * Extract userId from request.
+ * Checks in order: x-user-id header → userId query param → Authorization header.
+ */
+function extractUserId(req: NextRequest): string {
+  // Priority 1: Custom header (set by client-side fetch interceptor)
+  const headerUserId = req.headers.get("x-user-id");
+  if (headerUserId) return headerUserId;
+
+  // Priority 2: Query parameter (backward compat)
+  const { searchParams } = new URL(req.url);
+  const queryUserId = searchParams.get("userId") || "";
+  if (queryUserId) return queryUserId;
+
+  return "";
+}
+
+/**
  * Require authentication (any authenticated user).
  * Returns { authorized: true, role, userId, user } or { authorized: false, response }.
  */
 export async function requireAuth(
   req: NextRequest,
 ): Promise<{ authorized: true; role: string; userId: string; user: AuthUser } | { authorized: false; response: NextResponse }> {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || "";
+  const userId = extractUserId(req);
 
   if (!userId) {
     return {
@@ -50,15 +66,14 @@ export async function requireAuth(
 
 /**
  * Check if the requesting user has the required role(s).
- * Expects `userId` query param (role is fetched from DB).
+ * Reads userId from header or query param (role is fetched from DB).
  * Returns { authorized: true, role, userId } or { authorized: false }.
  */
 export async function checkRole(
   req: NextRequest,
   allowedRoles: string[] = ["ADMIN", "FORMATEUR"]
 ): Promise<{ authorized: boolean; role?: string; userId?: string; user?: AuthUser }> {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || "";
+  const userId = extractUserId(req);
 
   if (!userId) {
     return { authorized: false };
@@ -122,13 +137,12 @@ export async function requireRoleOrInstructor(
 }
 
 /**
- * Get user ID and role from request params.
- * Only requires `userId` — role is fetched from DB.
+ * Get user ID and role from request.
+ * Reads userId from header or query param — role is fetched from DB.
  * Returns { userId, role } or null.
  */
 export async function getUserFromRequest(req: NextRequest): Promise<{ userId: string; role: string } | null> {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || "";
+  const userId = extractUserId(req);
   if (!userId) return null;
 
   // ALWAYS fetch role from the database — never trust client-supplied role
@@ -139,7 +153,7 @@ export async function getUserFromRequest(req: NextRequest): Promise<{ userId: st
   if (!user || !user.isActive) return null;
 
   // If an explicit role was provided, verify it matches the DB role.
-  // Mismatches indicate a spoofing attempt; silently use the DB role.
+  const { searchParams } = new URL(req.url);
   const explicitRole = searchParams.get("role");
   if (explicitRole && explicitRole !== user.role) {
     console.warn(`[Auth] Role mismatch for userId=${userId}: client="${explicitRole}", db="${user.role}"`);

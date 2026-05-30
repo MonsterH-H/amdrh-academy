@@ -85,12 +85,11 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Auth check
+    // Auth check — accept userId from x-user-id header or query param
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const role = searchParams.get("role");
+    const userId = req.headers.get("x-user-id") || searchParams.get("userId") || "";
 
-    if (!userId || !role) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Authentification requise" },
         { status: 401 }
