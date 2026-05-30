@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/app";
 /* ─── Footer Section ──────────────────────────────────────────────────────── */
 
 export function FooterSection() {
-  const { navigate } = useAppStore();
+  const { navigate, isAuthenticated } = useAppStore();
 
   return (
     <footer className="bg-[#0F172A] pt-12 sm:pt-16 pb-6 px-4 sm:px-6 lg:px-8 relative">
@@ -72,7 +72,7 @@ export function FooterSection() {
                 <li key={item.label}>
                   <button
                     className="text-xs text-slate-400 hover:text-blue-400 transition-colors duration-200"
-                    onClick={() => navigate(item.view)}
+                    onClick={() => isAuthenticated ? navigate(item.view) : navigate("login")}
                   >
                     {item.label}
                   </button>

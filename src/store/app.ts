@@ -79,7 +79,8 @@ export const useAppStore = create<AppState>()(
       }),
       checkSessionExpiry: () => {
         const { lastActivityAt, user } = get();
-        if (!user) return false;
+        // No active session — nothing to expire, allow all operations
+        if (!user) return true;
         if (lastActivityAt && Date.now() - lastActivityAt > SESSION_TIMEOUT_MS) {
           get().logout();
           console.warn("[Session] Session expired (24h inactivity), logged out");
