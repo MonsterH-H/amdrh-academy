@@ -86,7 +86,7 @@ export function QuickStatsComparison() {
                 </div>
                 <Badge variant="secondary" className={cn(
                   "text-[10px] font-medium",
-                  item.positive ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700" : "bg-red-50 dark:bg-red-500/10 text-red-600",
+                  item.positive ? "bg-blue-50 dark:bg-blue-500/10 text-blue-700" : "bg-red-50 dark:bg-red-500/10 text-red-600",
                 )}>
                   {item.positive ? "+" : ""}{item.change}%
                 </Badge>

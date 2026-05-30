@@ -8,14 +8,14 @@ import { TestimonialsSection, TrustSection } from "./testimonials-section";
 import { RolesSection, CTASection } from "./roles-section";
 import { FooterSection } from "./footer-section";
 
-// ─── Landing Page ───────────────────────────────────────────────────────────
+/* ─── Landing Page ───────────────────────────────────────────────────────── */
 
 export function LandingPage() {
   const { navigate } = useAppStore();
   const handleLogin = () => navigate("login");
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFBFC]">
       <LandingHeader onLogin={handleLogin} />
       <HeroSection onLogin={handleLogin} />
       <StatsSection />

@@ -260,7 +260,7 @@ export function ConversationPage() {
         </button>
         <div className="flex items-center gap-2">
           {otherUserOnline && (
-            <span className="text-[10px] text-emerald-600 font-medium px-2 py-0.5 bg-emerald-50 rounded-full border border-emerald-200/60">
+            <span className="text-[10px] text-blue-600 font-medium px-2 py-0.5 bg-blue-50 rounded-full border border-blue-200/60">
               En ligne
             </span>
           )}

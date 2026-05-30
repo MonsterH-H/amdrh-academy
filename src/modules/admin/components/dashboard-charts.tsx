@@ -20,13 +20,13 @@ const ROLE_COLORS: Record<string, string> = {
   ADMIN: "#EF4444",
   FORMATEUR: "#8B5CF6",
   ARBITRE: "#06B6D4",
-  ENTRAINEUR: "#10B981",
+  ENTRAINEUR: "#2563EB",
   JOUEUR: "#F59E0B",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
   ARBITRAGE: "#06B6D4",
-  ENTRAINEMENT: "#10B981",
+  ENTRAINEMENT: "#2563EB",
   JOUEURS: "#F59E0B",
   ADMINISTRATION: "#8B5CF6",
 };
@@ -160,7 +160,7 @@ function TopCoursesBarChart({ courses }: { courses: Array<{ title: string; count
     <Card className="border-border/60">
       <CardContent className="p-6">
         <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-emerald-500" /> Top 5 cours
+          <BookOpen className="w-4 h-4 text-blue-500" /> Top 5 cours
         </h3>
         {chartData.length === 0 ? (
           <EmptyChartState message="Aucun cours" />
@@ -171,7 +171,7 @@ function TopCoursesBarChart({ courses }: { courses: Array<{ title: string; count
               <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} allowDecimals={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} width={120} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} inscrits`, ""]} labelFormatter={() => ""} />
-              <Bar dataKey="inscriptions" fill="#10B981" radius={[0, 6, 6, 0]} maxBarSize={28} />
+              <Bar dataKey="inscriptions" fill="#2563EB" radius={[0, 6, 6, 0]} maxBarSize={28} />
             </BarChart>
           </ResponsiveContainer>
         )}

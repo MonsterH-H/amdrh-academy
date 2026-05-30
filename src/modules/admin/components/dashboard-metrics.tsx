@@ -50,7 +50,7 @@ function MetricCard({ config }: { config: MetricConfig }) {
           {config.trend !== undefined && (
             <div className={cn(
               "flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full",
-              isPositive ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600" : "bg-red-50 dark:bg-red-500/10 text-red-600",
+              isPositive ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600" : "bg-red-50 dark:bg-red-500/10 text-red-600",
             )}>
               {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
               {Math.abs(config.trend)}%
@@ -87,8 +87,8 @@ export function DashboardMetricsGrid({ metrics }: { metrics: DashboardMetrics })
       label: "En ligne maintenant",
       value: metrics.onlineUsers,
       icon: Wifi,
-      color: "bg-emerald-500/10 text-emerald-600",
-      accent: "bg-emerald-500",
+      color: "bg-blue-500/10 text-blue-600",
+      accent: "bg-blue-500",
       subtitle: "Utilisateurs connectés",
     },
     {

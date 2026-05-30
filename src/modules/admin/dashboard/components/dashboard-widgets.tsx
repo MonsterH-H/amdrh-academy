@@ -142,7 +142,7 @@ export function RecentUsersWidget({ users }: { users: RecentUser[] }) {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Ajouter cours", view: "course-create" as AppView, icon: BookPlus, color: "text-emerald-600" },
+  { label: "Ajouter cours", view: "course-create" as AppView, icon: BookPlus, color: "text-blue-600" },
   { label: "Gérer utilisateurs", view: "admin-users" as AppView, icon: Users, color: "text-sky-600" },
   { label: "Créer quiz", view: "admin-quizzes" as AppView, icon: ClipboardList, color: "text-violet-600" },
   { label: "Émettre certificat", view: "admin-certificates" as AppView, icon: Award, color: "text-amber-600" },

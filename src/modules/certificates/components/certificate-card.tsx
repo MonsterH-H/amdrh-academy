@@ -64,7 +64,7 @@ export function CertificateCard({ cert, onOpenDetail, onDownloadPdf, onCopyLink 
         "border-2 bg-gradient-to-br cursor-pointer transition-all hover:shadow-md",
         cert.status === "REVOKED" ? "border-red-200 from-red-50/50 to-white"
           : cert.type === "DIPLOME" ? "border-amber-200 from-amber-50/50 to-white"
-            : cert.type === "ATTESTATION" ? "border-emerald-200 from-emerald-50/50 to-white"
+            : cert.type === "ATTESTATION" ? "border-blue-200 from-blue-50/50 to-white"
               : "border-amber-200 from-amber-50/50 to-white"
       )}
       onClick={() => onOpenDetail(cert)}
@@ -74,7 +74,7 @@ export function CertificateCard({ cert, onOpenDetail, onDownloadPdf, onCopyLink 
           <div className={cn(
             "w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0",
             cert.type === "DIPLOME" ? "bg-gradient-to-br from-amber-400 to-amber-600"
-              : cert.type === "ATTESTATION" ? "bg-gradient-to-br from-emerald-400 to-emerald-600"
+              : cert.type === "ATTESTATION" ? "bg-gradient-to-br from-blue-400 to-blue-600"
                 : "bg-gradient-to-br from-blue-400 to-blue-600"
           )}>
             <span className="text-2xl">{getCertTypeIcon(cert.type)}</span>

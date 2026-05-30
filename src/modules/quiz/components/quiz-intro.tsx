@@ -92,7 +92,7 @@ export function QuizIntro({
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <Target className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <Target className="w-5 h-5 text-blue-600 flex-shrink-0" />
               <div>
                 <p className="text-lg font-bold text-foreground">{passingScore}%</p>
                 <p className="text-[11px] text-muted-foreground">Score minimum</p>

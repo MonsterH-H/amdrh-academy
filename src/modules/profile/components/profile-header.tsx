@@ -66,7 +66,7 @@ export function ProfileHeader({ emailVerified, extendedUser, onAvatarChange }: P
   return (
     <Card className="border-border/60 overflow-hidden">
       {/* Banner / Cover */}
-      <div className="relative h-28 sm:h-36 bg-gradient-to-br from-emerald-600 via-teal-500 to-amber-500 overflow-hidden">
+      <div className="relative h-28 sm:h-36 bg-gradient-to-br from-blue-600 via-teal-500 to-amber-500 overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{
           backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)",
         }} />
@@ -99,7 +99,7 @@ export function ProfileHeader({ emailVerified, extendedUser, onAvatarChange }: P
                 {ROLE_LABELS[user.role || "ARBITRE"]}
               </Badge>
               {emailVerified ? (
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] gap-1">
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] gap-1">
                   <CheckCircle2 className="w-3 h-3" /> Vérifié
                 </Badge>
               ) : (

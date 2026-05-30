@@ -33,7 +33,7 @@ interface ExtendedUser { emailVerified?: Date | string | null; createdAt?: Date 
 function getActivityIcon(type: string) {
   const m: Record<string, React.ReactNode> = {
     CERTIFICAT: <Award className="w-4 h-4 text-amber-500" />,
-    QUIZ: <HelpCircle className="w-4 h-4 text-emerald-500" />,
+    QUIZ: <HelpCircle className="w-4 h-4 text-blue-500" />,
     COURS: <BookOpen className="w-4 h-4 text-sky-500" />,
     BADGE: <Star className="w-4 h-4 text-yellow-500" />,
     MESSAGE: <Mail className="w-4 h-4 text-violet-500" />,
@@ -95,8 +95,8 @@ export function ProfilePage() {
   const emailVerified = !!(extendedUser.emailVerified ?? user?.emailVerified ?? false);
   const createdAt = extendedUser.createdAt ?? user?.createdAt ?? null;
   const cp = completeness?.percentage || 0;
-  const cpColor = cp >= 80 ? "bg-emerald-500" : cp >= 50 ? "bg-amber-500" : cp >= 25 ? "bg-orange-500" : "bg-red-500";
-  const cpTextColor = cp >= 80 ? "text-emerald-600" : cp >= 50 ? "text-amber-600" : "text-orange-600";
+  const cpColor = cp >= 80 ? "bg-blue-500" : cp >= 50 ? "bg-amber-500" : cp >= 25 ? "bg-orange-500" : "bg-red-500";
+  const cpTextColor = cp >= 80 ? "text-blue-600" : cp >= 50 ? "text-amber-600" : "text-orange-600";
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
@@ -113,7 +113,7 @@ export function ProfilePage() {
 
       {/* Profile Header Card */}
       <Card className="border-border/60 overflow-hidden">
-        <div className="h-2 bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500" />
+        <div className="h-2 bg-gradient-to-r from-blue-600 via-teal-500 to-amber-500" />
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
             <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
@@ -145,7 +145,7 @@ export function ProfilePage() {
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
                 {completeness.details.map((d) => (
                   <span key={d.field} className="flex items-center gap-1 text-xs">
-                    {d.done ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Circle className="w-3 h-3 text-muted-foreground/40" />}
+                    {d.done ? <CheckCircle2 className="w-3 h-3 text-blue-500" /> : <Circle className="w-3 h-3 text-muted-foreground/40" />}
                     <span className={d.done ? "text-muted-foreground" : "text-muted-foreground/50"}>{d.field}</span>
                   </span>
                 ))}
@@ -237,8 +237,8 @@ export function ProfilePage() {
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-3 text-sm">
                 <div className="space-y-1"><span className="text-xs text-muted-foreground">Rôle</span><p className="font-medium text-foreground">{ROLE_LABELS[user.role || "ARBITRE"]}</p></div>
-                <div className="space-y-1"><span className="text-xs text-muted-foreground">Statut du compte</span><p className="font-medium text-foreground"><Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px]">Actif</Badge></p></div>
-                <div className="space-y-1"><span className="text-xs text-muted-foreground">Email vérifié</span><p className="font-medium text-foreground">{emailVerified ? <span className="text-emerald-600">Oui ✓</span> : <span className="text-amber-600">Non vérifié</span>}</p></div>
+                <div className="space-y-1"><span className="text-xs text-muted-foreground">Statut du compte</span><p className="font-medium text-foreground"><Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px]">Actif</Badge></p></div>
+                <div className="space-y-1"><span className="text-xs text-muted-foreground">Email vérifié</span><p className="font-medium text-foreground">{emailVerified ? <span className="text-blue-600">Oui ✓</span> : <span className="text-amber-600">Non vérifié</span>}</p></div>
                 <div className="space-y-1"><span className="text-xs text-muted-foreground">Inscrit le</span><p className="font-medium text-foreground">{createdAt ? new Date(createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}</p></div>
               </div>
             </CardContent>

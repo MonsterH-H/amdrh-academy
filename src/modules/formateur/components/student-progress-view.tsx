@@ -140,7 +140,7 @@ export function StudentProgressView({ studentId }: { studentId: string }) {
                 <h2 className="text-xl font-bold text-foreground">{student.prenom} {student.nom}</h2>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge variant="secondary" className={cn("text-[10px]", ROLE_COLORS[student.role] || "")}>{ROLE_LABELS[student.role] || student.role}</Badge>
-                  {student.isActive ? <Badge variant="secondary" className="text-[10px] bg-emerald-50 dark:bg-emerald-500/10 text-green-700">Actif</Badge> : null}
+                  {student.isActive ? <Badge variant="secondary" className="text-[10px] bg-blue-50 dark:bg-blue-500/10 text-green-700">Actif</Badge> : null}
                 </div>
                 <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {student.email}</span>
@@ -160,7 +160,7 @@ export function StudentProgressView({ studentId }: { studentId: string }) {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatMini icon={BookOpen} label="Inscriptions" value={`${summary.completedEnrollments}/${summary.totalEnrollments}`} color="text-sky-600" />
-        <StatMini icon={TrendingUp} label="Progression moy." value={`${summary.avgProgress}%`} color="text-emerald-600" />
+        <StatMini icon={TrendingUp} label="Progression moy." value={`${summary.avgProgress}%`} color="text-blue-600" />
         <StatMini icon={ClipboardCheck} label="Quiz réussis" value={`${summary.passedQuizzes}/${summary.totalQuizAttempts}`} color="text-amber-600" />
         <StatMini icon={Award} label="Certificats" value={String(summary.totalCertificates)} color="text-violet-600" />
       </div>
@@ -304,7 +304,7 @@ function StatMini({ icon: Icon, label, value, color }: { icon: React.ComponentTy
 function TimelineDot({ type }: { type: string }) {
   const colorMap: Record<string, string> = {
     enrollment: "bg-sky-500",
-    completion: "bg-emerald-500",
+    completion: "bg-blue-500",
     quiz: "bg-amber-500",
     certificate: "bg-violet-500",
     badge: "bg-orange-500",

@@ -153,8 +153,8 @@ export function PasswordForm({ userId }: PasswordFormProps) {
                   if (newPassword.length >= 12) score += 2;
                   const level = score <= 1 ? 0 : score <= 3 ? 1 : 2;
                   const label = newPassword.length < 8 ? "Trop court" : score <= 1 ? "Faible" : score <= 3 ? "Moyen" : "Fort";
-                  const colorClass = newPassword.length < 8 ? "bg-red-500" : score <= 1 ? "bg-red-500" : score <= 3 ? "bg-amber-500" : "bg-emerald-500";
-                  const textClass = newPassword.length < 8 ? "text-red-600" : score <= 1 ? "text-red-600" : score <= 3 ? "text-amber-600" : "text-emerald-600";
+                  const colorClass = newPassword.length < 8 ? "bg-red-500" : score <= 1 ? "bg-red-500" : score <= 3 ? "bg-amber-500" : "bg-blue-500";
+                  const textClass = newPassword.length < 8 ? "text-red-600" : score <= 1 ? "text-red-600" : score <= 3 ? "text-amber-600" : "text-blue-600";
                   return (
                     <>
                       <div className="flex gap-1">
@@ -191,7 +191,7 @@ export function PasswordForm({ userId }: PasswordFormProps) {
               <p className="text-[10px] text-red-500">Les mots de passe ne correspondent pas</p>
             )}
             {confirmPassword.length > 0 && newPassword === confirmPassword && (
-              <p className="text-[10px] text-emerald-500">Les mots de passe correspondent ✓</p>
+              <p className="text-[10px] text-blue-500">Les mots de passe correspondent ✓</p>
             )}
           </div>
         </div>

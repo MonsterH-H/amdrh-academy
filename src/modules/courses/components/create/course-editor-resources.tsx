@@ -46,7 +46,7 @@ const TYPE_COLORS: Record<string, string> = {
   VIDEO: "bg-purple-100 text-purple-700",
   PDF: "bg-red-100 text-red-700",
   IMAGE: "bg-sky-100 text-sky-700",
-  DOCUMENT: "bg-emerald-100 text-emerald-700",
+  DOCUMENT: "bg-blue-100 text-blue-700",
   AUDIO: "bg-pink-100 text-pink-700",
   ARCHIVE: "bg-orange-100 text-orange-700",
   AUTRE: "bg-muted text-muted-foreground",

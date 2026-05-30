@@ -184,7 +184,7 @@ export function QuizAttemptsView({
         />
         <StatCard
           icon={BarChart3} label="Score moyen" value={`${stats.avgScore}%`}
-          color="bg-emerald-500/10 text-emerald-600"
+          color="bg-blue-500/10 text-blue-600"
         />
       </div>
 

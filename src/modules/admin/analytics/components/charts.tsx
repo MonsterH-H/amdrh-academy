@@ -22,7 +22,7 @@ export function ChartsSection({ data }: { data: StatsData }) {
 
   const quizPieData = useMemo(() => {
     const items: Array<{ name: string; value: number; fill: string }> = [];
-    if (overview.passedAttempts > 0) items.push({ name: "Réussis", value: overview.passedAttempts, fill: "#10B981" });
+    if (overview.passedAttempts > 0) items.push({ name: "Réussis", value: overview.passedAttempts, fill: "#2563EB" });
     if (overview.failedAttempts > 0) items.push({ name: "Échoués", value: overview.failedAttempts, fill: "#EF4444" });
     if (items.length === 0) return [{ name: "Aucune tentative", value: 1, fill: "#94a3b8" }];
     return items;
@@ -39,7 +39,7 @@ export function ChartsSection({ data }: { data: StatsData }) {
   );
 
   const completionRadialData = useMemo(
-    () => [{ name: "Complétion", value: overview.completionRate, fill: "#10B981" }],
+    () => [{ name: "Complétion", value: overview.completionRate, fill: "#2563EB" }],
     [overview.completionRate],
   );
 
@@ -140,7 +140,7 @@ export function ChartsSection({ data }: { data: StatsData }) {
                   <Tooltip contentStyle={tooltipStyle} formatter={(value, _name, props) => [
                     `${value} inscriptions`, formatMonthFull(((props as Record<string, unknown>).payload as Record<string, unknown>)?.month as string),
                   ]} labelFormatter={() => ""} />
-                  <Bar dataKey="inscriptions" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={48} />
+                  <Bar dataKey="inscriptions" fill="#2563EB" radius={[4, 4, 0, 0]} maxBarSize={48} />
                 </BarChart>
               </ResponsiveContainer>
             )}

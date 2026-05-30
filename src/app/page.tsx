@@ -85,11 +85,11 @@ function PageLoader() {
   return (
     <div className="flex items-center justify-center py-20">
       <div className="flex flex-col items-center gap-4">
-        {/* Premium emerald spinner */}
+        {/* Premium blue spinner */}
         <div className="relative w-10 h-10">
           <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin shadow-[0_0_12px_rgba(16,185,129,0.3)]" />
-          <div className="absolute inset-1.5 rounded-full border-2 border-transparent border-b-emerald-300/60 animate-spin [animation-direction:reverse] [animation-duration:1.5s]" />
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
+          <div className="absolute inset-1.5 rounded-full border-2 border-transparent border-b-blue-300/60 animate-spin [animation-direction:reverse] [animation-duration:1.5s]" />
         </div>
         <p className="text-sm text-muted-foreground/70 font-medium">Chargement...</p>
       </div>

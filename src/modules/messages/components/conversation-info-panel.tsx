@@ -65,7 +65,7 @@ export function ConversationInfoPanel({
               <span
                 className={cn(
                   "absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-background",
-                  isOnline ? "bg-emerald-500" : "bg-muted-foreground",
+                  isOnline ? "bg-blue-500" : "bg-muted-foreground",
                 )}
               />
             </div>
@@ -90,7 +90,7 @@ export function ConversationInfoPanel({
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium",
                 isOnline
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                  ? "bg-blue-50 text-blue-700 border border-blue-200/60"
                   : "bg-muted text-muted-foreground",
               )}
             >

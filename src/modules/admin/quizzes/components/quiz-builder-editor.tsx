@@ -122,7 +122,7 @@ export function QuestionEditorCard({
                   className={cn(
                     "flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all border",
                     question.correctAnswer.includes(i)
-                      ? "bg-emerald-50 dark:bg-emerald-500/10 text-green-700 border-border"
+                      ? "bg-blue-50 dark:bg-blue-500/10 text-green-700 border-border"
                       : "bg-card text-muted-foreground border-border/60 hover:border-border"
                   )}>
                   {question.correctAnswer.includes(i) && "✓ "} {opt}

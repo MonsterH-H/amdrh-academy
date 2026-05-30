@@ -88,7 +88,7 @@ export function CreateCertificateDialog({ open, onOpenChange, onCreated }: Creat
               <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ATTESTATION">
-                  <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />Attestation de réussite</span>
+                  <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" />Attestation de réussite</span>
                 </SelectItem>
                 <SelectItem value="CERTIFICAT_COMPLETION">
                   <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" />Certificat de complétion</span>

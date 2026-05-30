@@ -17,7 +17,7 @@ interface ActivityTimelineProps {
 function getActivityIcon(type: string) {
   const m: Record<string, React.ReactNode> = {
     CERTIFICAT: <Award className="w-4 h-4 text-amber-500" />,
-    QUIZ: <HelpCircle className="w-4 h-4 text-emerald-500" />,
+    QUIZ: <HelpCircle className="w-4 h-4 text-blue-500" />,
     COURS: <BookOpen className="w-4 h-4 text-sky-500" />,
     BADGE: <Star className="w-4 h-4 text-yellow-500" />,
     MESSAGE: <Mail className="w-4 h-4 text-violet-500" />,

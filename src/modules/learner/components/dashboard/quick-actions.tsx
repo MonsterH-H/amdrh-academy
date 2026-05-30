@@ -43,8 +43,8 @@ export function QuickActionsSection({
       label: "Passer un quiz",
       description: "Évaluer vos connaissances",
       icon: HelpCircle,
-      colorClass: "text-emerald-600",
-      bgClass: "bg-emerald-50 hover:bg-emerald-100/80 dark:hover:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20",
+      colorClass: "text-blue-600",
+      bgClass: "bg-blue-50 hover:bg-blue-100/80 dark:hover:bg-blue-500/10 border-blue-100 dark:border-blue-500/20",
       onClick: () => onNavigate("courses"),
     },
     {

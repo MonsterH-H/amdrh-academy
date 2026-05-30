@@ -162,7 +162,7 @@ export function EditProfileTabs({ emailVerified, isLearnerRole, extendedUser, on
                 <Label htmlFor="ep-email" className="text-sm">
                   <span className="flex items-center gap-1.5">
                     Email
-                    {emailVerified && <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0">Vérifié</Badge>}
+                    {emailVerified && <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0">Vérifié</Badge>}
                   </span>
                 </Label>
                 <Input id="ep-email" value={user.email} disabled className="h-10 rounded-lg bg-muted" />
@@ -292,8 +292,8 @@ export function EditProfileTabs({ emailVerified, isLearnerRole, extendedUser, on
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-3 text-sm">
                 <div className="space-y-1"><span className="text-xs text-muted-foreground">Rôle</span><p className="font-medium text-foreground">{ROLE_LABELS[user.role || "ARBITRE"]}</p></div>
-                <div className="space-y-1"><span className="text-xs text-muted-foreground">Statut</span><p className="font-medium text-foreground"><Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px]">Actif</Badge></p></div>
-                <div className="space-y-1"><span className="text-xs text-muted-foreground">Email vérifié</span><p className="font-medium text-foreground">{emailVerified ? <span className="text-emerald-600">Oui ✓</span> : <span className="text-amber-600">Non vérifié</span>}</p></div>
+                <div className="space-y-1"><span className="text-xs text-muted-foreground">Statut</span><p className="font-medium text-foreground"><Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px]">Actif</Badge></p></div>
+                <div className="space-y-1"><span className="text-xs text-muted-foreground">Email vérifié</span><p className="font-medium text-foreground">{emailVerified ? <span className="text-blue-600">Oui ✓</span> : <span className="text-amber-600">Non vérifié</span>}</p></div>
                 <div className="space-y-1"><span className="text-xs text-muted-foreground">Inscrit le</span><p className="font-medium text-foreground">{createdAt ? new Date(createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}</p></div>
               </div>
             </CardContent>

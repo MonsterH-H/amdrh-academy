@@ -28,7 +28,7 @@ const CATEGORY_FILTERS: Array<{ id: AchievementCategory | "all"; label: string }
 
 const CATEGORY_COLORS: Record<AchievementCategory, string> = {
   cours: "text-sky-500 bg-sky-500/10",
-  quiz: "text-emerald-500 bg-emerald-500/10",
+  quiz: "text-blue-500 bg-blue-500/10",
   streak: "text-orange-500 bg-orange-500/10",
   social: "text-violet-500 bg-violet-500/10",
   special: "text-amber-500 bg-amber-500/10",

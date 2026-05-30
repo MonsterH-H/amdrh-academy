@@ -5,7 +5,7 @@ import { useAppStore } from "@/store/app";
 import { getBottomNavForRole } from "../data/navigation";
 
 // ──────────────────────────────────────────────────────────
-// Mobile Bottom Navigation — emerald accent, premium feel
+// Mobile Bottom Navigation — blue accent, premium feel
 // ──────────────────────────────────────────────────────────
 
 export function MobileBottomNav() {
@@ -32,7 +32,7 @@ export function MobileBottomNav() {
                   className={cn(
                     "w-5 h-5 transition-all duration-200",
                     isActive
-                      ? "text-primary drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]"
+                      ? "text-primary drop-shadow-[0_0_6px_rgba(37,99,235,0.4)]"
                       : "text-muted-foreground"
                   )}
                 />

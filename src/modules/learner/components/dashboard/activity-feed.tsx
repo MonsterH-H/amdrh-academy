@@ -22,7 +22,7 @@ export interface ActivityFeedItem {
 }
 
 const ACTIVITY_ICONS: Record<ActivityFeedItem["type"], { icon: typeof CheckCircle; colorClass: string; bgClass: string }> = {
-  lesson_completed: { icon: BookOpen, colorClass: "text-emerald-600 dark:text-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-500/10" },
+  lesson_completed: { icon: BookOpen, colorClass: "text-blue-600 dark:text-blue-400", bgClass: "bg-blue-50 dark:bg-blue-500/10" },
   quiz_passed: { icon: Trophy, colorClass: "text-amber-600 dark:text-amber-400", bgClass: "bg-amber-50 dark:bg-amber-500/10" },
   quiz_failed: { icon: HelpCircle, colorClass: "text-red-500 dark:text-red-400", bgClass: "bg-red-50 dark:bg-red-500/10" },
   certificate_earned: { icon: Award, colorClass: "text-violet-600 dark:text-violet-400", bgClass: "bg-violet-50 dark:bg-violet-500/10" },

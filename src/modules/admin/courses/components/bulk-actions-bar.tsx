@@ -50,7 +50,7 @@ export function BulkActionsBar({
   };
 
   const actions = [
-    { key: "PUBLIE", label: "Publier", icon: Globe, className: "text-green-600 hover:text-green-700 hover:bg-emerald-50 dark:bg-emerald-500/10" },
+    { key: "PUBLIE", label: "Publier", icon: Globe, className: "text-green-600 hover:text-green-700 hover:bg-blue-50 dark:bg-blue-500/10" },
     { key: "BROUILLON", label: "Brouillon", icon: FileText, className: "text-muted-foreground hover:text-foreground hover:bg-muted" },
     { key: "ARCHIVE", label: "Archiver", icon: Archive, className: "text-red-500 hover:text-red-600 hover:bg-red-50 dark:bg-red-500/10" },
   ];

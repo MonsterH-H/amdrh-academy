@@ -168,7 +168,7 @@ export function ProfileForm({ emailVerified, isLearnerRole, onSaved }: ProfileFo
               <span className="flex items-center gap-1.5">
                 Email
                 {emailVerified && (
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0">
                     Vérifié
                   </Badge>
                 )}

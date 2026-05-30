@@ -116,7 +116,7 @@ export function DashboardWidgets() {
   };
 
   const syncStatusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
-    TERMINE: { label: "Succès", color: "text-emerald-600", icon: CheckCircle2 },
+    TERMINE: { label: "Succès", color: "text-blue-600", icon: CheckCircle2 },
     ERREUR: { label: "Erreur", color: "text-red-600", icon: XCircle },
     EN_COURS: { label: "En cours", color: "text-primary", icon: RefreshCw },
     EN_ATTENTE: { label: "En attente", color: "text-muted-foreground", icon: Clock },
@@ -198,7 +198,7 @@ export function DashboardWidgets() {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", {
-                  "bg-emerald-50 dark:bg-emerald-950/50": syncCfg?.label === "Succès",
+                  "bg-blue-50 dark:bg-blue-950/50": syncCfg?.label === "Succès",
                   "bg-red-50 dark:bg-red-950/50": syncCfg?.label === "Erreur",
                   "bg-muted": !syncCfg || syncCfg?.label === "En attente",
                 })}>
@@ -243,11 +243,11 @@ export function DashboardWidgets() {
           ) : (
             <div className="flex items-center gap-4">
               <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", {
-                "bg-emerald-50 dark:bg-emerald-950/50": onlineCount > 0,
+                "bg-blue-50 dark:bg-blue-950/50": onlineCount > 0,
                 "bg-muted": onlineCount === 0,
               })}>
                 {onlineCount > 0 ? (
-                  <Wifi className="w-6 h-6 text-emerald-600" />
+                  <Wifi className="w-6 h-6 text-blue-600" />
                 ) : (
                   <WifiOff className="w-6 h-6 text-muted-foreground" />
                 )}
@@ -279,7 +279,7 @@ export function DashboardWidgets() {
             <QuickActionButton
               icon={BookOpen}
               label="Nouveau cours"
-              color="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600"
+              color="bg-blue-50 dark:bg-blue-950/50 text-blue-600"
               onClick={() => navigate("course-create")}
             />
             <QuickActionButton

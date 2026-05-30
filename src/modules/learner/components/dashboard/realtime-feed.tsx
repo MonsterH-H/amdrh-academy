@@ -32,7 +32,7 @@ export function RealtimeActivityFeed({ items }: { items: ActivityItem[] }) {
                   item.type === "quiz"
                     ? "bg-violet-100 text-violet-600"
                     : item.type === "progress"
-                      ? "bg-emerald-100 text-emerald-600"
+                      ? "bg-blue-100 text-blue-600"
                       : "bg-blue-100 text-blue-600"
                 )}>
                   {item.type === "quiz" ? (

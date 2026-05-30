@@ -62,7 +62,7 @@ export function QuizPreview({ quiz }: { quiz: QuizBuilderData }) {
                       <div key={i} className={cn(
                         "p-2 rounded-lg border text-xs text-center font-medium",
                         qn.correctAnswer.includes(i)
-                          ? "border-border bg-emerald-50 dark:bg-emerald-500/10 text-green-700"
+                          ? "border-border bg-blue-50 dark:bg-blue-500/10 text-green-700"
                           : "border-border/60 text-muted-foreground"
                       )}>
                         {opt}
@@ -75,7 +75,7 @@ export function QuizPreview({ quiz }: { quiz: QuizBuilderData }) {
                       <div key={i} className={cn(
                         "flex items-center gap-2 p-2 rounded-lg border text-xs",
                         qn.correctAnswer.includes(i)
-                          ? "border-border bg-emerald-50 dark:bg-emerald-500/10"
+                          ? "border-border bg-blue-50 dark:bg-blue-500/10"
                           : "border-border/40"
                       )}>
                         <div className={cn(

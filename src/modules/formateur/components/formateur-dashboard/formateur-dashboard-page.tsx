@@ -196,8 +196,8 @@ export function FormateurDashboardPage() {
       label: "Apprenants actifs",
       value: stats.totalEnrollments,
       icon: Users,
-      colorClass: "text-emerald-600",
-      bgColor: "bg-emerald-500/10",
+      colorClass: "text-blue-600",
+      bgColor: "bg-blue-500/10",
     },
     {
       label: "Quiz créés",
@@ -432,7 +432,7 @@ export function FormateurDashboardPage() {
             <CardContent className="p-4 pt-0">
               {pendingCourses.length === 0 ? (
                 <div className="text-center py-6">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+                  <CheckCircle2 className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                   <p className="text-xs text-muted-foreground">
                     Tous vos cours sont publiés ou validés
                   </p>
@@ -563,7 +563,7 @@ export function FormateurDashboardPage() {
                         <span
                           className={`text-sm font-semibold ${
                             result.score >= 70
-                              ? "text-emerald-600"
+                              ? "text-blue-600"
                               : result.score >= 50
                                 ? "text-amber-600"
                                 : "text-red-600"
@@ -604,7 +604,7 @@ export function FormateurDashboardPage() {
         <Card className="border-border/60">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <TrendingUp className="w-4 h-4 text-blue-600" />
               Vue d&apos;ensemble des cours
             </CardTitle>
           </CardHeader>
@@ -643,7 +643,7 @@ export function FormateurDashboardPage() {
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                        <CheckCircle2 className="w-3 h-3 text-blue-500" />
                         {course.passRate}% réussite
                       </span>
                       {course.completedCount > 0 && (

@@ -170,7 +170,7 @@ export function AdminLearningPathsPage() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-border/60"><CardContent className="p-4 flex items-center gap-3"><div className="p-2 rounded-lg bg-primary/10 text-primary"><Route className="w-5 h-5" /></div><div><p className="text-xl font-bold leading-none">{stats.total}</p><p className="text-[11px] text-muted-foreground mt-1">Total parcours</p></div></CardContent></Card>
-        <Card className="border-border/60"><CardContent className="p-4 flex items-center gap-3"><div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600"><UserCheck className="w-5 h-5" /></div><div><p className="text-xl font-bold leading-none">{stats.totalEnrollments}</p><p className="text-[11px] text-muted-foreground mt-1">Inscriptions totales</p></div></CardContent></Card>
+        <Card className="border-border/60"><CardContent className="p-4 flex items-center gap-3"><div className="p-2 rounded-lg bg-blue-500/10 text-blue-600"><UserCheck className="w-5 h-5" /></div><div><p className="text-xl font-bold leading-none">{stats.totalEnrollments}</p><p className="text-[11px] text-muted-foreground mt-1">Inscriptions totales</p></div></CardContent></Card>
         {Object.entries(stats.byRole).slice(0, 2).map(([role, count]) => (
           <Card key={role} className="border-border/60"><CardContent className="p-4 flex items-center gap-3"><div className={cn("p-2 rounded-lg", ROLE_COLORS[role] || "bg-gray-100")}><Target className="w-5 h-5" /></div><div><p className="text-xl font-bold leading-none">{count}</p><p className="text-[11px] text-muted-foreground mt-1">Parcours {ROLE_LABELS[role] || role}</p></div></CardContent></Card>
         ))}

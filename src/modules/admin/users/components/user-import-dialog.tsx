@@ -137,7 +137,7 @@ export function UserImportDialog({ onImported }: { onImported: () => void }) {
                 dragOver
                   ? "border-primary bg-primary/5"
                   : file
-                  ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/5"
+                  ? "border-blue-400 bg-blue-50 dark:bg-blue-500/5"
                   : "border-border hover:border-primary/50 hover:bg-muted/30",
               )}
             >
@@ -150,7 +150,7 @@ export function UserImportDialog({ onImported }: { onImported: () => void }) {
               />
               {file ? (
                 <div className="flex items-center justify-center gap-3">
-                  <FileText className="w-8 h-8 text-emerald-600" />
+                  <FileText className="w-8 h-8 text-blue-600" />
                   <div className="text-left">
                     <p className="text-sm font-medium text-foreground">{file.name}</p>
                     <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} Ko</p>
@@ -190,7 +190,7 @@ export function UserImportDialog({ onImported }: { onImported: () => void }) {
                 <p className="text-[10px] text-muted-foreground">Total</p>
               </CardContent></Card>
               <Card className="border-border/60"><CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold text-emerald-600">{result.successCount}</p>
+                <p className="text-2xl font-bold text-blue-600">{result.successCount}</p>
                 <p className="text-[10px] text-muted-foreground">Réussis</p>
               </CardContent></Card>
               <Card className="border-border/60"><CardContent className="p-3 text-center">

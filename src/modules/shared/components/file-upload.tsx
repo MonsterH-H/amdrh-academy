@@ -268,8 +268,8 @@ export function FileUpload({
           className={cn(
             "relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all cursor-pointer",
             isDragOver
-              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
-              : "border-muted-foreground/25 hover:border-emerald-400 hover:bg-muted/50",
+              ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
+              : "border-muted-foreground/25 hover:border-blue-400 hover:bg-muted/50",
             disabled && "opacity-50 cursor-not-allowed"
           )}
           style={{ width: 120, height: 120 }}
@@ -286,7 +286,7 @@ export function FileUpload({
           ) : (
             <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
               {isUploading ? (
-                <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
               ) : (
                 <Upload className="w-6 h-6" />
               )}
@@ -308,7 +308,7 @@ export function FileUpload({
 
         {uploadedFiles.length > 0 && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+            <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
             <span className="truncate max-w-[120px]">{uploadedFiles[0].name}</span>
             {!disabled && (
               <button
@@ -346,8 +346,8 @@ export function FileUpload({
           className={cn(
             "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 transition-all cursor-pointer select-none",
             isDragOver
-              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 scale-[1.01]"
-              : "border-muted-foreground/20 hover:border-emerald-400/60 hover:bg-muted/30",
+              ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20 scale-[1.01]"
+              : "border-muted-foreground/20 hover:border-blue-400/60 hover:bg-muted/30",
             disabled && "opacity-50 cursor-not-allowed hover:border-muted-foreground/20 hover:bg-transparent",
             isUploading && "pointer-events-none"
           )}
@@ -356,17 +356,17 @@ export function FileUpload({
             className={cn(
               "w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-colors",
               isDragOver
-                ? "bg-emerald-100 dark:bg-emerald-900/30"
+                ? "bg-blue-100 dark:bg-blue-900/30"
                 : "bg-muted"
             )}
           >
             {isUploading ? (
-              <Loader2 className="w-7 h-7 animate-spin text-emerald-500" />
+              <Loader2 className="w-7 h-7 animate-spin text-blue-500" />
             ) : (
               <Upload
                 className={cn(
                   "w-7 h-7",
-                  isDragOver ? "text-emerald-500" : "text-muted-foreground"
+                  isDragOver ? "text-blue-500" : "text-muted-foreground"
                 )}
               />
             )}
@@ -406,8 +406,8 @@ export function FileUpload({
                 key={qf.id}
                 className="flex items-center gap-3 rounded-xl border border-muted-foreground/15 bg-muted/30 px-4 py-3 transition-colors"
               >
-                <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{qf.file.name}</p>
@@ -441,7 +441,7 @@ export function FileUpload({
               size="sm"
               onClick={handleUpload}
               disabled={isUploading || queuedFiles.length === 0}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
             >
               {isUploading ? (
                 <>
@@ -471,7 +471,7 @@ export function FileUpload({
             return (
               <div
                 key={uf.key}
-                className="flex items-center gap-3 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/10 px-4 py-3 transition-colors"
+                className="flex items-center gap-3 rounded-xl border border-blue-200 dark:border-blue-800/40 bg-blue-50/50 dark:bg-blue-950/10 px-4 py-3 transition-colors"
               >
                 {isImg ? (
                   <img
@@ -480,14 +480,14 @@ export function FileUpload({
                     className="w-9 h-9 rounded-lg object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium truncate">{uf.name}</p>
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                   </div>
                   {uf.size !== undefined && (
                     <p className="text-xs text-muted-foreground">
@@ -499,7 +499,7 @@ export function FileUpload({
                   href={uf.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 text-muted-foreground hover:text-emerald-600 transition-colors p-1 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+                  className="flex-shrink-0 text-muted-foreground hover:text-blue-600 transition-colors p-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30"
                   title="Voir le fichier"
                 >
                   <FileText className="w-4 h-4" />
@@ -523,7 +523,7 @@ export function FileUpload({
               variant="outline"
               size="sm"
               onClick={() => inputRef.current?.click()}
-              className="w-full mt-1 border-dashed border-muted-foreground/25 text-muted-foreground hover:text-emerald-600 hover:border-emerald-400/40"
+              className="w-full mt-1 border-dashed border-muted-foreground/25 text-muted-foreground hover:text-blue-600 hover:border-blue-400/40"
             >
               <Upload className="w-3.5 h-3.5 mr-1.5" />
               Ajouter un autre fichier ({resolvedMaxFiles - uploadedFiles.length} restant

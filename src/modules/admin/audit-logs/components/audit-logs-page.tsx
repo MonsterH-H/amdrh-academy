@@ -54,7 +54,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 const ENTITY_COLORS: Record<string, string> = {
   User: "bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400",
-  Course: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+  Course: "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
   Quiz: "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
   Certificate: "bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400",
   Notification: "bg-pink-100 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400",

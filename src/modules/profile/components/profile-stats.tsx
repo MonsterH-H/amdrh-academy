@@ -31,7 +31,7 @@ interface ProfileStatsProps {
 
 const STAT_CARDS = [
   { label: "Cours inscrits", key: "enrollments" as const, icon: BookOpen, color: "text-sky-500", bg: "bg-sky-50", action: "courses" as AppView },
-  { label: "Cours terminés", key: "completedEnrollments" as const, icon: GraduationCap, color: "text-emerald-500", bg: "bg-emerald-50", action: "learner-traceability" as AppView },
+  { label: "Cours terminés", key: "completedEnrollments" as const, icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-50", action: "learner-traceability" as AppView },
   { label: "Certificats obtenus", key: "certificates" as const, icon: Award, color: "text-amber-500", bg: "bg-amber-50", action: "certificates" as AppView },
   { label: "Badges gagnés", key: "badges" as const, icon: Star, color: "text-yellow-500", bg: "bg-yellow-50", action: "badges" as AppView },
 ];
@@ -87,7 +87,7 @@ export function ProfileStats({ stats, loadingStats, onNavigate }: ProfileStatsPr
       <Card className="border-border/60">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-emerald-500" />
+            <HelpCircle className="w-4 h-4 text-blue-500" />
             Quiz
           </CardTitle>
         </CardHeader>

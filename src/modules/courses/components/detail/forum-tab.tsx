@@ -233,7 +233,7 @@ function DiscussionListItem({
                 <Pin className="w-3 h-3 text-amber-500 flex-shrink-0" />
               )}
               {discussion.isResolved && (
-                <Badge className="bg-emerald-100 text-emerald-700 text-[9px]">
+                <Badge className="bg-blue-100 text-blue-700 text-[9px]">
                   <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />
                   Résolu
                 </Badge>
@@ -334,7 +334,7 @@ function DiscussionDetail({
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <h3 className="text-base font-semibold text-foreground">{discussion.title}</h3>
                 {discussion.isResolved && (
-                  <Badge className="bg-emerald-100 text-emerald-700 text-[9px]">
+                  <Badge className="bg-blue-100 text-blue-700 text-[9px]">
                     <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />
                     Résolu
                   </Badge>

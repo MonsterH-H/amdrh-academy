@@ -117,7 +117,7 @@ export function FormateurDashboard() {
       {/* Stats Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={BookOpen} label="Mes formations" value={stats.totalCourses} colorClass="text-sky-600" bgColor="bg-gradient-to-br from-sky-50 to-sky-100/60 dark:from-sky-500/10 dark:to-sky-500/5" />
-        <StatCard icon={Users} label="Total inscrits" value={stats.totalEnrollments} colorClass="text-emerald-600" bgColor="bg-gradient-to-br from-emerald-50 to-emerald-100/60 dark:from-emerald-500/10 dark:to-emerald-500/5" />
+        <StatCard icon={Users} label="Total inscrits" value={stats.totalEnrollments} colorClass="text-blue-600" bgColor="bg-gradient-to-br from-blue-50 to-blue-100/60 dark:from-blue-500/10 dark:to-blue-500/5" />
         <StatCard icon={TrendingUp} label="Complétion moy." value={`${stats.avgCompletion}%`} colorClass="text-amber-600" bgColor="bg-gradient-to-br from-amber-50 to-amber-100/60 dark:from-amber-500/10 dark:to-amber-500/5" />
         <StatCard icon={Award} label="Score moyen quiz" value={`${stats.avgScore}%`} colorClass="text-violet-600" bgColor="bg-gradient-to-br from-violet-50 to-violet-100/60 dark:from-violet-500/10 dark:to-violet-500/5" />
       </div>
@@ -156,7 +156,7 @@ export function FormateurDashboard() {
                             {activity.score}%
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="text-[10px] bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700">
+                          <Badge variant="secondary" className="text-[10px] bg-blue-50 dark:bg-blue-500/10 text-blue-700">
                             Complété
                           </Badge>
                         )}
@@ -263,7 +263,7 @@ export function FormateurDashboard() {
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Taux réussite</span>
-                      <span className={cn("font-medium", course.passRate >= 70 ? "text-emerald-600" : "text-amber-600")}>{course.passRate}%</span>
+                      <span className={cn("font-medium", course.passRate >= 70 ? "text-blue-600" : "text-amber-600")}>{course.passRate}%</span>
                     </div>
                   </div>
                 </CardContent>

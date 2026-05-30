@@ -61,7 +61,7 @@ export function AdminNotificationsPage() {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Total envoyées" value={stats.total} icon={Bell} colorClass="bg-primary/10 text-primary" />
-          <StatCard label="Taux de lecture" value={`${stats.readRate}%`} icon={Eye} colorClass="bg-emerald-500/10 text-emerald-600" subtitle={`${stats.readCount} lues / ${stats.unreadCount} non lues`} />
+          <StatCard label="Taux de lecture" value={`${stats.readRate}%`} icon={Eye} colorClass="bg-blue-500/10 text-blue-600" subtitle={`${stats.readCount} lues / ${stats.unreadCount} non lues`} />
           <StatCard label="Non lues" value={stats.unreadCount} icon={EyeOff} colorClass="bg-amber-500/10 text-amber-600" />
           <TypeBreakdownCard byType={stats.byType} />
         </div>

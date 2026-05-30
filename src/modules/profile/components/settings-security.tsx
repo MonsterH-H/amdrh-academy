@@ -106,7 +106,7 @@ export function SettingsSecurity({ lastLoginAt, emailVerified }: SettingsSecurit
                 <p className="text-sm font-medium text-foreground">Vérification de l'email</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   {emailVerified ? (
-                    <Badge variant="secondary" className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] px-1.5 py-0">
+                    <Badge variant="secondary" className="bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] px-1.5 py-0">
                       Vérifié ✓
                     </Badge>
                   ) : (

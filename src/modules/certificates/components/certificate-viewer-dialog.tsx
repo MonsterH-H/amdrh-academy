@@ -35,7 +35,7 @@ function getCertTypeIcon(type: string) {
 
 function getScoreColor(score: number, maxScore: number): string {
   const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
-  if (pct >= 90) return "text-emerald-600 dark:text-emerald-400";
+  if (pct >= 90) return "text-blue-600 dark:text-blue-400";
   if (pct >= 70) return "text-green-600 dark:text-green-400";
   if (pct >= 50) return "text-amber-600 dark:text-amber-400";
   return "text-red-600 dark:text-red-400";
@@ -60,7 +60,7 @@ function ScoreBar({ score, maxScore }: { score: number; maxScore: number }) {
         <div
           className={cn(
             "h-full rounded-full transition-all duration-700",
-            pct >= 70 ? "bg-gradient-to-r from-green-400 to-emerald-500" :
+            pct >= 70 ? "bg-gradient-to-r from-green-400 to-blue-500" :
               pct >= 50 ? "bg-gradient-to-r from-amber-400 to-amber-500" :
                 "bg-gradient-to-r from-red-400 to-red-500"
           )}
@@ -135,9 +135,9 @@ export function CertificateViewerDialog({
                 </div>
               </div>
               {isValid && (
-                <div className="flex items-center gap-1.5 bg-emerald-400/20 px-2.5 py-1 rounded-full">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
-                  <span className="text-[10px] font-medium text-emerald-200">Vérifié</span>
+                <div className="flex items-center gap-1.5 bg-blue-400/20 px-2.5 py-1 rounded-full">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-200" />
+                  <span className="text-[10px] font-medium text-blue-200">Vérifié</span>
                 </div>
               )}
             </div>

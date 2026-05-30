@@ -32,7 +32,7 @@ export function NotificationEmptyState({
     return (
       <div className="text-center py-20 animate-fadeIn">
         <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-5">
-          <CheckCircle2 className="w-10 h-10 text-emerald-500/40" />
+          <CheckCircle2 className="w-10 h-10 text-blue-500/40" />
         </div>
         <h3 className="font-semibold text-foreground text-lg mb-2">
           Tout est lu !

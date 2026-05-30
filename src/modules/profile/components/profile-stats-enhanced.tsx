@@ -24,7 +24,7 @@ const STAT_CARDS: Array<{
   bg: string;
 }> = [
   { label: "Cours suivis", key: "enrollments", icon: BookOpen, color: "text-sky-500", bg: "bg-sky-500/10" },
-  { label: "Quiz complétés", key: "quizAttempts", icon: HelpCircle, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  { label: "Quiz complétés", key: "quizAttempts", icon: HelpCircle, color: "text-blue-500", bg: "bg-blue-500/10" },
   { label: "Certificats obtenus", key: "certificates", icon: Award, color: "text-amber-500", bg: "bg-amber-500/10" },
   { label: "Badges gagnés", key: "badges", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
 ];

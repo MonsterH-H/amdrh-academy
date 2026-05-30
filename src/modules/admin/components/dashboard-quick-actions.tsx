@@ -34,8 +34,8 @@ const actions: QuickAction[] = [
     description: "Nouvelle formation",
     view: "course-create",
     icon: BookPlus,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-500/10 hover:bg-emerald-500/15",
+    color: "text-blue-600",
+    bgColor: "bg-blue-500/10 hover:bg-blue-500/15",
   },
   {
     label: "Envoyer notification",

@@ -53,14 +53,14 @@ export const CATEGORY_ICONS: Record<string, string> = {
 
 export const CATEGORY_GRADIENTS: Record<string, string> = {
   ARBITRAGE: "from-blue-500/15 to-blue-600/20",
-  ENTRAINEMENT: "from-emerald-500/15 to-emerald-600/20",
+  ENTRAINEMENT: "from-blue-500/15 to-blue-600/20",
   JOUEURS: "from-amber-500/15 to-amber-600/20",
   ADMINISTRATION: "from-violet-500/15 to-violet-600/20",
 };
 
 export const CATEGORY_ICON_COLORS: Record<string, string> = {
   ARBITRAGE: "text-blue-400",
-  ENTRAINEMENT: "text-emerald-400",
+  ENTRAINEMENT: "text-blue-400",
   JOUEURS: "text-amber-400",
   ADMINISTRATION: "text-violet-400",
 };
@@ -73,7 +73,7 @@ export const DIFFICULTY_LABELS: Record<string, string> = {
 };
 
 export const DIFFICULTY_COLORS: Record<string, string> = {
-  DEBUTANT: "bg-emerald-100 text-emerald-700",
+  DEBUTANT: "bg-blue-100 text-blue-700",
   INTERMEDIAIRE: "bg-amber-100 text-amber-700",
   AVANCE: "bg-orange-100 text-orange-700",
   EXPERT: "bg-red-100 text-red-700",
@@ -157,7 +157,7 @@ export const LESSON_TYPE_ICONS: Record<string, string> = {
 export const LESSON_TYPE_COLORS: Record<string, string> = {
   VIDEO: "bg-purple-100 text-purple-700",
   PDF: "bg-red-100 text-red-700",
-  TEXTE: "bg-emerald-100 text-emerald-700",
+  TEXTE: "bg-blue-100 text-blue-700",
   INTERACTIF: "bg-amber-100 text-amber-700",
 };
 
@@ -178,7 +178,7 @@ export const QUESTION_TYPE_LABELS: Record<string, string> = {
 export const QUESTION_TYPE_COLORS: Record<string, string> = {
   QCM_SIMPLE: "bg-primary/10 text-primary",
   QCM_MULTIPLE: "bg-amber-100 text-amber-700",
-  VRAI_FAUX: "bg-emerald-100 text-emerald-700",
+  VRAI_FAUX: "bg-blue-100 text-blue-700",
 };
 
 export const COURSE_STATUS_COLORS: Record<string, string> = {
@@ -197,7 +197,7 @@ export const LEARNING_PATH_MODE_LABELS: Record<string, string> = {
 
 export const LEARNING_PATH_MODE_COLORS: Record<string, string> = {
   SEQUENTIEL: "bg-blue-100 text-blue-700",
-  FLEXIBLE: "bg-emerald-100 text-emerald-700",
+  FLEXIBLE: "bg-blue-100 text-blue-700",
   HYBRIDE: "bg-purple-100 text-purple-700",
 };
 
@@ -215,7 +215,7 @@ export const RESOURCE_TYPE_COLORS: Record<string, string> = {
   VIDEO: "bg-purple-100 text-purple-700",
   PDF: "bg-red-100 text-red-700",
   IMAGE: "bg-sky-100 text-sky-700",
-  DOCUMENT: "bg-emerald-100 text-emerald-700",
+  DOCUMENT: "bg-blue-100 text-blue-700",
   AUDIO: "bg-pink-100 text-pink-700",
   ARCHIVE: "bg-orange-100 text-orange-700",
   AUTRE: "bg-gray-100 text-gray-700",
@@ -242,7 +242,7 @@ export const RESOURCE_CATEGORY_LABELS: Record<string, string> = {
 export const RESOURCE_CATEGORY_COLORS: Record<string, string> = {
   SUPPORT_COURS: "bg-blue-100 text-blue-700",
   RESSOURCE_ANNEXE: "bg-amber-100 text-amber-700",
-  EVALUATION: "bg-emerald-100 text-emerald-700",
+  EVALUATION: "bg-blue-100 text-blue-700",
   MEDIA_COURS: "bg-purple-100 text-purple-700",
   AUTRE: "bg-gray-100 text-gray-700",
 };
@@ -255,7 +255,7 @@ export const CERTIFICATE_TYPE_LABELS: Record<string, string> = {
 };
 
 export const CERTIFICATE_TYPE_COLORS: Record<string, string> = {
-  ATTESTATION: "bg-emerald-100 text-emerald-700",
+  ATTESTATION: "bg-blue-100 text-blue-700",
   CERTIFICAT_COMPLETION: "bg-blue-100 text-blue-700",
   CERTIFICAT: "bg-blue-100 text-blue-700",
   DIPLOME: "bg-amber-100 text-amber-700",
@@ -303,7 +303,7 @@ export const ANNOUNCEMENT_TYPE_LABELS: Record<string, string> = {
 export const ANNOUNCEMENT_TYPE_COLORS: Record<string, string> = {
   INFO: "bg-blue-100 text-blue-700",
   URGENT: "bg-red-100 text-red-700",
-  EVENEMENT: "bg-emerald-100 text-emerald-700",
+  EVENEMENT: "bg-blue-100 text-blue-700",
   FORMATION: "bg-purple-100 text-purple-700",
   RESULTAT: "bg-amber-100 text-amber-700",
 };

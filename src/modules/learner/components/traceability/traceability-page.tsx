@@ -196,7 +196,7 @@ function TraceabilityContent() {
 
         <TabsContent value="stats" className="mt-4">
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <StatCard icon={Zap} label="Score moyen" value={`${avgQuizScore}%`} colorClass="text-emerald-600" bgColor="bg-emerald-50" />
+            <StatCard icon={Zap} label="Score moyen" value={`${avgQuizScore}%`} colorClass="text-blue-600" bgColor="bg-blue-50" />
             <StatCard icon={Trophy} label="Taux de réussite" value={`${quizAttempts.length > 0 ? Math.round((passedQuizzes / quizAttempts.length) * 100) : 0}%`} colorClass="text-amber-600" bgColor="bg-amber-50" />
           </div>
           <AnalyticsCharts courses={courses} progressMap={progressMap} quizAttempts={quizAttempts} />
@@ -218,7 +218,7 @@ function TraceabilityContent() {
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-lg font-bold text-emerald-600">{cert.maxScore > 0 ? Math.round((cert.score / cert.maxScore) * 100) : 0}%</p>
+                    <p className="text-lg font-bold text-blue-600">{cert.maxScore > 0 ? Math.round((cert.score / cert.maxScore) * 100) : 0}%</p>
                     <p className="text-[10px] text-muted-foreground">{cert.score}/{cert.maxScore}</p>
                   </div>
                 </div>

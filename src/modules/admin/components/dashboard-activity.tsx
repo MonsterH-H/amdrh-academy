@@ -153,11 +153,11 @@ function StatusBadge({ status, action }: { status: string; action: string }) {
     className = "bg-amber-50 dark:bg-amber-500/10 text-amber-700";
     label = "Actif";
   } else if (action === "Soumission quiz") {
-    if (status === "REUSSI") { className = "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700"; label = "Réussi"; }
+    if (status === "REUSSI") { className = "bg-blue-50 dark:bg-blue-500/10 text-blue-700"; label = "Réussi"; }
     else if (status === "ECHOUE") { className = "bg-red-50 dark:bg-red-500/10 text-red-700"; label = "Échoué"; }
     else { className = "bg-sky-50 dark:bg-sky-500/10 text-sky-700"; label = "Soumis"; }
   } else if (status === "termine") {
-    className = "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700";
+    className = "bg-blue-50 dark:bg-blue-500/10 text-blue-700";
     label = "Terminé";
   } else if (status === "abandonne") {
     className = "bg-red-50 dark:bg-red-500/10 text-red-700";

@@ -20,7 +20,7 @@ export function UserStatsGrid({ counts, passedQuizzes }: { counts: Record<string
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {[
         { label: "Cours suivis", value: counts.enrollments || 0, icon: BookOpen, color: "bg-primary/10 text-primary" },
-        { label: "Certificats", value: counts.certificates || 0, icon: Award, color: "bg-emerald-500/10 text-emerald-600" },
+        { label: "Certificats", value: counts.certificates || 0, icon: Award, color: "bg-blue-500/10 text-blue-600" },
         { label: "Quiz réussis", value: passedQuizzes, icon: CheckCircle2, color: "bg-amber-500/10 text-amber-600" },
         { label: "Badges", value: counts.userBadges || 0, icon: Star, color: "bg-violet-500/10 text-violet-600" },
       ].map((stat) => (
@@ -189,7 +189,7 @@ export function CertificatesCard({ certificates }: { certificates: Array<Record<
     <Card className="border-border/60">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Award className="w-4 h-4 text-emerald-600" />
+          <Award className="w-4 h-4 text-blue-600" />
           Certificats obtenus
           <Badge variant="secondary" className="text-[10px] ml-auto">{certificates.length}</Badge>
         </CardTitle>
@@ -199,8 +199,8 @@ export function CertificatesCard({ certificates }: { certificates: Array<Record<
           {certificates.slice(0, 10).map((cert) => (
             <div key={cert.id as string} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <Award className="w-4 h-4 text-emerald-600" />
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Award className="w-4 h-4 text-blue-600" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{cert.courseTitle as string}</p>

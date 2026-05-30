@@ -36,7 +36,7 @@ export function Sidebar() {
     <div className="flex flex-col h-full">
       {/* Logo + Role badge — cleaner branding */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-border/40 flex-shrink-0">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
           <CircleDot className="w-5 h-5 text-white" />
         </div>
         {!collapsed && (
@@ -95,7 +95,7 @@ export function Sidebar() {
         </div>
       </ScrollArea>
 
-      {/* User section — polished with emerald avatar ring */}
+      {/* User section — polished with blue avatar ring */}
       <div className="border-t border-border/40 p-3 flex-shrink-0">
         <button
           onClick={() => navigate("profile")}
@@ -110,7 +110,7 @@ export function Sidebar() {
                 {getInitials(user.nom, user.prenom)}
               </AvatarFallback>
             </Avatar>
-            {/* Emerald ring around avatar */}
+            {/* Blue ring around avatar */}
             <span className="absolute -inset-0.5 rounded-full ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all duration-300" />
           </div>
           {!collapsed && (

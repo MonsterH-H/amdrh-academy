@@ -84,7 +84,7 @@ export function EnrollmentRowComponent({ row, expanded, detailsLoading, onToggle
           {row.quizBestScore ? <span className={cn("text-xs font-semibold", row.quizStatus === "REUSSI" ? "text-green-700" : "text-amber-700")}>{row.quizBestScore}</span> : <span className="text-xs text-muted-foreground">—</span>}
         </td>
         <td className="py-3 px-4 hidden xl:table-cell">
-          {row.certificateCode ? <Badge variant="secondary" className="text-[9px] bg-emerald-50 text-emerald-700"><Award className="w-3 h-3 mr-0.5" />Obtenu</Badge> : <span className="text-xs text-muted-foreground">Non</span>}
+          {row.certificateCode ? <Badge variant="secondary" className="text-[9px] bg-blue-50 text-blue-700"><Award className="w-3 h-3 mr-0.5" />Obtenu</Badge> : <span className="text-xs text-muted-foreground">Non</span>}
         </td>
         <td className="py-3 px-4 hidden md:table-cell">
           <Badge variant="secondary" className={cn("text-[9px]", ENROLLMENT_STATUS_COLORS[row.status] || "")}>{ENROLLMENT_STATUS_LABELS[row.status] || row.status}</Badge>

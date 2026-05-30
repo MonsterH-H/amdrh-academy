@@ -258,7 +258,7 @@ export function QuizResults({
                         </div>
                         <Badge variant="secondary" className={cn(
                           "text-[10px] flex-shrink-0",
-                          q.correctRate >= 70 ? "bg-emerald-50 dark:bg-emerald-500/10 text-green-700"
+                          q.correctRate >= 70 ? "bg-blue-50 dark:bg-blue-500/10 text-green-700"
                             : q.correctRate >= 40 ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700"
                             : "bg-red-50 dark:bg-red-500/10 text-red-700"
                         )}>
@@ -302,7 +302,7 @@ export function QuizResults({
                         <div className={cn(
                           "w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0",
                           attempt.status === "REUSSI"
-                            ? "bg-emerald-50 dark:bg-emerald-500/10 text-green-700"
+                            ? "bg-blue-50 dark:bg-blue-500/10 text-green-700"
                             : "bg-red-50 dark:bg-red-500/10 text-red-700"
                         )}>
                           {scorePercent}%
@@ -339,7 +339,7 @@ export function QuizResults({
                             (r: Record<string, unknown>, idx: number) => (
                               <div key={String(r.questionId)} className={cn(
                                 "flex items-start gap-2 p-2 rounded text-xs",
-                                r.isCorrect ? "bg-emerald-50 dark:bg-emerald-500/10" : "bg-red-50 dark:bg-red-500/10"
+                                r.isCorrect ? "bg-blue-50 dark:bg-blue-500/10" : "bg-red-50 dark:bg-red-500/10"
                               )}>
                                 {r.isCorrect
                                   ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />

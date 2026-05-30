@@ -112,7 +112,7 @@ export function CertificatesTab() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total certificats", value: stats.total, icon: FileCheck, color: "bg-primary/10 text-primary" },
-            { label: "Ce mois", value: stats.thisMonth, icon: Calendar, color: "bg-emerald-500/10 text-emerald-600" },
+            { label: "Ce mois", value: stats.thisMonth, icon: Calendar, color: "bg-blue-500/10 text-blue-600" },
             { label: "Valides", value: stats.valid, icon: ShieldCheck, color: "bg-green-500/10 text-green-600" },
             { label: "Expirés", value: stats.expired, icon: AlertCircle, color: "bg-red-500/10 text-red-600" },
           ].map((s) => (

@@ -19,10 +19,10 @@ export function CourseEditorQuiz({
   if (hasQuiz && quizId) {
     return (
       <div className="space-y-4">
-        <Card className="border-emerald-200/60 bg-emerald-50/30 dark:bg-emerald-500/10">
+        <Card className="border-blue-200/60 bg-blue-50/30 dark:bg-blue-500/10">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/15 flex items-center justify-center shrink-0">
                 <Award className="w-6 h-6 text-green-600" />
               </div>
               <div className="flex-1 min-w-0">

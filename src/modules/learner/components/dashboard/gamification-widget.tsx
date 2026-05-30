@@ -43,7 +43,7 @@ interface GamificationData {
 }
 
 const BREAKDOWN_CONFIG = [
-  { key: "lessons" as const, icon: BookOpen, color: "text-emerald-600 dark:text-emerald-400" },
+  { key: "lessons" as const, icon: BookOpen, color: "text-blue-600 dark:text-blue-400" },
   { key: "quizzes" as const, icon: Target, color: "text-blue-600 dark:text-blue-400" },
   { key: "certificates" as const, icon: Award, color: "text-amber-600 dark:text-amber-400" },
   { key: "badges" as const, icon: Star, color: "text-violet-600 dark:text-violet-400" },
@@ -52,7 +52,7 @@ const BREAKDOWN_CONFIG = [
 
 const LEVEL_COLORS: Record<string, string> = {
   "Débutant": "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-  "Apprenti": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  "Apprenti": "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   "Confirmé": "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   "Avancé": "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   "Expert": "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
@@ -146,8 +146,8 @@ export function GamificationWidget() {
       <Card className="border-border/50 hover:shadow-lg transition-all duration-300">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-emerald-500" />
+            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-blue-500" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Points aujourd&apos;hui</p>

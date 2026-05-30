@@ -33,7 +33,7 @@ const typeIcons: Record<string, typeof BookOpen> = {
 const typeColors: Record<string, string> = {
   COURS: "bg-primary/10 text-primary",
   CERTIFICAT: "bg-amber-500/10 text-amber-600",
-  MESSAGE: "bg-emerald-500/10 text-emerald-600",
+  MESSAGE: "bg-blue-500/10 text-blue-600",
   QUIZ: "bg-violet-500/10 text-violet-600",
   BADGE: "bg-pink-500/10 text-pink-600",
   SYSTEME: "bg-muted text-muted-foreground",

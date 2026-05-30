@@ -45,12 +45,12 @@ export function PlatformHealth() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Uptime */}
           <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/30">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-blue-500" />
             <div className="min-w-0">
               <p className="text-[10px] text-muted-foreground">Disponibilité</p>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-semibold text-emerald-600">99.9%</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-xs font-semibold text-blue-600">99.9%</span>
               </div>
               <p className="text-[9px] text-muted-foreground/60">{uptimeLabel}</p>
             </div>

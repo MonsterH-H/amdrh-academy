@@ -46,7 +46,7 @@ interface KpiCardDef {
 
 const KPI_CARDS: KpiCardDef[] = [
   { key: "totalUsers", label: "Utilisateurs", subtitle: "Total inscrits", icon: Users, color: "sky", suffix: "", decimals: 0 },
-  { key: "publishedCourses", label: "Cours publiés", subtitle: "En ligne", icon: BookOpen, color: "emerald", suffix: "", decimals: 0 },
+  { key: "publishedCourses", label: "Cours publiés", subtitle: "En ligne", icon: BookOpen, color: "blue", suffix: "", decimals: 0 },
   { key: "activeEnrollments", label: "Inscriptions actives", subtitle: "En cours", icon: GraduationCap, color: "violet", suffix: "", decimals: 0 },
   { key: "completionRate", label: "Taux complétion", subtitle: "Moyenne globale", icon: CheckCircle, color: "green", suffix: "%", decimals: 1 },
   { key: "totalCertificates", label: "Certificats", subtitle: "Émis au total", icon: Award, color: "amber", suffix: "", decimals: 0 },
@@ -59,7 +59,7 @@ const KPI_CARDS: KpiCardDef[] = [
 
 const ACCENT_MAP: Record<string, { classes: string; borderClass: string }> = {
   sky: { classes: "bg-sky-500/10 text-sky-600", borderClass: "border-t-sky-500" },
-  emerald: { classes: "bg-emerald-500/10 text-emerald-600", borderClass: "border-t-emerald-500" },
+  blue: { classes: "bg-blue-500/10 text-blue-600", borderClass: "border-t-blue-500" },
   violet: { classes: "bg-violet-500/10 text-violet-600", borderClass: "border-t-violet-500" },
   green: { classes: "bg-green-500/10 text-green-600", borderClass: "border-t-green-500" },
   amber: { classes: "bg-amber-500/10 text-amber-600", borderClass: "border-t-amber-500" },

@@ -117,7 +117,7 @@ export function LearnerDashboardPage() {
 
   const statCards = [
     { label: "Cours en cours", value: stats.coursesEnCours, icon: BookOpen, colorClass: "text-primary", bgColor: "bg-primary/10" },
-    { label: "Cours terminés", value: stats.coursesTermines, icon: FileCheck, colorClass: "text-emerald-600", bgColor: "bg-emerald-500/10" },
+    { label: "Cours terminés", value: stats.coursesTermines, icon: FileCheck, colorClass: "text-blue-600", bgColor: "bg-blue-500/10" },
     { label: "Certificats", value: stats.certificatesCount, icon: Award, colorClass: "text-amber-600", bgColor: "bg-amber-500/10" },
     { label: "Score moyen", value: `${stats.avgScore}%`, icon: TrendingUp, colorClass: "text-violet-600", bgColor: "bg-violet-500/10" },
   ];

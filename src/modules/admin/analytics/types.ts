@@ -51,13 +51,13 @@ export const ROLE_CHART_COLORS: Record<string, string> = {
   ADMIN: "#EF4444",
   FORMATEUR: "#8B5CF6",
   ARBITRE: "#06B6D4",
-  ENTRAINEUR: "#10B981",
+  ENTRAINEUR: "#2563EB",
   JOUEUR: "#F59E0B",
 };
 
 export const CATEGORY_CHART_COLORS: Record<string, string> = {
   ARBITRAGE: "#06B6D4",
-  ENTRAINEMENT: "#10B981",
+  ENTRAINEMENT: "#2563EB",
   JOUEURS: "#F59E0B",
   ADMINISTRATION: "#8B5CF6",
 };

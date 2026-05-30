@@ -304,7 +304,7 @@ export function AdminAnnouncementsPage() {
           label="Publiées"
           value={publishedCount}
           icon={Eye}
-          colorClass="bg-emerald-500/10 text-emerald-600"
+          colorClass="bg-blue-500/10 text-blue-600"
         />
         <StatCard
           label="Épinglées"

@@ -64,7 +64,7 @@ export function ProfileCompletionWidget({ completeness }: ProfileCompletionProps
             <div className="absolute inset-0 flex items-center justify-center">
               <span className={cn(
                 "text-lg font-bold",
-                cp >= 80 ? "text-emerald-600" : cp >= 50 ? "text-amber-600" : "text-orange-600",
+                cp >= 80 ? "text-blue-600" : cp >= 50 ? "text-amber-600" : "text-orange-600",
               )}>
                 {cp}%
               </span>
@@ -80,7 +80,7 @@ export function ProfileCompletionWidget({ completeness }: ProfileCompletionProps
               {completeness.details.map((d) => (
                 <div key={d.field} className="flex items-center gap-2">
                   {d.done ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                   ) : (
                     <Circle className="w-3.5 h-3.5 text-muted-foreground/30 flex-shrink-0" />
                   )}

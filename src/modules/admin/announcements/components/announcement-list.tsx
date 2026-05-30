@@ -242,7 +242,7 @@ export function AnnouncementList({
                       className={cn(
                         "text-[10px] px-1.5 py-0",
                         announcement.isPublished
-                          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                          ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
                           : "text-muted-foreground"
                       )}
                     >

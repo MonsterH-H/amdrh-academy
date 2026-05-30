@@ -84,7 +84,7 @@ export function ResourceStatsRow({ stats, total }: ResourceStatsRowProps) {
       {/* Last upload */}
       <Card className="border-border/60">
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600">
+          <div className="p-2.5 rounded-lg bg-blue-500/10 text-blue-600">
             <Upload className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">

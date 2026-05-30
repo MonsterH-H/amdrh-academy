@@ -141,7 +141,7 @@ export function CourseRow({
           <div className={cn(
             "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-lg",
             course.category === "ARBITRAGE" && "bg-primary/10",
-            course.category === "ENTRAINEMENT" && "bg-emerald-50",
+            course.category === "ENTRAINEMENT" && "bg-blue-50",
             course.category === "JOUEURS" && "bg-amber-50",
             course.category === "ADMINISTRATION" && "bg-violet-50",
           )}>

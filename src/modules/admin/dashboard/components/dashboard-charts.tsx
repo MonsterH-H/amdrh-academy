@@ -9,7 +9,7 @@ import { TrendingUp, PieChartIcon, BarChart3 } from "lucide-react";
 import { formatMonth } from "../types";
 import type { ChartData, RoleDistribution, TopCourse } from "../types";
 
-const ROLE_PIE_COLORS = ["#EF4444", "#8B5CF6", "#06B6D4", "#10B981", "#F59E0B"];
+const ROLE_PIE_COLORS = ["#EF4444", "#8B5CF6", "#06B6D4", "#2563EB", "#F59E0B"];
 
 function ChartTooltip({ active, payload, label }: {
   active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string;

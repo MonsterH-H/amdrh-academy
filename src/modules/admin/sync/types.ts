@@ -49,7 +49,7 @@ export type SyncType = "licence_sync" | "certification_sync" | "users_sync" | "c
 export const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
   EN_ATTENTE: { label: "En attente", color: "bg-muted text-muted-foreground", icon: Clock },
   EN_COURS: { label: "En cours", color: "bg-primary/10 text-primary", icon: Loader2 },
-  TERMINE: { label: "Terminé", color: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400", icon: CheckCircle2 },
+  TERMINE: { label: "Terminé", color: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400", icon: CheckCircle2 },
   ERREUR: { label: "Erreur", color: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400", icon: XCircle },
 };
 
@@ -57,6 +57,6 @@ export const syncCards: Array<{ type: SyncType; label: string; desc: string; ico
   { type: "licence_sync", label: "Licences", desc: "Valider et normaliser les numéros de licence fédérale", icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/50" },
   { type: "certification_sync", label: "Certifications", desc: "Vérifier l'intégrité des certificats et badges", icon: Award, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/50" },
   { type: "users_sync", label: "Utilisateurs", desc: "Analyser et normaliser les données utilisateurs", icon: Database, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/50", variant: "outline" },
-  { type: "courses_sync", label: "Cours", desc: "Vérifier l'intégrité du catalogue et des parcours", icon: BookOpen, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/50", variant: "outline" },
+  { type: "courses_sync", label: "Cours", desc: "Vérifier l'intégrité du catalogue et des parcours", icon: BookOpen, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/50", variant: "outline" },
   { type: "quizzes_sync", label: "Quiz", desc: "Valider les quiz, questions et tentatives", icon: HelpCircle, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/50", variant: "outline" },
 ];

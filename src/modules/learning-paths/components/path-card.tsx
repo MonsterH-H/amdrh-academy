@@ -76,7 +76,7 @@ function formatDate(d: string) {
 
 function getRoleGradient(role: string): string {
   const m: Record<string, string> = {
-    ARBITRE: "from-blue-500 to-blue-600", ENTRAINEUR: "from-emerald-500 to-emerald-600",
+    ARBITRE: "from-blue-500 to-blue-600", ENTRAINEUR: "from-blue-500 to-blue-600",
     JOUEUR: "from-amber-500 to-amber-600", FORMATEUR: "from-purple-500 to-purple-600",
   };
   return m[role] || "from-gray-500 to-gray-600";

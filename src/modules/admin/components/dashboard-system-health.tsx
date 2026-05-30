@@ -45,12 +45,12 @@ export function DashboardSystemHealth({ totalRecords }: { totalRecords: number }
         <div className="grid grid-cols-3 gap-3">
           {/* Realtime Service */}
           <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/30">
-            <Wifi className={cn("w-4 h-4", realtimeOk === true ? "text-emerald-500" : realtimeOk === false ? "text-red-400" : "text-muted-foreground/40")} />
+            <Wifi className={cn("w-4 h-4", realtimeOk === true ? "text-blue-500" : realtimeOk === false ? "text-red-400" : "text-muted-foreground/40")} />
             <div className="min-w-0">
               <p className="text-[10px] text-muted-foreground">Temps réel</p>
               <div className="flex items-center gap-1.5">
                 <StatusDot ok={realtimeOk} />
-                <span className={cn("text-xs font-semibold", realtimeOk === true ? "text-emerald-600" : "text-red-500")}>
+                <span className={cn("text-xs font-semibold", realtimeOk === true ? "text-blue-600" : "text-red-500")}>
                   {realtimeOk === null ? "Vérif..." : realtimeOk ? "Opérationnel" : "Hors ligne"}
                 </span>
               </div>
@@ -59,12 +59,12 @@ export function DashboardSystemHealth({ totalRecords }: { totalRecords: number }
 
           {/* Database */}
           <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/30">
-            <Database className="w-4 h-4 text-emerald-500" />
+            <Database className="w-4 h-4 text-blue-500" />
             <div className="min-w-0">
               <p className="text-[10px] text-muted-foreground">Base de données</p>
               <div className="flex items-center gap-1.5">
                 <StatusDot ok={true} />
-                <span className="text-xs font-semibold text-emerald-600">Opérationnel</span>
+                <span className="text-xs font-semibold text-blue-600">Opérationnel</span>
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@ function StatusDot({ ok }: { ok: boolean | null }) {
   return (
     <span className={cn(
       "w-1.5 h-1.5 rounded-full",
-      ok === true ? "bg-emerald-500 animate-pulse" : ok === false ? "bg-red-400" : "bg-muted-foreground/30",
+      ok === true ? "bg-blue-500 animate-pulse" : ok === false ? "bg-red-400" : "bg-muted-foreground/30",
     )} />
   );
 }
