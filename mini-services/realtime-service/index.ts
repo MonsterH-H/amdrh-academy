@@ -1,6 +1,6 @@
 /**
  * AMDRH Real-Time Service
- * 
+ *
  * Handles:
  * - Live notifications (new, read, count)
  * - Real-time messaging (conversations, typing indicators)
@@ -8,7 +8,7 @@
  * - Live enrollment progress updates
  * - Quiz submission broadcasts
  * - Rate limiting per connection
- * 
+ *
  * Production features:
  * - Connection rate limiting (max 5 connections per 10s per IP)
  * - Message rate limiting (max 30 messages per minute per user)
@@ -104,7 +104,7 @@ function getOnlineUsersForRole(role: string): string[] {
 }
 
 function broadcastPresenceChange(userId: string, isOnline: boolean) {
-  // Broadcast to all connected admin sockets
+  // Broadcast to all connected sockets
   for (const [uid, info] of presenceStore) {
     for (const sid of info.socketIds) {
       io.to(sid).emit("presence:change", { userId, isOnline, timestamp: Date.now() });
@@ -169,7 +169,6 @@ const io = new Server(httpServer, {
 io.use((socket, next) => {
   const userId = socket.handshake.auth.userId as string;
   const role = socket.handshake.auth.role as string;
-  const sessionToken = socket.handshake.auth.sessionToken as string;
 
   if (!userId || !role) {
     return next(new Error("Authentication required: userId and role are required"));
@@ -237,7 +236,7 @@ io.on("connection", (socket) => {
   });
 
   // ─── Notifications ───
-  
+
   socket.on("notifications:subscribe", () => {
     const count = getCachedUnreadCount(userId);
     socket.emit("notifications:count", { count: count || 0 });
@@ -284,7 +283,7 @@ io.on("connection", (socket) => {
 
   socket.on("messages:new", (data: { conversationId: string; messageId: string; content: string; receiverId?: string }) => {
     if (!data?.conversationId || !data?.messageId) return;
-    
+
     // Rate limit
     if (!checkRateLimit(userId, messageLimiter, MAX_MESSAGES_PER_MINUTE, MESSAGE_WINDOW_MS)) {
       socket.emit("error", { code: "RATE_LIMITED", message: "Trop de messages. Attendez un moment." });
@@ -350,7 +349,7 @@ io.on("connection", (socket) => {
   });
 
   // ─── Disconnect ───
-  
+
   socket.on("disconnect", (reason) => {
     console.log(`[Realtime] ${role} ${userId.slice(0, 8)}... disconnected: ${reason} (remaining: ${io.engine.clientsCount})`);
     removePresenceSocket(userId, socket.id);
@@ -362,7 +361,7 @@ io.on("connection", (socket) => {
 // ──────────────────────────────────────────────────
 
 const PORT = 3004;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`[AMDRH Realtime Service] Running on port ${PORT}`);
   console.log(`[AMDRH Realtime Service] Max connections per IP: ${MAX_CONNECTIONS_PER_IP}/${CONNECTION_WINDOW_MS}ms`);
   console.log(`[AMDRH Realtime Service] Message rate limit: ${MAX_MESSAGES_PER_MINUTE}/${MESSAGE_WINDOW_MS}ms`);
@@ -373,14 +372,12 @@ httpServer.listen(PORT, () => {
 // HTTP API Endpoints (for Next.js push integration)
 // ──────────────────────────────────────────────────
 
-/**
- * Simple HTTP server to receive push requests from Next.js API routes.
- * Uses the same httpServer as Socket.IO.
- */
-
 httpServer.on("request", async (req, res) => {
   const parsedUrl = new URL(req.url || "/", `http://localhost:${PORT}`);
   const path = parsedUrl.pathname;
+
+  // Let Socket.IO handle its own polling/websocket paths
+  if (path.startsWith("/socket.io/")) return;
 
   // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
