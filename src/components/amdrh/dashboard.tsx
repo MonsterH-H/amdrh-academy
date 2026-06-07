@@ -100,7 +100,8 @@ function getTimeAgo(timestamp: number): string {
 // Connection Status Badge
 // ──────────────────────────────────────────────────────────
 
-function ConnectionStatusBadge({ isConnected }: { isConnected: boolean }) {
+function ConnectionStatusBadge({ isConnected, isEnabled }: { isConnected: boolean; isEnabled: boolean }) {
+  if (!isEnabled) return null;
   return (
     <div className={cn(
       "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full transition-colors duration-300",
@@ -116,7 +117,7 @@ function ConnectionStatusBadge({ isConnected }: { isConnected: boolean }) {
 
 export function DashboardPage() {
   const { user, navigate } = useAppStore();
-  const { isConnected, on } = useRealtime();
+  const { isConnected, isEnabled, on } = useRealtime();
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [onlineCount, setOnlineCount] = useState<number | null>(null);
@@ -211,7 +212,7 @@ export function DashboardPage() {
   if (loading) return <DashboardSkeleton />;
   if (!data || !user) return null;
 
-  const realtimeProps = { isConnected, onlineCount, activityFeed };
+  const realtimeProps = { isConnected, isEnabled, onlineCount, activityFeed };
 
   if (data.type === "admin") return <AdminDashboard data={data} user={user} realtime={realtimeProps} />;
   if (data.type === "formateur") return <FormateurDashboard data={data} user={user} realtime={realtimeProps} />;
@@ -220,6 +221,7 @@ export function DashboardPage() {
 
 interface RealtimeProps {
   isConnected: boolean;
+  isEnabled: boolean;
   onlineCount: number | null;
   activityFeed: ActivityItem[];
 }
@@ -257,7 +259,7 @@ function LearnerDashboard({ data, user, realtime }: { data: Record<string, unkno
               {realtime.onlineCount} en ligne
             </div>
           )}
-          <ConnectionStatusBadge isConnected={realtime.isConnected} />
+          <ConnectionStatusBadge isConnected={realtime.isConnected} isEnabled={realtime.isEnabled} />
         </div>
       </div>
 
@@ -595,7 +597,7 @@ function FormateurDashboard({ data, user, realtime }: { data: Record<string, unk
               {realtime.onlineCount} en ligne
             </div>
           )}
-          <ConnectionStatusBadge isConnected={realtime.isConnected} />
+          <ConnectionStatusBadge isConnected={realtime.isConnected} isEnabled={realtime.isEnabled} />
           <Button
             onClick={() => navigate("course-create")}
             className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0 w-full sm:w-auto"
@@ -902,7 +904,7 @@ function AdminDashboard({ data, realtime }: { data: Record<string, unknown>; use
               {realtime.onlineCount} en ligne
             </div>
           )}
-          <ConnectionStatusBadge isConnected={realtime.isConnected} />
+          <ConnectionStatusBadge isConnected={realtime.isConnected} isEnabled={realtime.isEnabled} />
           <Button
             onClick={() => navigate("course-create")}
             className="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 rounded-lg shrink-0 w-full sm:w-auto"

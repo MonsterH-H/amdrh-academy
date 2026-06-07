@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function TopBar() {
   const { user, currentView, navigate, unreadCount, setUnreadCount, sidebarCollapsed } = useAppStore();
-  const { isConnected } = useRealtime();
+  const { isConnected, isEnabled } = useRealtime();
 
   if (!user) return null;
 
@@ -48,15 +48,17 @@ export function TopBar() {
               {getInitials(user.nom, user.prenom)}
             </AvatarFallback>
           </Avatar>
-          <span
-            className={cn(
-              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card transition-all duration-300",
-              isConnected
-                ? "bg-blue-500 shadow-[0_0_6px_rgba(37,99,235,0.5)]"
-                : "bg-yellow-400 animate-pulse"
-            )}
-            title={isConnected ? "En ligne" : "Reconnexion..."}
-          />
+          {isEnabled && (
+            <span
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card transition-all duration-300",
+                isConnected
+                  ? "bg-blue-500 shadow-[0_0_6px_rgba(37,99,235,0.5)]"
+                  : "bg-yellow-400 animate-pulse"
+              )}
+              title={isConnected ? "En ligne" : "Reconnexion..."}
+            />
+          )}
         </div>
       </div>
     </header>

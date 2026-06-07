@@ -465,7 +465,7 @@ export function MobileBottomNav() {
 
 export function TopBar() {
   const { user, currentView, navigate, unreadCount, setUnreadCount, sidebarCollapsed, isAuthenticated } = useAppStore();
-  const { isConnected, subscribeNotifications, on } = useRealtime();
+  const { isConnected, isEnabled, subscribeNotifications, on } = useRealtime();
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifMarkingAll, setNotifMarkingAll] = useState(false);
@@ -714,13 +714,15 @@ export function TopBar() {
             </AvatarFallback>
           </Avatar>
           {/* Real-time connection indicator */}
-          <span
-            className={cn(
-              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white transition-colors duration-300",
-              isConnected ? "bg-green-500" : "bg-yellow-400 animate-pulse"
-            )}
-            title={isConnected ? "En ligne" : "Reconnexion..."}
-          />
+          {isEnabled && (
+            <span
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white transition-colors duration-300",
+                isConnected ? "bg-green-500" : "bg-yellow-400 animate-pulse"
+              )}
+              title={isConnected ? "En ligne" : "Reconnexion..."}
+            />
+          )}
         </div>
       </div>
     </header>

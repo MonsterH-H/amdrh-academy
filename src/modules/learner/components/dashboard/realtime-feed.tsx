@@ -57,7 +57,8 @@ export function RealtimeActivityFeed({ items }: { items: ActivityItem[] }) {
   );
 }
 
-export function ConnectionStatusBadge({ isConnected }: { isConnected: boolean }) {
+export function ConnectionStatusBadge({ isConnected, isEnabled = true }: { isConnected: boolean; isEnabled?: boolean }) {
+  if (!isEnabled) return null;
   return (
     <div className={cn(
       "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full transition-colors duration-300",

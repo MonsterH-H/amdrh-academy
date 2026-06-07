@@ -287,7 +287,7 @@ function NewConversationDialog({
 
 export function MessagesPage() {
   const { user, navigate } = useAppStore();
-  const { isConnected } = useRealtime();
+  const { isConnected, isEnabled } = useRealtime();
   const [conversations, setConversations] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -344,13 +344,15 @@ export function MessagesPage() {
           </div>
           <div className="flex items-center gap-2">
             {/* Connection status */}
-            <div className={cn(
-              "hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full",
-              isConnected ? "bg-green-50 text-green-700 border border-green-200/60" : "bg-yellow-50 text-yellow-700 border border-yellow-200/60"
-            )}>
-              {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-              {isConnected ? "En ligne" : "Reconnexion..."}
-            </div>
+            {isEnabled && (
+              <div className={cn(
+                "hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full",
+                isConnected ? "bg-green-50 text-green-700 border border-green-200/60" : "bg-yellow-50 text-yellow-700 border border-yellow-200/60"
+              )}>
+                {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                {isConnected ? "En ligne" : "Reconnexion..."}
+              </div>
+            )}
             <Button
               size="sm"
               className="rounded-lg text-xs"
@@ -493,6 +495,7 @@ export function ConversationPage() {
   const conversationId = viewParams?.id;
   const {
     isConnected,
+    isEnabled,
     subscribeConversation,
     unsubscribeConversation,
     sendTyping,
@@ -683,13 +686,15 @@ export function ConversationPage() {
               En ligne
             </span>
           )}
-          <div className={cn(
-            "flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full",
-            isConnected ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
-          )}>
-            {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-            {isConnected ? "Connecté" : "Reconnexion..."}
-          </div>
+          {isEnabled && (
+            <div className={cn(
+              "flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full",
+              isConnected ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
+            )}>
+              {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+              {isConnected ? "Connecté" : "Reconnexion..."}
+            </div>
+          )}
         </div>
       </div>
 

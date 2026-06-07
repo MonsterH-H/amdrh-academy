@@ -50,7 +50,7 @@ function MessagesSkeleton() {
 
 export function MessagesPage() {
   const { user, navigate } = useAppStore();
-  const { isConnected } = useRealtime();
+  const { isConnected, isEnabled } = useRealtime();
   const [conversations, setConversations] = useState<
     Array<Record<string, unknown>>
   >([]);
@@ -105,21 +105,23 @@ export function MessagesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div
-              className={cn(
-                "hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full",
-                isConnected
-                  ? "bg-green-50 text-green-700 border border-green-200/60"
-                  : "bg-yellow-50 text-yellow-700 border border-yellow-200/60"
-              )}
-            >
-              {isConnected ? (
-                <Wifi className="w-3 h-3" />
-              ) : (
-                <WifiOff className="w-3 h-3" />
-              )}
-              {isConnected ? "En ligne" : "Reconnexion..."}
-            </div>
+            {isEnabled && (
+              <div
+                className={cn(
+                  "hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full",
+                  isConnected
+                    ? "bg-green-50 text-green-700 border border-green-200/60"
+                    : "bg-yellow-50 text-yellow-700 border border-yellow-200/60"
+                )}
+              >
+                {isConnected ? (
+                  <Wifi className="w-3 h-3" />
+                ) : (
+                  <WifiOff className="w-3 h-3" />
+                )}
+                {isConnected ? "En ligne" : "Reconnexion..."}
+              </div>
+            )}
             <Button
               size="sm"
               className="rounded-lg text-xs"

@@ -14,7 +14,7 @@ import { RealtimeActivityFeed, ConnectionStatusBadge, type ActivityItem } from "
 
 export function LearnerDashboardPage() {
   const { user, navigate } = useAppStore();
-  const { isConnected, on } = useRealtime();
+  const { isConnected, isEnabled, on } = useRealtime();
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -141,7 +141,7 @@ export function LearnerDashboardPage() {
               {onlineCount} en ligne
             </div>
           )}
-          <ConnectionStatusBadge isConnected={isConnected} />
+          <ConnectionStatusBadge isConnected={isConnected} isEnabled={isEnabled} />
         </div>
       </div>
 

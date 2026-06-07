@@ -61,6 +61,7 @@ export function ConversationPage() {
   const conversationId = viewParams?.id;
   const {
     isConnected,
+    isEnabled,
     subscribeConversation,
     unsubscribeConversation,
     sendTyping,
@@ -264,21 +265,23 @@ export function ConversationPage() {
               En ligne
             </span>
           )}
-          <div
-            className={cn(
-              "flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full",
-              isConnected
-                ? "bg-green-50 text-green-700"
-                : "bg-yellow-50 text-yellow-700"
-            )}
-          >
-            {isConnected ? (
-              <Wifi className="w-3 h-3" />
-            ) : (
-              <WifiOff className="w-3 h-3" />
-            )}
-            {isConnected ? "Connecté" : "Reconnexion..."}
-          </div>
+          {isEnabled && (
+            <div
+              className={cn(
+                "flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full",
+                isConnected
+                  ? "bg-green-50 text-green-700"
+                  : "bg-yellow-50 text-yellow-700"
+              )}
+            >
+              {isConnected ? (
+                <Wifi className="w-3 h-3" />
+              ) : (
+                <WifiOff className="w-3 h-3" />
+              )}
+              {isConnected ? "Connecté" : "Reconnexion..."}
+            </div>
+          )}
         </div>
       </div>
 

@@ -2,12 +2,17 @@
  * useRealtime - Socket.IO client hook for AMDRH platform
  * 
  * Features:
+ * - Fully optional: controlled by NEXT_PUBLIC_ENABLE_REALTIME env var
  * - Graceful degradation when service is unavailable (no console errors)
  * - Auto-reconnect with exponential backoff
  * - Connection state management
  * - Event subscription helpers
  * - Role-based room joining
  * - 60-second cooldown after connection failure (prevents 404 spam)
+ * 
+ * On Vercel: Socket.IO doesn't work (no persistent WebSocket support).
+ * Set NEXT_PUBLIC_ENABLE_REALTIME=false or leave it unset to disable.
+ * On self-hosted: Set NEXT_PUBLIC_ENABLE_REALTIME=true to enable.
  */
 
 "use client";
@@ -15,6 +20,8 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAppStore } from "@/store/app";
+
+const REALTIME_ENABLED = process.env.NEXT_PUBLIC_ENABLE_REALTIME === "true";
 
 // ──────────────────────────────────────────────────
 // Connection Manager Singleton
@@ -28,6 +35,8 @@ let socketDisabledUntil: number = 0;
 const SOCKET_RETRY_COOLDOWN = 60_000; // 1 minute cooldown after failure
 
 function getOrCreateSocket(userId: string, role: string): Socket | null {
+  if (!REALTIME_ENABLED) return null;
+
   // Skip if we've recently determined socket server is unavailable (cooldown)
   const now = Date.now();
   if (isSocketAvailable === false && now < socketDisabledUntil) return null;
@@ -94,7 +103,10 @@ function getOrCreateSocket(userId: string, role: string): Socket | null {
 // ──────────────────────────────────────────────────
 
 interface UseRealtimeReturn {
+  /** Whether realtime is available and connected */
   isConnected: boolean;
+  /** Whether realtime is enabled at all (env var) */
+  isEnabled: boolean;
   emit: (event: string, data?: unknown) => void;
   on: (event: string, handler: (...args: unknown[]) => void) => () => void;
   subscribeNotifications: () => void;
@@ -111,7 +123,7 @@ export function useRealtime(): UseRealtimeReturn {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    if (!REALTIME_ENABLED || !isAuthenticated || !user) {
       if (socketRef.current) {
         try {
           socketRef.current.disconnect();
@@ -123,7 +135,6 @@ export function useRealtime(): UseRealtimeReturn {
 
     const socket = getOrCreateSocket(user.id, user.role);
     if (!socket) {
-      // Socket unavailable — clean up any existing ref, but let connected state persist naturally
       socketRef.current = null;
       return;
     }
@@ -193,7 +204,8 @@ export function useRealtime(): UseRealtimeReturn {
   }, []);
 
   return {
-    isConnected,
+    isConnected: REALTIME_ENABLED ? isConnected : false,
+    isEnabled: REALTIME_ENABLED,
     emit,
     on,
     subscribeNotifications,
