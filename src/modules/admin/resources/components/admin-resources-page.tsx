@@ -63,19 +63,23 @@ export function AdminResourcesPage() {
   const { startUpload, isUploading } = useUploadThing("courseResource", {
     onClientUploadComplete: async (res) => {
       if (res && res.length > 0) {
+        let savedCount = 0;
         // POST metadata for each uploaded file
         for (const file of res) {
           try {
-            await fetch("/api/resources", {
+            const title = uploadFiles.length === 1 ? uploadTitle : file.name.replace(/\.[^.]+$/, "");
+            if (!title) continue;
+
+            const res2 = await fetch("/api/resources", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                title: uploadFiles.length === 1 ? uploadTitle : file.name.replace(/\.[^.]+$/, ""),
+                title,
                 description: uploadDescription || null,
                 filePath: file.url,
                 fileKey: file.key,
                 fileName: file.name,
-                fileSize: file.size,
+                fileSize: file.size || 0,
                 fileType: getFileType(file.name),
                 mimeType: getMimeType(file.name),
                 category: uploadCategory,
@@ -83,18 +87,43 @@ export function AdminResourcesPage() {
                 isDownloadable: true,
               }),
             });
-          } catch {
-            console.error(`Failed to save metadata for ${file.name}`);
+
+            if (res2.ok) {
+              savedCount++;
+              console.log(`[Resources] Metadata saved for ${file.name} → ${file.url}`);
+            } else {
+              const errData = await res2.json().catch(() => ({}));
+              console.error(`[Resources] Failed to save metadata for ${file.name}:`, res2.status, errData);
+            }
+          } catch (err) {
+            console.error(`[Resources] Exception saving metadata for ${file.name}:`, err);
           }
         }
-        toast({ title: "Téléchargement réussi", description: `${res.length} fichier(s) ajouté(s)` });
-        resetUploadForm();
-        setUploadOpen(false);
-        fetchResources();
+
+        if (savedCount > 0) {
+          toast({
+            title: "Téléchargement réussi",
+            description: `${savedCount} fichier(s) ajouté(s) avec succès`,
+          });
+          resetUploadForm();
+          setUploadOpen(false);
+          fetchResources();
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Le fichier a été téléversé mais les métadonnées n'ont pas pu être enregistrées",
+            variant: "destructive",
+          });
+        }
       }
     },
     onUploadError: (err) => {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      console.error("[Resources] UploadThing upload error:", err);
+      toast({
+        title: "Erreur de téléchargement",
+        description: err.message || "Une erreur est survenue lors du téléversement du fichier",
+        variant: "destructive",
+      });
     },
   });
 

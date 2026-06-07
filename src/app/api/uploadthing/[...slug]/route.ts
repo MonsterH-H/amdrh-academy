@@ -8,6 +8,11 @@ import { UploadRouter } from "@/lib/uploadthing/server";
 export const { GET, POST } = createRouteHandler({
   router: UploadRouter,
   config: {
-    callbackUrl: process.env.NEXTAUTH_URL || "http://localhost:3000",
+    /**
+     * UploadThing uses this URL for callbacks after upload completes.
+     * When deployed, set NEXTAUTH_URL to your public domain.
+     * The client SDK also supports polling as a fallback.
+     */
+    callbackUrl: process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   },
 });

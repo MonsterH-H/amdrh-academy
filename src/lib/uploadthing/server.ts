@@ -14,41 +14,73 @@ async function createAuthedContext() {
 }
 
 export const UploadRouter = {
-  // Avatar upload (max 2MB, image only)
+  // Avatar upload (max 2MB, single image only)
   avatar: f({
-    middleware: createAuthedContext,
-    onUploadComplete: async ({ file }) => {
-      console.log("[UploadThing] Avatar uploaded:", file.name);
-      return { url: file.url, key: file.key, name: file.name };
+    image: {
+      maxFileSize: "2MB",
+      maxFileCount: 1,
     },
-  }),
+  })
+    .middleware(createAuthedContext)
+    .onUploadComplete(async ({ file }) => {
+      console.log("[UploadThing] Avatar uploaded:", file.name, "→", file.url);
+      return { url: file.url, key: file.key, name: file.name };
+    }),
 
   // Document upload (max 50MB — PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX)
   document: f({
-    middleware: createAuthedContext,
-    onUploadComplete: async ({ file }) => {
-      console.log("[UploadThing] Document uploaded:", file.name);
+    "application/pdf": { maxFileSize: "50MB", maxFileCount: 10 },
+    "application/msword": { maxFileSize: "50MB", maxFileCount: 10 },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": { maxFileSize: "50MB", maxFileCount: 10 },
+    "application/vnd.ms-excel": { maxFileSize: "50MB", maxFileCount: 10 },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": { maxFileSize: "50MB", maxFileCount: 10 },
+    "application/vnd.ms-powerpoint": { maxFileSize: "50MB", maxFileCount: 10 },
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": { maxFileSize: "50MB", maxFileCount: 10 },
+    "text/plain": { maxFileSize: "50MB", maxFileCount: 10 },
+    "text/csv": { maxFileSize: "50MB", maxFileCount: 10 },
+    image: { maxFileSize: "50MB", maxFileCount: 10 },
+  })
+    .middleware(createAuthedContext)
+    .onUploadComplete(async ({ file }) => {
+      console.log("[UploadThing] Document uploaded:", file.name, "→", file.url);
       return { url: file.url, key: file.key, name: file.name };
-    },
-  }),
+    }),
 
   // Media upload (max 100MB — images, videos)
   media: f({
-    middleware: createAuthedContext,
-    onUploadComplete: async ({ file }) => {
-      console.log("[UploadThing] Media uploaded:", file.name);
+    image: { maxFileSize: "100MB", maxFileCount: 5 },
+    video: { maxFileSize: "100MB", maxFileCount: 5 },
+  })
+    .middleware(createAuthedContext)
+    .onUploadComplete(async ({ file }) => {
+      console.log("[UploadThing] Media uploaded:", file.name, "→", file.url);
       return { url: file.url, key: file.key, name: file.name };
-    },
-  }),
+    }),
 
   // Course resource upload (max 200MB — all types)
   courseResource: f({
-    middleware: createAuthedContext,
-    onUploadComplete: async ({ file }) => {
-      console.log("[UploadThing] Course resource uploaded:", file.name);
+    image: { maxFileSize: "200MB", maxFileCount: 20 },
+    video: { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/pdf": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/msword": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/vnd.ms-excel": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/vnd.ms-powerpoint": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": { maxFileSize: "200MB", maxFileCount: 20 },
+    "text/plain": { maxFileSize: "200MB", maxFileCount: 20 },
+    "text/csv": { maxFileSize: "200MB", maxFileCount: 20 },
+    audio: { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/zip": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/x-rar-compressed": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/x-7z-compressed": { maxFileSize: "200MB", maxFileCount: 20 },
+    "application/gzip": { maxFileSize: "200MB", maxFileCount: 20 },
+  })
+    .middleware(createAuthedContext)
+    .onUploadComplete(async ({ file }) => {
+      console.log("[UploadThing] Course resource uploaded:", file.name, "→", file.url);
       return { url: file.url, key: file.key, name: file.name };
-    },
-  }),
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof UploadRouter;
