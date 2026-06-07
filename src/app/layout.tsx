@@ -4,6 +4,9 @@ import "./globals.css";
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { UploadRouter } from "@/lib/uploadthing/server";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -42,6 +45,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <NextSSRPlugin
+            routerConfig={extractRouterConfig(UploadRouter)}
+          />
           {children}
           <ShadcnToaster />
           <SonnerToaster position="top-right" richColors closeButton />

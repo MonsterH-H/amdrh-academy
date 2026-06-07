@@ -1,4 +1,4 @@
-import { createUploadthing, type FileRouter } from "uploadthing/next-legacy";
+import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UTApi } from "uploadthing/server";
 
 const f = createUploadthing();
