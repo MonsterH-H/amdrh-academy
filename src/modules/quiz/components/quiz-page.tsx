@@ -3,9 +3,14 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAppStore } from "@/store/app";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Trophy, Loader2, ClipboardList, Clock, Target,
+  CheckCircle2, XCircle, ArrowRight, BookOpen,
+  ChevronRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { QuizState, QuizData, QuizResult } from "../types";
@@ -15,10 +20,220 @@ import { QuizQuestion } from "./quiz-question";
 import { QuizProgressBar } from "./quiz-progress-bar";
 import { QuizResults } from "./quiz-results";
 
+interface LearnerQuizItem {
+  quizId: string;
+  courseId: string;
+  quizTitle: string;
+  quizDescription: string | null;
+  courseTitle: string;
+  courseCategory: string;
+  courseDifficulty: string;
+  courseCoverImage: string | null;
+  courseIsCertifying: boolean;
+  duration: number;
+  passingScore: number;
+  maxAttempts: number;
+  totalQuestions: number;
+  maxScore: number;
+  enrollmentStatus: string;
+  enrollmentProgress: number;
+  attemptsUsed: number;
+  attemptsRemaining: number;
+  bestScore: number | null;
+  bestScorePercentage: number | null;
+  bestStatus: string | null;
+  lastAttemptDate: string | null;
+}
+
+function QuizListingPage() {
+  const { user, navigate } = useAppStore();
+  const [quizzes, setQuizzes] = useState<LearnerQuizItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      try {
+        const res = await fetch("/api/learner/quizzes");
+        if (!res.ok) throw new Error("Erreur");
+        const data = await res.json();
+        setQuizzes(data.quizzes || []);
+      } catch {
+        setError(true);
+        toast({ title: "Erreur", description: "Impossible de charger les quiz.", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user) fetchQuizzes();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-4 animate-fadeIn">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
+        <div className="grid gap-4 mt-6">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-xl mx-auto text-center py-20 animate-fadeIn">
+        <h2 className="text-lg font-semibold text-foreground mb-2">Erreur</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Impossible de charger les quiz. Veuillez réessayer.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => setLoading(true)}
+          className="rounded-lg"
+        >
+          Réessayer
+        </Button>
+      </div>
+    );
+  }
+
+  if (quizzes.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto text-center py-20 animate-fadeIn">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
+          <ClipboardList className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-bold text-foreground mb-2">
+          Aucun quiz disponible
+        </h2>
+        <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+          Vous n&apos;êtes inscrit(e) à aucune formation comportant un quiz.
+          Inscrivez-vous à une formation pour accéder à ses quiz.
+        </p>
+        <Button
+          onClick={() => navigate("courses")}
+          className="rounded-lg gap-2"
+        >
+          <BookOpen className="w-4 h-4" />
+          Voir les formations
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto animate-fadeIn">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-foreground">Quiz & Examens</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Quiz de vos formations inscrites
+        </p>
+      </div>
+
+      <div className="grid gap-4">
+        {quizzes.map((quiz) => (
+          <Card
+            key={quiz.quizId}
+            className="border-border/60 hover:border-primary/30 transition-all cursor-pointer group"
+          >
+            <CardContent className="p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-foreground truncate">
+                      {quiz.quizTitle}
+                    </h3>
+                    {quiz.courseIsCertifying && (
+                      <Badge variant="outline" className="text-xs flex-shrink-0 bg-amber-50 text-amber-700 border-amber-200">
+                        Certifiant
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Formation : {quiz.courseTitle}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Target className="w-3.5 h-3.5" />
+                      {quiz.totalQuestions} question{quiz.totalQuestions > 1 ? "s" : ""}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {quiz.duration} min
+                    </span>
+                    <span className="flex items-center gap-1">
+                      Seuil : {quiz.passingScore}%
+                    </span>
+                    <span>
+                      {quiz.attemptsUsed}/{quiz.maxAttempts} tentative{quiz.maxAttempts > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+                  {quiz.bestStatus && (
+                    <div className="flex items-center gap-1.5">
+                      {quiz.bestStatus === "REUSSI" ? (
+                        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Réussi {quiz.bestScorePercentage}%
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-red-600 border-red-200 text-xs gap-1">
+                          <XCircle className="w-3 h-3" />
+                          Échoué {quiz.bestScorePercentage}%
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  <Button
+                    size="sm"
+                    className="rounded-lg gap-1.5 group-hover:gap-2 transition-all"
+                    disabled={quiz.attemptsRemaining <= 0 && quiz.bestStatus !== "REUSSI"}
+                    onClick={() =>
+                      navigate("quiz", {
+                        quizId: quiz.quizId,
+                        courseId: quiz.courseId,
+                      })
+                    }
+                  >
+                    {quiz.attemptsRemaining <= 0 && quiz.bestStatus !== "REUSSI"
+                      ? "Aucune tentative"
+                      : quiz.bestStatus === "REUSSI"
+                        ? "Revoir"
+                        : "Commencer"}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function QuizPage() {
   const { user, viewParams, navigate } = useAppStore();
   const quizId = viewParams?.quizId;
   const courseId = viewParams?.courseId;
+
+  // If no quizId, show the quiz listing page
+  if (!quizId) {
+    return <QuizListingPage />;
+  }
+
+  return <QuizTakingPage quizId={quizId} courseId={courseId} />;
+}
+
+function QuizTakingPage({ quizId, courseId }: { quizId: string; courseId?: string }) {
+  const { user, navigate } = useAppStore();
 
   const [state, setState] = useState<QuizState>("loading");
   const [quizData, setQuizData] = useState<QuizData | null>(null);
@@ -102,10 +317,9 @@ export function QuizPage() {
       setResult(data);
       setState("results");
 
-      // Toast notifications based on result
       if (data.status === "REUSSI") {
         if (data.certificate) {
-          toast({ title: "🎉 Certificat obtenu !", description: `Votre certificat ${data.certificate.code} a été généré.` });
+          toast({ title: "Certificat obtenu !", description: `Votre certificat ${data.certificate.code} a été généré.` });
         } else if (data.enrollmentCompleted) {
           toast({ title: "Formation terminée !", description: "Vous avez complété cette formation avec succès." });
         } else {
@@ -202,9 +416,14 @@ export function QuizPage() {
       <div className="max-w-xl mx-auto text-center py-20 animate-fadeIn">
         <h2 className="text-lg font-semibold text-foreground mb-2">Erreur</h2>
         <p className="text-sm text-muted-foreground mb-4">Impossible de charger le quiz. Veuillez réessayer.</p>
-        <Button variant="outline" onClick={() => navigate("course-detail", { id: courseId || "" })} className="rounded-lg">
-          Retour
-        </Button>
+        <div className="flex gap-3 justify-center">
+          <Button variant="outline" onClick={() => navigate("quiz")} className="rounded-lg">
+            ← Mes quiz
+          </Button>
+          <Button variant="outline" onClick={() => navigate("course-detail", { id: courseId || "" })} className="rounded-lg">
+            Retour au cours
+          </Button>
+        </div>
       </div>
     );
   }

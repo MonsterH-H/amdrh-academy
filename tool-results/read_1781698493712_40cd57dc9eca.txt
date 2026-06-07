@@ -1,0 +1,768 @@
+     1→"use client";
+     2→
+     3→import { useState, useEffect, useCallback } from "react";
+     4→import { useAppStore } from "@/store/app";
+     5→import { useRealtime } from "@/hooks/use-realtime";
+     6→import { toast } from "sonner";
+     7→import {
+     8→  LayoutDashboard,
+     9→  BookOpen,
+    10→  GraduationCap,
+    11→  Award,
+    12→  MessageSquare,
+    13→  Bell,
+    14→  Users,
+    15→  UserPlus,
+    16→  Plus,
+    17→  BellRing,
+    18→  RefreshCw,
+    19→  User,
+    20→  LogOut,
+    21→  ChevronLeft,
+    22→  ChevronRight,
+    23→  CircleDot,
+    24→  Menu,
+    25→  X,
+    26→  Star,
+    27→  HelpCircle,
+    28→  Settings,
+    29→  CheckCheck,
+    30→  ChevronRight as ChevronRightIcon,
+    31→  Loader2,
+    32→  ClipboardList,
+    33→  BarChart3,
+    34→  Send,
+    35→  FolderOpen,
+    36→  TrendingUp,
+    37→  Activity,
+    38→  Compass,
+    39→} from "lucide-react";
+    40→import { cn } from "@/lib/utils";
+    41→import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
+    42→import type { AppView } from "@/store/app";
+    43→import { Badge } from "@/components/ui/badge";
+    44→import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+    45→import { Button } from "@/components/ui/button";
+    46→import { Separator } from "@/components/ui/separator";
+    47→import { ScrollArea } from "@/components/ui/scroll-area";
+    48→import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+    49→import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+    50→import {
+    51→  Tooltip,
+    52→  TooltipContent,
+    53→  TooltipTrigger,
+    54→} from "@/components/ui/tooltip";
+    55→
+    56→// ──────────────────────────────────────────────────────────
+    57→// Navigation item type with optional section grouping
+    58→// ──────────────────────────────────────────────────────────
+    59→
+    60→interface NavItem {
+    61→  view: AppView;
+    62→  label: string;
+    63→  icon: typeof BookOpen;
+    64→  section?: string; // optional section label for grouping
+    65→}
+    66→
+    67→// ──────────────────────────────────────────────────────────
+    68→// Navigation per role — organized by sections
+    69→// ADMIN: Platform management (NO learning, NO courses)
+    70→// FORMATEUR: Content creation + learner tracking
+    71→// ARBITRE/ENTRAINEUR/JOUEUR: Learners (browse, learn, get certified)
+    72→// ──────────────────────────────────────────────────────────
+    73→
+    74→const adminNavItems: NavItem[] = [
+    75→  { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+    76→  { view: "admin-users", label: "Utilisateurs", icon: UserPlus, section: "Gestion Utilisateurs" },
+    77→  { view: "admin-courses", label: "Gestion Cours", icon: BookOpen, section: "Gestion Contenu" },
+    78→  { view: "admin-quizzes", label: "Gestion Quiz", icon: ClipboardList, section: "Gestion Contenu" },
+    79→  { view: "admin-learning-paths", label: "Parcours Formation", icon: GraduationCap, section: "Gestion Contenu" },
+    80→  { view: "admin-resources", label: "Médiathèque", icon: FolderOpen, section: "Gestion Contenu" },
+    81→  { view: "admin-certificates", label: "Certificats & Badges", icon: Award, section: "Certification" },
+    82→  { view: "messages", label: "Messagerie", icon: MessageSquare, section: "Communication" },
+    83→  { view: "admin-notifications", label: "Gestion Notifications", icon: BellRing, section: "Communication" },
+    84→  { view: "admin-analytics", label: "Analyses", icon: BarChart3, section: "Système" },
+    85→  { view: "admin-traceability", label: "Traçabilité", icon: Activity, section: "Système" },
+    86→  { view: "admin-sync", label: "Sync Fédération", icon: RefreshCw, section: "Système" },
+    87→];
+    88→
+    89→const formateurNavItems: NavItem[] = [
+    90→  { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+    91→  { view: "course-create", label: "Créer une formation", icon: Plus, section: "Mes Formations" },
+    92→  { view: "admin-courses", label: "Mes Cours", icon: BookOpen, section: "Mes Formations" },
+    93→  { view: "admin-quizzes", label: "Mes Quiz", icon: ClipboardList, section: "Mes Formations" },
+    94→  { view: "courses", label: "Catalogue Cours", icon: Compass, section: "Explorer" },
+    95→  { view: "admin-resources", label: "Médiathèque", icon: FolderOpen, section: "Ressources" },
+    96→  { view: "messages", label: "Messagerie", icon: MessageSquare, section: "Communication" },
+    97→  { view: "notifications", label: "Notifications", icon: Bell, section: "Communication" },
+    98→];
+    99→
+   100→const learnerNavItems: NavItem[] = [
+   101→  { view: "dashboard", label: "Tableau de bord", icon: LayoutDashboard, section: "Principal" },
+   102→  { view: "courses", label: "Catalogue Cours", icon: BookOpen, section: "Formation" },
+   103→  { view: "learning-paths", label: "Parcours Formation", icon: GraduationCap, section: "Formation" },
+   104→  { view: "learner-traceability", label: "Ma Progression", icon: TrendingUp, section: "Suivi" },
+   105→  { view: "certificates", label: "Certificats", icon: Award, section: "Suivi" },
+   106→  { view: "badges", label: "Badges", icon: Star, section: "Suivi" },
+   107→  { view: "messages", label: "Messagerie", icon: MessageSquare, section: "Communication" },
+   108→  { view: "notifications", label: "Notifications", icon: Bell, section: "Communication" },
+   109→];
+   110→
+   111→function getNavItemsForRole(role: string): NavItem[] {
+   112→  switch (role) {
+   113→    case "ADMIN":
+   114→      return adminNavItems;
+   115→    case "FORMATEUR":
+   116→      return formateurNavItems;
+   117→    case "ARBITRE":
+   118→    case "ENTRAINEUR":
+   119→    case "JOUEUR":
+   120→    default:
+   121→      return learnerNavItems;
+   122→  }
+   123→}
+   124→
+   125→// ──────────────────────────────────────────────────────────
+   126→// Sidebar nav item button (with tooltip support when collapsed)
+   127→// ──────────────────────────────────────────────────────────
+   128→
+   129→function SidebarNavItem({ item, isActive, collapsed, onClick, badge }: {
+   130→  item: NavItem;
+   131→  isActive: boolean;
+   132→  collapsed: boolean;
+   133→  onClick: () => void;
+   134→  badge?: number;
+   135→}) {
+   136→  const Icon = item.icon;
+   137→
+   138→  const button = (
+   139→    <button
+   140→      onClick={onClick}
+   141→      className={cn(
+   142→        "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+   143→        item.view === "course-create"
+   144→          ? isActive
+   145→            ? "bg-primary text-primary-foreground shadow-sm"
+   146→            : "bg-primary/5 border border-primary/20 text-primary"
+   147→          : isActive
+   148→            ? "bg-primary/10 text-primary shadow-sm"
+   149→            : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+   150→        collapsed && "justify-center px-2"
+   151→      )}
+   152→    >
+   153→      <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+   154→      {!collapsed && <span>{item.label}</span>}
+   155→      {badge !== undefined && badge > 0 && !collapsed && (
+   156→        <span className="ml-auto bg-destructive text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+   157→          {badge > 9 ? "9+" : badge}
+   158→        </span>
+   159→      )}
+   160→    </button>
+   161→  );
+   162→
+   163→  if (collapsed) {
+   164→    return (
+   165→      <Tooltip>
+   166→        <TooltipTrigger asChild>{button}</TooltipTrigger>
+   167→        <TooltipContent side="right" sideOffset={8}>
+   168→          {item.label}
+   169→        </TooltipContent>
+   170→      </Tooltip>
+   171→    );
+   172→  }
+   173→
+   174→  return button;
+   175→}
+   176→
+   177→// ──────────────────────────────────────────────────────────
+   178→// Mobile bottom nav per role
+   179→// ──────────────────────────────────────────────────────────
+   180→
+   181→const learnerBottomNav = [
+   182→  { view: "courses" as const, label: "Cours", icon: BookOpen },
+   183→  { view: "learner-traceability" as const, label: "Progrès", icon: TrendingUp },
+   184→  { view: "learning-paths" as const, label: "Parcours", icon: GraduationCap },
+   185→  { view: "messages" as const, label: "Messages", icon: MessageSquare },
+   186→  { view: "profile" as const, label: "Profil", icon: User },
+   187→];
+   188→
+   189→const adminBottomNav = [
+   190→  { view: "dashboard" as const, label: "Accueil", icon: LayoutDashboard },
+   191→  { view: "admin-courses" as const, label: "Cours", icon: BookOpen },
+   192→  { view: "admin-users" as const, label: "Utilis.", icon: Users },
+   193→  { view: "messages" as const, label: "Messages", icon: MessageSquare },
+   194→  { view: "profile" as const, label: "Profil", icon: User },
+   195→];
+   196→
+   197→const formateurBottomNav = [
+   198→  { view: "dashboard" as const, label: "Accueil", icon: LayoutDashboard },
+   199→  { view: "course-create" as const, label: "Créer", icon: Plus },
+   200→  { view: "admin-courses" as const, label: "Mes Cours", icon: BookOpen },
+   201→  { view: "messages" as const, label: "Messages", icon: MessageSquare },
+   202→  { view: "profile" as const, label: "Profil", icon: User },
+   203→];
+   204→
+   205→function getBottomNavForRole(role: string) {
+   206→  switch (role) {
+   207→    case "ADMIN": return adminBottomNav;
+   208→    case "FORMATEUR": return formateurBottomNav;
+   209→    default: return learnerBottomNav;
+   210→  }
+   211→}
+   212→
+   213→function getInitials(nom: string, prenom: string) {
+   214→  return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
+   215→}
+   216→
+   217→const notificationTypeIcons: Record<string, typeof Bell> = {
+   218→  COURS: BookOpen,
+   219→  CERTIFICAT: Award,
+   220→  MESSAGE: MessageSquare,
+   221→  QUIZ: HelpCircle,
+   222→  BADGE: Star,
+   223→  SYSTEME: Settings,
+   224→};
+   225→
+   226→const notificationTypeColors: Record<string, string> = {
+   227→  COURS: "bg-blue-100 text-blue-600",
+   228→  CERTIFICAT: "bg-amber-100 text-amber-600",
+   229→  MESSAGE: "bg-green-100 text-green-600",
+   230→  QUIZ: "bg-purple-100 text-purple-600",
+   231→  BADGE: "bg-pink-100 text-pink-600",
+   232→  SYSTEME: "bg-gray-100 text-gray-600",
+   233→};
+   234→
+   235→function timeAgo(dateStr: string): string {
+   236→  const now = Date.now();
+   237→  const then = new Date(dateStr).getTime();
+   238→  const diffMs = now - then;
+   239→  const diffSec = Math.floor(diffMs / 1000);
+   240→  const diffMin = Math.floor(diffSec / 60);
+   241→  const diffH = Math.floor(diffMin / 60);
+   242→  const diffD = Math.floor(diffH / 24);
+   243→
+   244→  if (diffSec < 60) return "à l'instant";
+   245→  if (diffMin < 60) return `il y a ${diffMin} min`;
+   246→  if (diffH < 24) return `il y a ${diffH}h`;
+   247→  if (diffD < 7) return `il y a ${diffD}j`;
+   248→  return new Date(dateStr).toLocaleDateString("fr-FR", {
+   249→    day: "numeric",
+   250→    month: "short",
+   251→  });
+   252→}
+   253→
+   254→// ──────────────────────────────────────────────────────────
+   255→// Sidebar component
+   256→// ──────────────────────────────────────────────────────────
+   257→
+   258→export function Sidebar() {
+   259→  const { user, currentView, navigate, sidebarCollapsed, setSidebarCollapsed, setUser, unreadCount } = useAppStore();
+   260→
+   261→  if (!user) return null;
+   262→
+   263→  const userRole = user.role as string;
+   264→  const navItems = getNavItemsForRole(userRole);
+   265→
+   266→  const navContent = (collapsed: boolean) => (
+   267→    <div className="flex flex-col h-full">
+   268→      {/* Logo + Role badge */}
+   269→      <div className="flex items-center gap-3 px-4 py-5 border-b border-border/50 flex-shrink-0">
+   270→        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+   271→          <CircleDot className="w-5 h-5 text-white" />
+   272→        </div>
+   273→        {!collapsed && (
+   274→          <div className="animate-fadeIn flex items-center gap-2 min-w-0">
+   275→            <div className="min-w-0">
+   276→              <h1 className="font-bold text-sm text-foreground leading-tight">Académie</h1>
+   277→              <p className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase">AMDRH</p>
+   278→            </div>
+   279→            <Badge
+   280→              variant="secondary"
+   281→              className={cn(
+   282→                "text-[9px] px-1.5 py-0 h-4 font-semibold flex-shrink-0",
+   283→                ROLE_COLORS[userRole] || ""
+   284→              )}
+   285→            >
+   286→              {ROLE_LABELS[userRole] || userRole}
+   287→            </Badge>
+   288→          </div>
+   289→        )}
+   290→      </div>
+   291→
+   292→      {/* Scrollable Navigation */}
+   293→      <ScrollArea className="flex-1 min-h-0 scroll-smooth">
+   294→        <div className="px-3 py-4 space-y-1">
+   295→          {navItems.map((item, i) => {
+   296→            const showSectionHeader =
+   297→              item.section &&
+   298→              (i === 0 || navItems[i - 1].section !== item.section);
+   299→
+   300→            return (
+   301→              <div key={item.view}>
+   302→                {/* Section header */}
+   303→                {showSectionHeader && (
+   304→                  <>
+   305→                    {i > 0 && <Separator className="my-3" />}
+   306→                    <p
+   307→                      className={cn(
+   308→                        "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-2",
+   309→                        collapsed && "text-center"
+   310→                      )}
+   311→                    >
+   312→                      {collapsed ? "•••" : item.section}
+   313→                    </p>
+   314→                  </>
+   315→                )}
+   316→
+   317→                {/* Nav item */}
+   318→                <SidebarNavItem
+   319→                  item={item}
+   320→                  isActive={currentView === item.view}
+   321→                  collapsed={collapsed}
+   322→                  onClick={() => navigate(item.view)}
+   323→                  badge={item.view === "messages" ? unreadCount : undefined}
+   324→                />
+   325→              </div>
+   326→            );
+   327→          })}
+   328→        </div>
+   329→      </ScrollArea>
+   330→
+   331→      {/* User section — pinned at bottom */}
+   332→      <div className="border-t border-border/50 p-3 flex-shrink-0">
+   333→        <button
+   334→          onClick={() => navigate("profile")}
+   335→          className={cn(
+   336→            "w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted/60 transition-all duration-200",
+   337→            collapsed && "justify-center"
+   338→          )}
+   339→        >
+   340→          <Avatar className="w-8 h-8 flex-shrink-0">
+   341→            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+   342→              {getInitials(user.nom, user.prenom)}
+   343→            </AvatarFallback>
+   344→          </Avatar>
+   345→          {!collapsed && (
+   346→            <div className="flex-1 text-left min-w-0">
+   347→              <p className="text-sm font-semibold text-foreground truncate">{user.prenom} {user.nom}</p>
+   348→              <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0 h-4", ROLE_COLORS[user.role] || "")}>
+   349→                {ROLE_LABELS[user.role] || user.role}
+   350→              </Badge>
+   351→            </div>
+   352→          )}
+   353→        </button>
+   354→        <button
+   355→          onClick={() => { setUser(null); navigate("landing"); }}
+   356→          className={cn(
+   357→            "w-full flex items-center gap-3 rounded-lg px-2 py-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200 mt-1",
+   358→            collapsed && "justify-center"
+   359→          )}
+   360→        >
+   361→          <LogOut className="w-4 h-4 flex-shrink-0" />
+   362→          {!collapsed && <span className="text-xs">Déconnexion</span>}
+   363→        </button>
+   364→      </div>
+   365→
+   366→      {/* Collapse toggle — desktop only */}
+   367→      <div className="hidden lg:block border-t border-border/50 p-2 flex-shrink-0">
+   368→        <Button
+   369→          variant="ghost"
+   370→          size="sm"
+   371→          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+   372→          className="w-full flex items-center justify-center"
+   373→        >
+   374→          {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+   375→        </Button>
+   376→      </div>
+   377→    </div>
+   378→  );
+   379→
+   380→  return (
+   381→    <>
+   382→      {/* Desktop sidebar */}
+   383→      <aside
+   384→        className={cn(
+   385→          "hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-white border-r border-border/60 z-40 transition-all duration-300 ease-out",
+   386→          sidebarCollapsed ? "w-[72px]" : "w-[280px]"
+   387→        )}
+   388→      >
+   389→        {navContent(sidebarCollapsed)}
+   390→      </aside>
+   391→
+   392→      {/* Mobile sidebar (Sheet) — always full-width, never collapsed */}
+   393→      <Sheet>
+   394→        <SheetTrigger asChild>
+   395→          <Button
+   396→            variant="ghost"
+   397→            size="icon"
+   398→            className="lg:hidden fixed top-2.5 sm:top-3 left-3 z-50 bg-white shadow-sm border border-border/50 rounded-lg"
+   399→          >
+   400→            <Menu className="w-5 h-5" />
+   401→          </Button>
+   402→        </SheetTrigger>
+   403→        <SheetContent side="left" className="p-0 w-[280px]">
+   404→          <SheetTitle className="sr-only">Navigation</SheetTitle>
+   405→          {navContent(false)}
+   406→        </SheetContent>
+   407→      </Sheet>
+   408→    </>
+   409→  );
+   410→}
+   411→
+   412→// ──────────────────────────────────────────────────────────
+   413→// Mobile Bottom Navigation
+   414→// ──────────────────────────────────────────────────────────
+   415→
+   416→export function MobileBottomNav() {
+   417→  const { user, currentView, navigate, unreadCount, isAuthenticated } = useAppStore();
+   418→
+   419→  if (!user || !isAuthenticated) return null;
+   420→
+   421→  const bottomItems = getBottomNavForRole(user.role);
+   422→
+   423→  return (
+   424→    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border/60 z-50 pb-safe">
+   425→      <div className="flex items-center justify-around px-1 py-1">
+   426→        {bottomItems.map((item) => {
+   427→          const Icon = item.icon;
+   428→          const isActive = currentView === item.view;
+   429→          return (
+   430→            <button
+   431→              key={item.view}
+   432→              onClick={() => navigate(item.view)}
+   433→              className="flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] px-2 rounded-lg transition-all duration-200"
+   434→            >
+   435→              <div className="relative">
+   436→                <Icon
+   437→                  className={cn(
+   438→                    "w-5 h-5 transition-colors duration-200",
+   439→                    isActive ? "text-primary" : "text-muted-foreground"
+   440→                  )}
+   441→                />
+   442→                {item.view === "messages" && unreadCount > 0 && (
+   443→                  <span className="absolute -top-1.5 -right-1.5 bg-destructive text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
+   444→                    {unreadCount > 9 ? "9+" : unreadCount}
+   445→                  </span>
+   446→                )}
+   447→              </div>
+   448→              <span className={cn(
+   449→                "text-[10px] font-medium transition-colors duration-200",
+   450→                isActive ? "text-primary" : "text-muted-foreground"
+   451→              )}>
+   452→                {item.label}
+   453→              </span>
+   454→            </button>
+   455→          );
+   456→        })}
+   457→      </div>
+   458→    </nav>
+   459→  );
+   460→}
+   461→
+   462→// ──────────────────────────────────────────────────────────
+   463→// Top Bar
+   464→// ──────────────────────────────────────────────────────────
+   465→
+   466→export function TopBar() {
+   467→  const { user, currentView, navigate, unreadCount, setUnreadCount, sidebarCollapsed, isAuthenticated } = useAppStore();
+   468→  const { isConnected, isEnabled, subscribeNotifications, on } = useRealtime();
+   469→  const [notifOpen, setNotifOpen] = useState(false);
+   470→  const [notifLoading, setNotifLoading] = useState(false);
+   471→  const [notifMarkingAll, setNotifMarkingAll] = useState(false);
+   472→  const [recentNotifs, setRecentNotifs] = useState<Array<{
+   473→    id: string;
+   474→    title: string;
+   475→    message: string;
+   476→    type: string;
+   477→    createdAt: string;
+   478→    isRead: boolean;
+   479→  }>>([]);
+   480→
+   481→  const fetchRecentNotifications = useCallback(async () => {
+   482→    if (!user) return;
+   483→    setNotifLoading(true);
+   484→    try {
+   485→      const res = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=true`);
+   486→      const data = await res.json();
+   487→      const notifs = (data.notifications || []).slice(0, 5);
+   488→      setRecentNotifs(notifs.map((n: Record<string, unknown>) => ({
+   489→        id: n.id as string,
+   490→        title: n.title as string,
+   491→        message: n.message as string,
+   492→        type: n.type as string,
+   493→        createdAt: n.createdAt as string,
+   494→        isRead: n.isRead as boolean,
+   495→      })));
+   496→      setUnreadCount(data.unreadCount || 0);
+   497→    } catch {
+   498→      // silently fail
+   499→    } finally {
+   500→      setNotifLoading(false);
+   501→    }
+   502→  }, [user, setUnreadCount]);
+   503→
+   504→  // Subscribe to notifications on mount
+   505→  useEffect(() => {
+   506→    if (!isAuthenticated || !user) return;
+   507→    subscribeNotifications();
+   508→  }, [isAuthenticated, user, subscribeNotifications]);
+   509→
+   510→  // Listen for real-time notification pushes
+   511→  useEffect(() => {
+   512→    const unsubNewNotif = on("notification:new", (args: unknown[]) => {
+   513→      const data = args[0] as Record<string, unknown> | undefined;
+   514→      if (data) {
+   515→        toast.info(data.title as string || "Nouvelle notification", {
+   516→          description: data.message as string,
+   517→          duration: 5000,
+   518→        });
+   519→        // Refresh notifications list if popover is open
+   520→        if (notifOpen) {
+   521→          fetchRecentNotifications();
+   522→        }
+   523→      }
+   524→    });
+   525→
+   526→    const unsubPresence = on("presence:change", () => {
+   527→      // Available for future presence-based features
+   528→    });
+   529→
+   530→    return () => {
+   531→      unsubNewNotif();
+   532→      unsubPresence();
+   533→    };
+   534→  }, [on, notifOpen, fetchRecentNotifications]);
+   535→
+   536→  const fetchUnreadCount = async () => {
+   537→    try {
+   538→      const res = await fetch(`/api/notifications?userId=${user!.id}&unreadOnly=true`);
+   539→      const data = await res.json();
+   540→      setUnreadCount(data.unreadCount || 0);
+   541→    } catch {
+   542→      // silently fail
+   543→    }
+   544→  };
+   545→
+   546→  const handlePopoverOpenChange = (open: boolean) => {
+   547→    setNotifOpen(open);
+   548→    if (open) {
+   549→      fetchRecentNotifications();
+   550→    }
+   551→  };
+   552→
+   553→  const handleMarkAllRead = async () => {
+   554→    if (!user || notifMarkingAll) return;
+   555→    setNotifMarkingAll(true);
+   556→    try {
+   557→      await fetch("/api/notifications", {
+   558→        method: "POST",
+   559→        headers: { "Content-Type": "application/json" },
+   560→        body: JSON.stringify({ markAll: true, userId: user.id }),
+   561→      });
+   562→      setUnreadCount(0);
+   563→      setRecentNotifs([]);
+   564→    } catch {
+   565→      // silently fail
+   566→    } finally {
+   567→      setNotifMarkingAll(false);
+   568→    }
+   569→  };
+   570→
+   571→  const handleSeeAll = () => {
+   572→    setNotifOpen(false);
+   573→    navigate("notifications");
+   574→  };
+   575→
+   576→  if (!user) return null;
+   577→
+   578→  return (
+   579→    <header
+   580→      className={cn(
+   581→        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 bg-white/80 backdrop-blur-xl border-b border-border/40 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
+   582→        sidebarCollapsed ? "lg:left-[72px]" : "lg:left-[280px]"
+   583→      )}
+   584→    >
+   585→      <div className="flex-1 min-w-0">
+   586→        <h2 className="text-base sm:text-lg font-semibold text-foreground truncate pl-10 lg:pl-0">
+   587→          {getViewTitle(currentView)}
+   588→        </h2>
+   589→      </div>
+   590→
+   591→      <div className="flex items-center gap-2">
+   592→        {/* Notifications Popover */}
+   593→        <Popover open={notifOpen} onOpenChange={handlePopoverOpenChange}>
+   594→          <PopoverTrigger asChild>
+   595→            <Button variant="ghost" size="icon" className="relative rounded-lg">
+   596→              <Bell className="w-5 h-5 text-muted-foreground" />
+   597→              {unreadCount > 0 && (
+   598→                <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center px-1">
+   599→                  {unreadCount}
+   600→                </span>
+   601→              )}
+   602→            </Button>
+   603→          </PopoverTrigger>
+   604→          <PopoverContent
+   605→            align="end"
+   606→            sideOffset={8}
+   607→            className="w-80 max-w-[calc(100vw-2rem)] sm:w-96 p-0 rounded-lg shadow-lg border-border/60"
+   608→          >
+   609→            {/* Header */}
+   610→            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+   611→              <div>
+   612→                <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+   613→                {unreadCount > 0 && (
+   614→                  <p className="text-xs text-muted-foreground mt-0.5">
+   615→                    {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+   616→                  </p>
+   617→                )}
+   618→              </div>
+   619→              {unreadCount > 0 && (
+   620→                <Button
+   621→                  variant="ghost"
+   622→                  size="sm"
+   623→                  className="text-xs text-muted-foreground hover:text-foreground h-7 px-2 rounded-lg"
+   624→                  onClick={handleMarkAllRead}
+   625→                  disabled={notifMarkingAll}
+   626→                >
+   627→                  {notifMarkingAll ? (
+   628→                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+   629→                  ) : (
+   630→                    <CheckCheck className="w-3 h-3 mr-1" />
+   631→                  )}
+   632→                  Tout marquer comme lu
+   633→                </Button>
+   634→              )}
+   635→            </div>
+   636→
+   637→            <Separator className="mx-4" />
+   638→
+   639→            {/* Notifications list */}
+   640→            <div className="max-h-80 overflow-y-auto">
+   641→              {notifLoading ? (
+   642→                <div className="flex flex-col items-center justify-center py-8 gap-2">
+   643→                  <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+   644→                  <p className="text-xs text-muted-foreground">Chargement...</p>
+   645→                </div>
+   646→              ) : recentNotifs.length === 0 ? (
+   647→                <div className="flex flex-col items-center justify-center py-10 px-4">
+   648→                  <div className="w-12 h-12 rounded-full bg-muted/60 flex items-center justify-center mb-3">
+   649→                    <Bell className="w-5 h-5 text-muted-foreground/60" />
+   650→                  </div>
+   651→                  <p className="text-sm font-medium text-foreground">Aucune notification</p>
+   652→                  <p className="text-xs text-muted-foreground mt-1">Vous êtes à jour !</p>
+   653→                </div>
+   654→              ) : (
+   655→                <div className="py-1">
+   656→                  {recentNotifs.map((notif) => {
+   657→                    const Icon = notificationTypeIcons[notif.type] || Bell;
+   658→                    const colorClass = notificationTypeColors[notif.type] || "bg-gray-100 text-gray-600";
+   659→                    return (
+   660→                      <button
+   661→                        key={notif.id}
+   662→                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+   663→                        onClick={() => {
+   664→                          setNotifOpen(false);
+   665→                          navigate("notifications");
+   666→                        }}
+   667→                      >
+   668→                        <div className={cn(
+   669→                          "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5",
+   670→                          colorClass
+   671→                        )}>
+   672→                          <Icon className="w-3.5 h-3.5" />
+   673→                        </div>
+   674→                        <div className="flex-1 min-w-0">
+   675→                          <div className="flex items-center gap-2">
+   676→                            <p className="text-sm font-medium text-foreground truncate">
+   677→                              {notif.title}
+   678→                            </p>
+   679→                            <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+   680→                          </div>
+   681→                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+   682→                            {notif.message}
+   683→                          </p>
+   684→                          <p className="text-[10px] text-muted-foreground/70 mt-1">
+   685→                            {timeAgo(notif.createdAt)}
+   686→                          </p>
+   687→                        </div>
+   688→                      </button>
+   689→                    );
+   690→                  })}
+   691→                </div>
+   692→              )}
+   693→            </div>
+   694→
+   695→            {/* Footer */}
+   696→            <Separator className="mx-4" />
+   697→            <div className="px-4 py-2.5">
+   698→              <button
+   699→                onClick={handleSeeAll}
+   700→                className="w-full flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors py-1 rounded-md hover:bg-primary/5"
+   701→              >
+   702→                Voir tout
+   703→                <ChevronRightIcon className="w-3 h-3" />
+   704→              </button>
+   705→            </div>
+   706→          </PopoverContent>
+   707→        </Popover>
+   708→
+   709→        {/* Quick profile with realtime status indicator */}
+   710→        <div className="relative">
+   711→          <Avatar className="w-8 h-8 cursor-pointer" onClick={() => navigate("profile")}>
+   712→            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+   713→              {getInitials(user.nom, user.prenom)}
+   714→            </AvatarFallback>
+   715→          </Avatar>
+   716→          {/* Real-time connection indicator */}
+   717→          {isEnabled && (
+   718→            <span
+   719→              className={cn(
+   720→                "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white transition-colors duration-300",
+   721→                isConnected ? "bg-green-500" : "bg-yellow-400 animate-pulse"
+   722→              )}
+   723→              title={isConnected ? "En ligne" : "Reconnexion..."}
+   724→            />
+   725→          )}
+   726→        </div>
+   727→      </div>
+   728→    </header>
+   729→  );
+   730→}
+   731→
+   732→// ──────────────────────────────────────────────────────────
+   733→// View title helper
+   734→// ──────────────────────────────────────────────────────────
+   735→
+   736→function getViewTitle(view: string): string {
+   737→  const titles: Record<string, string> = {
+   738→    landing: "Académie AMDRH",
+   739→    login: "Connexion",
+   740→    register: "Inscription",
+   741→    dashboard: "Tableau de bord",
+   742→    courses: "Catalogue des cours",
+   743→    "course-detail": "Détail du cours",
+   744→    "learner-traceability": "Ma progression",
+   745→    "learning-paths": "Parcours de formation",
+   746→    quiz: "Quiz",
+   747→    certificates: "Certificats",
+   748→    badges: "Badges",
+   749→    messages: "Messagerie",
+   750→    conversation: "Conversation",
+   751→    notifications: "Notifications",
+   752→    "admin-users": "Gestion des utilisateurs",
+   753→    "admin-user-detail": "Détail utilisateur",
+   754→    "admin-quizzes": "Gestion des quiz",
+   755→    "admin-sync": "Synchronisation Fédération",
+   756→    "admin-certificates": "Certificats & Badges",
+   757→    "admin-learning-paths": "Gestion des parcours",
+   758→    "admin-courses": "Gestion des cours",
+   759→    "admin-notifications": "Gestion des notifications",
+   760→    "course-create": "Créer une formation",
+   761→    "admin-analytics": "Analytique",
+   762→    "admin-resources": "Médiathèque",
+   763→    "admin-traceability": "Traçabilité",
+   764→    profile: "Mon profil",
+   765→  };
+   766→  return titles[view] || view;
+   767→}
+   768→
