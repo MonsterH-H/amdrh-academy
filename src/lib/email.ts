@@ -8,7 +8,7 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FROM_NAME = "Académie AMDRH";
-const FROM_EMAIL = process.env.EMAIL_FROM || "noreply@amdrh-academy.ma";
+const FROM_EMAIL = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
 interface SendEmailParams {
   to: string;
