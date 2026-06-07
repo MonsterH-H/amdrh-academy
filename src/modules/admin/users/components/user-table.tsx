@@ -167,24 +167,40 @@ export function UserTable({
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground hidden md:table-cell">{u.club as string || "—"}</td>
                       <td className="py-3 px-4 hidden lg:table-cell">
-                        <button onClick={() => onToggleActive(u)} className="cursor-pointer">
-                          <Badge variant={u.isActive ? "default" : "secondary"} className={cn("text-[10px] transition-all", u.isActive ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-50 text-red-600 hover:bg-red-100")}>
+                        <button onClick={() => onToggleActive(u)} className="cursor-pointer group flex items-center gap-1.5">
+                          <span className={cn(
+                            "w-2 h-2 rounded-full shrink-0",
+                            u.isActive ? "bg-green-500" : "bg-red-500"
+                          )} />
+                          <span className={cn(
+                            "text-[10px] font-medium transition-colors",
+                            u.isActive ? "text-green-700 group-hover:text-green-800" : "text-red-600 group-hover:text-red-700"
+                          )}>
                             {u.isActive ? "Actif" : "Inactif"}
-                          </Badge>
+                          </span>
                         </button>
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="sm" className="h-8 rounded-lg" onClick={() => onViewUser(u.id as string)}>
+                          <Button variant="ghost" size="sm" className="h-8 rounded-lg" onClick={() => onViewUser(u.id as string)} title="Voir le profil">
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={cn("h-8 rounded-lg", !u.isActive ? "text-green-600 hover:bg-green-50" : "text-red-600 hover:bg-red-50")}
+                            className={cn(
+                              "h-8 rounded-lg",
+                              u.isActive
+                                ? "text-red-600 hover:bg-red-50 hover:text-red-700"
+                                : "text-green-600 hover:bg-green-50 hover:text-green-700"
+                            )}
                             onClick={() => onToggleActive(u)}
+                            title={u.isActive ? "Désactiver l'utilisateur" : "Activer l'utilisateur"}
                           >
                             {u.isActive ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                            <span className="ml-1 text-[10px] hidden xl:inline">
+                              {u.isActive ? "Désactiver" : "Activer"}
+                            </span>
                           </Button>
                         </div>
                       </td>

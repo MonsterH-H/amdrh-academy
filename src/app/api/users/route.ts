@@ -1,7 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
+import { ROLE_LABELS } from "@/lib/constants";
 import bcrypt from "bcryptjs";
+
+function generateSecurePassword(length = 12): string {
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const digits = "0123456789";
+  const special = "!@#$%&*?+-=";
+  const all = upper + lower + digits + special;
+  let password = "";
+  // Guarantee at least one of each required type
+  password += upper[Math.floor(Math.random() * upper.length)];
+  password += lower[Math.floor(Math.random() * lower.length)];
+  password += digits[Math.floor(Math.random() * digits.length)];
+  password += special[Math.floor(Math.random() * special.length)];
+  // Fill the rest
+  for (let i = password.length; i < length; i++) {
+    password += all[Math.floor(Math.random() * all.length)];
+  }
+  // Shuffle
+  return password.split("").sort(() => Math.random() - 0.5).join("");
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -99,9 +120,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password if provided, otherwise generate a temporary one (no crypto.randomUUID)
-    const tempPassword = password || `Temp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-    const passwordHash = await bcrypt.hash(tempPassword, 12);
+    // Generate or use provided password
+    const plainPassword = password || generateSecurePassword(12);
+    const passwordHash = await bcrypt.hash(plainPassword, 12);
 
     const user = await db.user.create({
       data: {
@@ -119,7 +140,34 @@ export async function POST(req: NextRequest) {
       select: { id: true, email: true, nom: true, prenom: true, role: true },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
+    // Build credentials summary
+    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://amdrh-academy.ma"}/login`;
+    const roleLabel = ROLE_LABELS[role] || role;
+    const summaryMessage = [
+      `🎓 *Compte AMDRH Academy créé*`,
+      ``,
+      `Bonjour ${prenom} ${nom},`,
+      ``,
+      `Votre compte a été créé avec succès.`,
+      ``,
+      `📧 *Email* : ${email}`,
+      `🔑 *Mot de passe* : ${plainPassword}`,
+      `📋 *Rôle* : ${roleLabel}`,
+      `🔗 *Connexion* : ${loginUrl}`,
+      ``,
+      `Veuillez changer votre mot de passe après la première connexion.`,
+    ].join("\n");
+
+    const credentials = {
+      email,
+      password: plainPassword,
+      role,
+      roleLabel,
+      loginUrl,
+      summaryMessage,
+    };
+
+    return NextResponse.json({ user, credentials }, { status: 201 });
   } catch (error) {
     console.error("User create error:", error);
     return NextResponse.json({ error: "Erreur" }, { status: 500 });

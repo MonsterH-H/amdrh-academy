@@ -91,6 +91,24 @@ export async function PATCH(
       return NextResponse.json({ error: validated.error.flatten() }, { status: 400 });
     }
 
+    // Log activate/deactivate action
+    if (validated.data.isActive !== undefined) {
+      const existing = await db.user.findUnique({ where: { id }, select: { isActive: true, prenom: true, nom: true } });
+      if (existing && existing.isActive !== validated.data.isActive) {
+        const actionLabel = validated.data.isActive ? "Activation" : "Désactivation";
+        await db.auditLog.create({
+          data: {
+            userId: auth.userId || "system",
+            action: "update",
+            entity: "user",
+            entityId: id,
+            details: `${actionLabel} de l'utilisateur ${existing.prenom} ${existing.nom} (${id})`,
+            ipAddress: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || null,
+          },
+        });
+      }
+    }
+
     const user = await db.user.update({
       where: { id },
       data: validated.data,

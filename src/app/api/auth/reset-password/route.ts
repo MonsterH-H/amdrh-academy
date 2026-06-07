@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendPasswordResetConfirmation } from "@/lib/email";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token requis"),
@@ -90,6 +91,12 @@ export async function POST(req: NextRequest) {
         email: resetToken.email,
         id: { not: resetToken.id },
       },
+    });
+
+    // Send confirmation email (fire-and-forget — don't block the response)
+    const fullName = [user.prenom, user.nom].filter(Boolean).join(" ");
+    sendPasswordResetConfirmation(user.email, fullName).catch((err) => {
+      console.error("[ResetPassword] Failed to send confirmation email:", err);
     });
 
     return NextResponse.json({

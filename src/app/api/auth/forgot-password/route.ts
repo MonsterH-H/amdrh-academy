@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import crypto from "crypto";
 import { authLimiter } from "@/lib/api-rate-limit";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,13 +61,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // In production, send email via Resend or similar
-    // For now, return the token in development mode
-    const isDev = process.env.NODE_ENV !== "production";
+    // Build the reset URL using the request origin
+    const origin =
+      req.headers.get("origin") ||
+      req.headers.get("referer")?.split("/").slice(0, 3).join("/") ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "";
+    const resetUrl = `${origin}/reset-password?token=${token}`;
+
+    // Send the password reset email
+    const fullName = [user.prenom, user.nom].filter(Boolean).join(" ");
+    await sendPasswordResetEmail(normalizedEmail, fullName, resetUrl);
 
     return NextResponse.json({
       message: "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
-      ...(isDev && { devToken: token }),
     });
   } catch (error) {
     console.error("Forgot password error:", error);
