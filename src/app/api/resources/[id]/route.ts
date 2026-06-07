@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createReadStream, existsSync, unlinkSync, statSync } from "fs";
-import { join } from "path";
-import { Readable } from "stream";
 import { db } from "@/lib/db";
 import { requireRole, getUserFromRequest } from "@/lib/auth-helpers";
+import { deleteFile } from "@/lib/uploadthing/utils";
 const RESOURCE_CATEGORIES = ["SUPPORT_COURS", "RESSOURCE_ANNEXE", "EVALUATION", "MEDIA_COURS", "AUTRE"] as const;
 
 // ─────────────────────────────────────────────────────────────
-// GET /api/resources/[id] — Fetch single resource, stream file
+// GET /api/resources/[id] — Fetch single resource, redirect for download
 // ─────────────────────────────────────────────────────────────
 export async function GET(
   req: NextRequest,
@@ -38,7 +36,7 @@ export async function GET(
       );
     }
 
-    // ── Download mode: stream file ──────────────────────────────
+    // ── Download mode: redirect to UploadThing URL ─────────────
     if (download) {
       // Increment download count
       await db.resource.update({
@@ -46,46 +44,6 @@ export async function GET(
         data: { downloadCount: { increment: 1 } },
       });
 
-      // Check if file is local
-      if (resource.filePath.startsWith("/uploads/")) {
-        const relativePath = resource.filePath.replace(/^\/uploads\//, "");
-        const absolutePath = join(process.cwd(), "public", "uploads", relativePath);
-
-        if (!existsSync(absolutePath)) {
-          return NextResponse.json(
-            { error: "Fichier introuvable sur le serveur" },
-            { status: 404 }
-          );
-        }
-
-        const stat = statSync(absolutePath);
-        const fileStream = createReadStream(absolutePath);
-
-        // Convert Node.js stream to Web ReadableStream
-        const webStream = Readable.toWeb(fileStream) as ReadableStream<Uint8Array>;
-
-        const headers = new Headers();
-        headers.set("Content-Type", resource.mimeType || "application/octet-stream");
-        headers.set("Content-Length", stat.size.toString());
-
-        if (resource.isDownloadable) {
-          // Use RFC 5987 encoding for non-ASCII filenames
-          const encodedFileName = encodeURIComponent(resource.fileName).replace(
-            /['()]/g,
-            (c) => encodeURIComponent(c)
-          );
-          headers.set(
-            "Content-Disposition",
-            `attachment; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`
-          );
-        } else {
-          headers.set("Content-Disposition", "inline");
-        }
-
-        return new Response(webStream, { headers });
-      }
-
-      // External URL — redirect the client
       return NextResponse.redirect(resource.filePath);
     }
 
@@ -208,7 +166,7 @@ export async function PATCH(
 }
 
 // ─────────────────────────────────────────────────────────────
-// DELETE /api/resources/[id] — Delete resource
+// DELETE /api/resources/[id] — Delete resource (cloud file + DB)
 // ─────────────────────────────────────────────────────────────
 export async function DELETE(
   req: NextRequest,
@@ -219,7 +177,6 @@ export async function DELETE(
 
     // ── Auth check ──────────────────────────────────────────────
     const auth = await requireRole(req, ["ADMIN", "FORMATEUR"]);
-    let isOwnerFormateur = false;
 
     if (!auth.authorized) {
       return NextResponse.json(
@@ -253,18 +210,13 @@ export async function DELETE(
       );
     }
 
-    // ── Delete physical file if local ───────────────────────────
-    if (existing.filePath.startsWith("/uploads/")) {
+    // ── Delete file from UploadThing cloud (non-blocking) ──────
+    if (existing.fileKey) {
       try {
-        const relativePath = existing.filePath.replace(/^\/uploads\//, "");
-        const absolutePath = join(process.cwd(), "public", "uploads", relativePath);
-
-        if (existsSync(absolutePath)) {
-          unlinkSync(absolutePath);
-        }
+        await deleteFile(existing.fileKey);
       } catch (fileError) {
-        console.error("File deletion error (non-blocking):", fileError);
-        // Don't fail the entire operation if file deletion fails
+        console.error("UploadThing file deletion error (non-blocking):", fileError);
+        // Don't fail the entire operation if cloud deletion fails
       }
     }
 

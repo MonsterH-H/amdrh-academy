@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Plus, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useUploadThing } from "@/lib/uploadthing/client";
+import { getFileType, getMimeType } from "@/lib/uploadthing/utils";
 import type { ResourceItem, CourseOption, ResourceStats } from "../types";
 import { ResourceCard, ResourceRow } from "./resource-grid";
 import { ResourceUploadDialog } from "./resource-upload-dialog";
@@ -54,6 +56,47 @@ export function AdminResourcesPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // UploadThing state
+  const [uploadedResults, setUploadedResults] = useState<{ url: string; key: string; name: string; size: number }[]>([]);
+
+  const { startUpload, isUploading } = useUploadThing("courseResource", {
+    onClientUploadComplete: async (res) => {
+      if (res && res.length > 0) {
+        // POST metadata for each uploaded file
+        for (const file of res) {
+          try {
+            await fetch("/api/resources", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                title: uploadFiles.length === 1 ? uploadTitle : file.name.replace(/\.[^.]+$/, ""),
+                description: uploadDescription || null,
+                filePath: file.url,
+                fileKey: file.key,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: getFileType(file.name),
+                mimeType: getMimeType(file.name),
+                category: uploadCategory,
+                courseId: uploadCourseId !== "NONE" ? uploadCourseId : null,
+                isDownloadable: true,
+              }),
+            });
+          } catch {
+            console.error(`Failed to save metadata for ${file.name}`);
+          }
+        }
+        toast({ title: "Téléchargement réussi", description: `${res.length} fichier(s) ajouté(s)` });
+        resetUploadForm();
+        setUploadOpen(false);
+        fetchResources();
+      }
+    },
+    onUploadError: (err) => {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    },
+  });
 
   // Edit dialog
   const [editResource, setEditResource] = useState<ResourceItem | null>(null);
@@ -137,23 +180,17 @@ export function AdminResourcesPage() {
     if (uploadFiles.length === 0) { toast({ title: "Fichier requis", description: "Veuillez sélectionner au moins un fichier.", variant: "destructive" }); return; }
     if (!uploadTitle) { toast({ title: "Titre requis", description: "Veuillez entrer un titre pour la ressource.", variant: "destructive" }); return; }
     setUploading(true); setUploadProgress(0);
-    const formData = new FormData();
-    if (uploadFiles.length === 1) formData.append("file", uploadFiles[0]);
-    else uploadFiles.forEach((f) => formData.append("files", f));
-    formData.append("userId", user?.id || ""); formData.append("role", user?.role || "ADMIN");
-    formData.append("title", uploadTitle);
-    if (uploadDescription) formData.append("description", uploadDescription);
-    formData.append("category", uploadCategory);
-    if (uploadCourseId !== "NONE") formData.append("courseId", uploadCourseId);
     const progressInterval = setInterval(() => setUploadProgress((prev) => Math.min(prev + 10, 90)), 300);
     try {
-      const res = await fetch("/api/files", { method: "POST", body: formData });
-      if (res.ok) {
-        setUploadProgress(100);
-        toast({ title: "Téléchargement réussi", description: `${uploadFiles.length} fichier${uploadFiles.length > 1 ? "s" : ""} ajouté${uploadFiles.length > 1 ? "s" : ""} avec succès.` });
-        resetUploadForm(); setUploadOpen(false); fetchResources();
-      } else { const data = await res.json(); toast({ title: "Erreur", description: data.error || "Impossible de télécharger le fichier", variant: "destructive" }); }
-    } catch { toast({ title: "Erreur serveur", description: "Une erreur est survenue lors du téléchargement.", variant: "destructive" }); } finally { clearInterval(progressInterval); setUploading(false); setUploadProgress(0); }
+      await startUpload(uploadFiles);
+      setUploadProgress(100);
+    } catch {
+      toast({ title: "Erreur serveur", description: "Une erreur est survenue lors du téléchargement.", variant: "destructive" });
+    } finally {
+      clearInterval(progressInterval);
+      setUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   // Edit handlers
@@ -185,16 +222,16 @@ export function AdminResourcesPage() {
     } catch { toast({ title: "Erreur serveur", variant: "destructive" }); } finally { setDeleteLoading(false); }
   };
 
-  // Download handler
-  const handleDownload = async (resource: ResourceItem) => {
-    try {
-      const res = await fetch(`/api/resources/${resource.id}?download=true`);
-      if (!res.ok) { toast({ title: "Erreur", description: "Impossible de télécharger la ressource", variant: "destructive" }); return; }
-      const blob = await res.blob(); const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = resource.fileName;
-      document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); document.body.removeChild(a);
-      fetchResources();
-    } catch { toast({ title: "Erreur", description: "Impossible de télécharger la ressource", variant: "destructive" }); }
+  // Download handler — open UploadThing URL in new tab
+  const handleDownload = (resource: ResourceItem) => {
+    if (!resource.filePath) { toast({ title: "Erreur", description: "Fichier introuvable", variant: "destructive" }); return; }
+    window.open(resource.filePath, "_blank");
+  };
+
+  // View handler — same as download for cloud files
+  const handleView = (resource: ResourceItem) => {
+    if (!resource.filePath) { toast({ title: "Erreur", description: "Fichier introuvable", variant: "destructive" }); return; }
+    window.open(resource.filePath, "_blank");
   };
 
   const clearFilters = () => { setSearch(""); setTypeFilter("ALL"); setCategoryFilter("ALL"); setCourseFilter("ALL"); setPage(1); };
@@ -236,7 +273,7 @@ export function AdminResourcesPage() {
         <>
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {resources.map((resource) => <ResourceCard key={resource.id} resource={resource} onDownload={() => handleDownload(resource)} onEdit={() => openEdit(resource)} onDelete={() => setDeleteResource(resource)} />)}
+              {resources.map((resource) => <ResourceCard key={resource.id} resource={resource} onDownload={() => handleDownload(resource)} onView={() => handleView(resource)} onEdit={() => openEdit(resource)} onDelete={() => setDeleteResource(resource)} />)}
             </div>
           ) : (
             <div className="border border-border/60 rounded-lg overflow-hidden"><div className="overflow-x-auto"><table className="w-full">
@@ -250,7 +287,7 @@ export function AdminResourcesPage() {
                 <th className="text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3 w-12">Actions</th>
               </tr></thead>
               <tbody className="divide-y divide-border/40">
-                {resources.map((resource) => <ResourceRow key={resource.id} resource={resource} onDownload={() => handleDownload(resource)} onEdit={() => openEdit(resource)} onDelete={() => setDeleteResource(resource)} />)}
+                {resources.map((resource) => <ResourceRow key={resource.id} resource={resource} onDownload={() => handleDownload(resource)} onView={() => handleView(resource)} onEdit={() => openEdit(resource)} onDelete={() => setDeleteResource(resource)} />)}
               </tbody>
             </table></div></div>
           )}
@@ -276,7 +313,7 @@ export function AdminResourcesPage() {
       <ResourceUploadDialog open={uploadOpen} onOpenChange={setUploadOpen} courses={courses}
         uploadFiles={uploadFiles} uploadTitle={uploadTitle} uploadDescription={uploadDescription}
         uploadCategory={uploadCategory} uploadCourseId={uploadCourseId}
-        uploading={uploading} uploadProgress={uploadProgress} dragActive={dragActive}
+        uploading={uploading || isUploading} uploadProgress={uploadProgress} dragActive={dragActive}
         fileInputRef={fileInputRef} setUploadTitle={setUploadTitle} setUploadDescription={setUploadDescription}
         setUploadCategory={setUploadCategory} setUploadCourseId={setUploadCourseId}
         onDrag={handleDrag} onDrop={handleDrop} onFileChange={handleFileChange}

@@ -46,6 +46,7 @@ export interface ResourceData {
   fileName: string;
   fileSize: number;
   fileType: string;
+  filePath: string;
   category: string;
   isDownloadable: boolean;
   downloadCount: number;

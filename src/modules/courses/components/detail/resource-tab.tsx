@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Video, FileText, GraduationCap, PlayCircle, FolderOpen, Download,
+  Video, FileText, GraduationCap, PlayCircle, FolderOpen, Download, ExternalLink,
 } from "lucide-react";
 import {
   RESOURCE_TYPE_LABELS,
@@ -66,30 +66,47 @@ export function ResourceTab({
     );
   }
 
+  const handleOpenResource = (resource: ResourceData) => {
+    if (resource.filePath) {
+      window.open(resource.filePath, "_blank");
+    }
+  };
+
   return (
     <div className="space-y-3">
       {resources.map((resource) => (
         <Card key={resource.id} className="border-border/60 hover:border-primary/20 transition-colors">
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
-              <div className={cn(
-                "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0",
-                RESOURCE_TYPE_COLORS[resource.fileType] || "bg-muted text-muted-foreground",
-              )}>
+              <button
+                type="button"
+                onClick={() => handleOpenResource(resource)}
+                className={cn(
+                  "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer",
+                  RESOURCE_TYPE_COLORS[resource.fileType] || "bg-muted text-muted-foreground",
+                )}
+                title="Ouvrir le fichier"
+              >
                 <ResourceIcon type={resource.fileType} />
-              </div>
+              </button>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-semibold text-foreground truncate">{resource.title}</h4>
-                  <Badge variant="secondary" className={cn("text-[10px] flex-shrink-0", RESOURCE_TYPE_COLORS[resource.fileType])}>
-                    {RESOURCE_TYPE_LABELS[resource.fileType] || resource.fileType}
-                  </Badge>
-                  {resource.category && resource.category !== "AUTRE" && (
-                    <Badge variant="outline" className="text-[10px] flex-shrink-0">
-                      {RESOURCE_CATEGORY_LABELS[resource.category] || resource.category}
+                <button
+                  type="button"
+                  onClick={() => handleOpenResource(resource)}
+                  className="text-left w-full"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-sm font-semibold text-foreground truncate hover:text-primary transition-colors">{resource.title}</h4>
+                    <Badge variant="secondary" className={cn("text-[10px] flex-shrink-0", RESOURCE_TYPE_COLORS[resource.fileType])}>
+                      {RESOURCE_TYPE_LABELS[resource.fileType] || resource.fileType}
                     </Badge>
-                  )}
-                </div>
+                    {resource.category && resource.category !== "AUTRE" && (
+                      <Badge variant="outline" className="text-[10px] flex-shrink-0">
+                        {RESOURCE_CATEGORY_LABELS[resource.category] || resource.category}
+                      </Badge>
+                    )}
+                  </div>
+                </button>
                 {resource.description && (
                   <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{resource.description}</p>
                 )}
@@ -98,17 +115,31 @@ export function ResourceTab({
                   <span>{resource.downloadCount} téléchargement{resource.downloadCount > 1 ? "s" : ""}</span>
                 </div>
               </div>
-              {resource.isDownloadable && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-lg flex-shrink-0 gap-1.5 text-xs"
-                  onClick={() => onDownload(resource.id)}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Télécharger
-                </Button>
-              )}
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {resource.filePath && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg gap-1.5 text-xs"
+                    onClick={() => handleOpenResource(resource)}
+                    title="Ouvrir"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Ouvrir
+                  </Button>
+                )}
+                {resource.isDownloadable && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg flex-shrink-0 gap-1.5 text-xs"
+                    onClick={() => onDownload(resource.id)}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Télécharger
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

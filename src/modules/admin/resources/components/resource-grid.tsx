@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Download, Edit3, Trash2, Link2, MoreVertical } from "lucide-react";
+import { ExternalLink, Download, Edit3, Trash2, Link2, MoreVertical, Eye } from "lucide-react";
 import {
   RESOURCE_TYPE_LABELS,
   RESOURCE_TYPE_COLORS,
@@ -29,11 +29,13 @@ import { ResourceTypeIcon, formatFileSize, formatRelativeTime } from "../types";
 export function ResourceCard({
   resource,
   onDownload,
+  onView,
   onEdit,
   onDelete,
 }: {
   resource: ResourceItem;
   onDownload: () => void;
+  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -42,17 +44,20 @@ export function ResourceCard({
       <CardContent className="p-4 flex flex-col h-full">
         {/* Top: icon + actions */}
         <div className="flex items-start justify-between mb-3">
-          <div
+          <button
+            type="button"
+            onClick={onView}
             className={cn(
-              "p-2.5 rounded-lg",
+              "p-2.5 rounded-lg hover:opacity-80 transition-opacity cursor-pointer",
               RESOURCE_TYPE_COLORS[resource.type]
             )}
+            title="Ouvrir le fichier"
           >
             <ResourceTypeIcon
               type={resource.type}
               className="w-5 h-5"
             />
-          </div>
+          </button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -66,6 +71,10 @@ export function ResourceCard({
             <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onView} className="cursor-pointer">
+                <Eye className="w-4 h-4 mr-2" />
+                Ouvrir
+              </DropdownMenuItem>
               {resource.isDownloadable && (
                 <DropdownMenuItem onClick={onDownload} className="cursor-pointer">
                   <Download className="w-4 h-4 mr-2" />
@@ -90,12 +99,18 @@ export function ResourceCard({
 
         {/* Title + Description */}
         <div className="flex-1 min-w-0">
-          <h3
-            className="text-sm font-semibold text-foreground truncate"
-            title={resource.title}
+          <button
+            type="button"
+            onClick={onView}
+            className="text-left w-full"
+            title={`Ouvrir : ${resource.title}`}
           >
-            {resource.title}
-          </h3>
+            <h3
+              className="text-sm font-semibold text-foreground truncate hover:text-primary transition-colors"
+            >
+              {resource.title}
+            </h3>
+          </button>
           {resource.description && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
               {resource.description}
@@ -157,11 +172,13 @@ export function ResourceCard({
 export function ResourceRow({
   resource,
   onDownload,
+  onView,
   onEdit,
   onDelete,
 }: {
   resource: ResourceItem;
   onDownload: () => void;
+  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -170,21 +187,30 @@ export function ResourceRow({
       {/* Resource info */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div
+          <button
+            type="button"
+            onClick={onView}
             className={cn(
-              "p-2 rounded-lg flex-shrink-0",
+              "p-2 rounded-lg flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer",
               RESOURCE_TYPE_COLORS[resource.type]
             )}
+            title="Ouvrir le fichier"
           >
             <ResourceTypeIcon
               type={resource.type}
               className="w-4 h-4"
             />
-          </div>
+          </button>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">
-              {resource.title}
-            </p>
+            <button
+              type="button"
+              onClick={onView}
+              className="text-left w-full"
+            >
+              <p className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors">
+                {resource.title}
+              </p>
+            </button>
             {resource.description && (
               <p className="text-[10px] text-muted-foreground truncate mt-0.5">
                 {resource.description}
@@ -251,12 +277,22 @@ export function ResourceRow({
       {/* Actions */}
       <td className="px-4 py-3 text-right">
         <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onView}
+            className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity"
+            title="Ouvrir"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </Button>
           {resource.isDownloadable && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onDownload}
               className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity"
+              title="Télécharger"
             >
               <Download className="w-4 h-4" />
             </Button>
@@ -266,6 +302,7 @@ export function ResourceRow({
             size="sm"
             onClick={onEdit}
             className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity"
+            title="Modifier"
           >
             <Edit3 className="w-4 h-4" />
           </Button>
@@ -274,6 +311,7 @@ export function ResourceRow({
             size="sm"
             onClick={onDelete}
             className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity text-red-600 hover:text-red-600 hover:bg-red-50"
+            title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
           </Button>

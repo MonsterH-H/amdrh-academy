@@ -16,6 +16,8 @@ export interface ResourceItem {
   fileName: string;
   fileSize: number;
   mimeType: string;
+  filePath: string;
+  fileKey: string | null;
   fileUrl: string | null;
   isDownloadable: boolean;
   downloadCount: number;
