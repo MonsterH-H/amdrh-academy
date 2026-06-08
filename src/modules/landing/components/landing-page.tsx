@@ -2,13 +2,9 @@
 
 import { useAppStore } from "@/store/app";
 import { LandingHeader, HeroSection } from "./hero-section";
-import { StatsSection } from "./stats-section";
 import { FeaturesSection } from "./features-section";
-import { TestimonialsSection, TrustSection } from "./testimonials-section";
-import { RolesSection, CTASection } from "./roles-section";
+import { RolesSection } from "./roles-section";
 import { FooterSection } from "./footer-section";
-
-/* ─── Landing Page ───────────────────────────────────────────────────────── */
 
 export function LandingPage() {
   const { navigate } = useAppStore();
@@ -18,12 +14,8 @@ export function LandingPage() {
     <div className="min-h-screen bg-[#FAFBFC]">
       <LandingHeader onLogin={handleLogin} />
       <HeroSection onLogin={handleLogin} />
-      <StatsSection />
       <FeaturesSection />
       <RolesSection />
-      <TestimonialsSection />
-      <TrustSection />
-      <CTASection />
       <FooterSection />
     </div>
   );

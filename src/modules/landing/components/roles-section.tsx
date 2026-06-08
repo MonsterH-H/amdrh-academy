@@ -1,11 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, ArrowRight, Hand, Scale, Users, Trophy, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAppStore } from "@/store/app";
-
-/* ─── Data ────────────────────────────────────────────────────────────────── */
+import { CheckCircle2, Hand, Scale, Users, Trophy, Settings } from "lucide-react";
 
 const roles = [
   {
@@ -34,8 +30,6 @@ const roles = [
   },
 ];
 
-/* ─── Animation Variants ──────────────────────────────────────────────────── */
-
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
@@ -45,8 +39,6 @@ const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
-
-/* ─── Roles Section ───────────────────────────────────────────────────────── */
 
 export function RolesSection() {
   return (
@@ -80,7 +72,7 @@ export function RolesSection() {
               <motion.div
                 key={role.title}
                 variants={cardVariants}
-                className="group rounded-xl bg-[#1E293B] border border-slate-700/50 p-6 hover:scale-[1.02] hover:border-slate-600 transition-all duration-300 cursor-default"
+                className="group rounded-xl bg-[#1E293B] border border-slate-700/50 p-6 hover:scale-[1.02] hover:border-slate-600 transition-all duration-300"
               >
                 <div className={`w-12 h-12 rounded-xl ${role.iconBg} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   <Icon className="w-6 h-6 text-white" />
@@ -98,39 +90,6 @@ export function RolesSection() {
             );
           })}
         </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── CTA Section ─────────────────────────────────────────────────────────── */
-
-export function CTASection() {
-  const { navigate } = useAppStore();
-  return (
-    <section id="cta" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#FAFBFC]">
-      <div className="max-w-3xl mx-auto text-center relative">
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-8 sm:p-12 lg:p-16 text-white relative overflow-hidden shadow-2xl shadow-blue-600/20">
-          <div className="absolute top-4 right-4 opacity-[0.08] pointer-events-none" aria-hidden="true">
-            <Hand className="w-24 h-24 text-white" />
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 relative">
-            Prêt à commencer votre formation ?
-          </h2>
-          <p className="text-blue-100 mb-8 max-w-lg mx-auto relative">
-            Rejoignez l&apos;Académie AMDRH et accédez à des formations de qualité reconnues par la Fédération.
-          </p>
-          <p className="text-white/80 text-sm relative font-medium">
-            Application interne — Contactez votre administrateur pour obtenir un compte.
-          </p>
-          <Button
-            size="lg"
-            className="bg-white text-blue-700 hover:bg-blue-50 rounded-xl px-8 h-12 font-semibold relative mt-6 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer"
-            onClick={() => navigate("login")}
-          >
-            Se connecter <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-        </div>
       </div>
     </section>
   );

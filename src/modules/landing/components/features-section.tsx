@@ -6,18 +6,14 @@ import {
   BookOpen, GraduationCap, Award, Users, Shield, TrendingUp,
 } from "lucide-react";
 
-/* ─── Data ────────────────────────────────────────────────────────────────── */
-
 const features = [
-  { icon: BookOpen, title: "Cours Certifiants", description: "Formations en arbitrage, entraînement et jeu avec certification officielle AMDRH-FRMHB reconnue à l'international." },
-  { icon: GraduationCap, title: "Parcours Structurés", description: "Parcours personnalisés selon votre profil : arbitre, entraîneur, joueur ou administrateur de club." },
-  { icon: Award, title: "Certificats Reconnus", description: "Certificats numériques sécurisés avec code unique AMDRH, reconnus par la Fédération Royale Marocaine." },
-  { icon: Users, title: "Formateurs Experts", description: "Corps de formateurs certifiés IHF avec une expérience internationale avérée en handball." },
+  { icon: BookOpen, title: "Cours Certifiants", description: "Formations en arbitrage, entraînement et jeu avec certification officielle AMDRH-FRMHB." },
+  { icon: GraduationCap, title: "Parcours Structurés", description: "Parcours personnalisés selon votre profil : arbitre, entraîneur, joueur ou administrateur." },
+  { icon: Award, title: "Certificats Reconnus", description: "Certificats numériques sécurisés avec code unique AMDRH reconnus par la FRMHB." },
+  { icon: Users, title: "Formateurs Experts", description: "Corps de formateurs certifiés IHF avec une expérience internationale avérée." },
   { icon: Shield, title: "Standards IHF", description: "Contenu pédagogique conforme aux standards internationaux de l'IHF et de la FRMHB." },
-  { icon: TrendingUp, title: "Suivi de Progression", description: "Tableau de bord complet pour suivre votre progression, vos performances et vos objectifs." },
+  { icon: TrendingUp, title: "Suivi de Progression", description: "Tableau de bord complet pour suivre votre progression et vos performances." },
 ];
-
-/* ─── Animation Variants ──────────────────────────────────────────────────── */
 
 const containerVariants = {
   hidden: {},
@@ -28,8 +24,6 @@ const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
-
-/* ─── Features Section ────────────────────────────────────────────────────── */
 
 export function FeaturesSection() {
   return (
@@ -42,14 +36,11 @@ export function FeaturesSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="inline-flex mb-4 px-4 py-1.5 rounded-full bg-blue-50 text-xs font-semibold text-blue-700 border border-blue-100">
-            Pourquoi AMDRH Academy
-          </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Une formation complète et certifiante
+            Formation complète et certifiante
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Tous les outils nécessaires pour progresser dans le handball marocain, de la formation initiale à la certification avancée.
+            Tous les outils pour progresser dans le handball marocain.
           </p>
         </motion.div>
 
@@ -67,7 +58,7 @@ export function FeaturesSection() {
                 key={feature.title}
                 variants={cardVariants}
                 className={cn(
-                  "bg-white rounded-xl p-6 border border-gray-200 group cursor-default relative overflow-hidden shadow-sm",
+                  "bg-white rounded-xl p-6 border border-gray-200 relative overflow-hidden shadow-sm",
                   "hover:shadow-lg hover:shadow-blue-500/[0.06] hover:border-blue-200 hover:-translate-y-1",
                   "transition-all duration-300 ease-out"
                 )}
