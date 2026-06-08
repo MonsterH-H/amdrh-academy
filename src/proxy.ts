@@ -59,12 +59,14 @@ function getSecurityHeaders(): HeadersInit {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.vercel-storage.dev https://*.neon.tech https://avatars.githubusercontent.com https://uploadthing.com https://utfs.io",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.neon.tech https://uploadthing.com https://utfs.io wss://* https://cdn.jsdelivr.net",
+      // connect-src: MUST include *.ingest.uploadthing.com for file uploads (presigned URLs)
+      "connect-src 'self' https://*.neon.tech https://uploadthing.com https://utfs.io https://*.ingest.uploadthing.com wss://* https://cdn.jsdelivr.net",
       "frame-src 'none'",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      // form-action: allow UploadThing callbacks
+      "form-action 'self' https://*.uploadthing.com",
     ].join('; '),
   };
 }
