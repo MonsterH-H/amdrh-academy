@@ -13,6 +13,14 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+    // Ensure DATABASE_URL is always available for Prisma
+    ...(process.env.DATABASE_URL ? {} : {
+      datasources: {
+        db: {
+          url: 'postgresql://neondb_owner:npg_BJ1sINw6ChyU@ep-empty-meadow-amjci1oh-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require'
+        }
+      }
+    })
   })
 }
 

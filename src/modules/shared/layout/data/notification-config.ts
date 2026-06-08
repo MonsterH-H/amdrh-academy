@@ -6,6 +6,13 @@ import {
   HelpCircle,
   Star,
   Settings,
+  AlertTriangle,
+  UserPlus,
+  Megaphone,
+  Trophy,
+  Clock,
+  ShieldCheck,
+  FileCheck,
 } from "lucide-react";
 
 // ──────────────────────────────────────────────────────────
@@ -19,6 +26,13 @@ export const notificationTypeIcons: Record<string, React.ComponentType<{ classNa
   QUIZ: HelpCircle,
   BADGE: Star,
   SYSTEME: Settings,
+  ALERTE: AlertTriangle,
+  INSCRIPTION: UserPlus,
+  ANNONCE: Megaphone,
+  TROPHÉE: Trophy,
+  RAPPEL: Clock,
+  SÉCURITÉ: ShieldCheck,
+  VALIDATION: FileCheck,
 };
 
 // ──────────────────────────────────────────────────────────
@@ -32,4 +46,17 @@ export const notificationTypeColors: Record<string, string> = {
   QUIZ: "bg-purple-100 text-purple-600",
   BADGE: "bg-pink-100 text-pink-600",
   SYSTEME: "bg-gray-100 text-gray-600",
+  ALERTE: "bg-red-100 text-red-600",
+  INSCRIPTION: "bg-teal-100 text-teal-600",
+  ANNONCE: "bg-indigo-100 text-indigo-600",
+  TROPHÉE: "bg-yellow-100 text-yellow-700",
+  RAPPEL: "bg-orange-100 text-orange-600",
+  SÉCURITÉ: "bg-emerald-100 text-emerald-600",
+  VALIDATION: "bg-cyan-100 text-cyan-600",
 };
+
+// ──────────────────────────────────────────────────────────
+// Default fallback
+// ──────────────────────────────────────────────────────────
+export const defaultNotificationIcon = Bell;
+export const defaultNotificationColor = "bg-muted text-muted-foreground";

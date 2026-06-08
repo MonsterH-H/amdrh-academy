@@ -21,7 +21,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, Mail, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAppStore } from "@/store/app";
 import type { EmailSettings as EmailSettingsType } from "../types";
 
 interface Props {
@@ -29,7 +28,6 @@ interface Props {
 }
 
 export function EmailSettingsCard({ initial }: Props) {
-  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [form, setForm] = useState<EmailSettingsType>({ ...initial });
@@ -42,20 +40,24 @@ export function EmailSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "email", data: form }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur de sauvegarde");
+      }
       toast({
         title: "Paramètres e-mail sauvegardés",
         description: "La configuration SMTP a été mise à jour.",
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres e-mail.",
+        description: err instanceof Error ? err.message : "Impossible de sauvegarder les paramètres e-mail.",
         variant: "destructive",
       });
     } finally {
@@ -66,21 +68,25 @@ export function EmailSettingsCard({ initial }: Props) {
   const handleTestEmail = async () => {
     setTesting(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "test-email" }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur lors de l'envoi");
+      }
       const data = await res.json();
       toast({
         title: "E-mail de test envoyé",
         description: data.message,
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible d&apos;envoyer l&apos;e-mail de test.",
+        description: err instanceof Error ? err.message : "Impossible d'envoyer l'e-mail de test.",
         variant: "destructive",
       });
     } finally {

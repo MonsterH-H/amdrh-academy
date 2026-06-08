@@ -23,7 +23,6 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAppStore } from "@/store/app";
 import type { LearningSettings } from "../types";
 
 interface Props {
@@ -31,7 +30,6 @@ interface Props {
 }
 
 export function LearningSettingsCard({ initial }: Props) {
-  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<LearningSettings>({ ...initial });
   const { toast } = useToast();
@@ -43,20 +41,24 @@ export function LearningSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "learning", data: form }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur de sauvegarde");
+      }
       toast({
-        title: "Paramètres d&apos;apprentissage sauvegardés",
+        title: "Paramètres d'apprentissage sauvegardés",
         description: "Les configurations pédagogiques ont été mises à jour.",
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres d&apos;apprentissage.",
+        description: err instanceof Error ? err.message : "Impossible de sauvegarder les paramètres d'apprentissage.",
         variant: "destructive",
       });
     } finally {

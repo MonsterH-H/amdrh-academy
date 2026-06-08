@@ -10,3 +10,4 @@
 export { Sidebar } from "./components/sidebar";
 export { TopBar } from "./components/topbar";
 export { MobileBottomNav } from "./components/mobile-bottom-nav";
+export { getViewTitle as ViewTitle } from "./components/view-title";

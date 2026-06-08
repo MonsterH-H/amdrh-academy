@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAppStore } from "@/store/app";
 import type { PlatformSettings } from "../types";
 
 interface Props {
@@ -22,7 +21,6 @@ interface Props {
 }
 
 export function PlatformSettingsCard({ initial }: Props) {
-  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<PlatformSettings>({ ...initial });
   const { toast } = useToast();
@@ -34,20 +32,24 @@ export function PlatformSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "platform", data: form }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur de sauvegarde");
+      }
       toast({
         title: "Paramètres sauvegardés",
         description: "Les informations de la plateforme ont été mises à jour.",
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres.",
+        description: err instanceof Error ? err.message : "Impossible de sauvegarder les paramètres.",
         variant: "destructive",
       });
     } finally {

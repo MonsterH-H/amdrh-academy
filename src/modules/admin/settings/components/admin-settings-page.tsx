@@ -93,8 +93,12 @@ export function AdminSettingsPage() {
 
   const fetchSettings = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`);
-      if (!res.ok) throw new Error();
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur de chargement");
+      }
       const data = await res.json();
       setSettings(data.settings || DEFAULT_SETTINGS);
     } catch {
@@ -102,7 +106,7 @@ export function AdminSettingsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchSettings();

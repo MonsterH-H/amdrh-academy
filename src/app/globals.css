@@ -191,6 +191,26 @@
   50% { transform: translateY(-6px); }
 }
 
+/* Notification badge pulse animation */
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+}
+
+/* Notification badge bump on new notification */
+@keyframes badge-bump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.3); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* +1 float away animation */
+@keyframes plus-one-float {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-20px) scale(0.8); }
+}
+
 @keyframes line-expand {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -241,6 +261,25 @@
 }
 .animate-line-expand {
   animation: line-expand 0.8s ease-out forwards;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.animate-pulse-badge {
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+/* Notification animation classes */
+.animate-badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+.animate-badge-bump {
+  animation: badge-bump 0.4s ease-out;
+}
+.animate-plus-one-float {
+  animation: plus-one-float 0.8s ease-out forwards;
 }
 
 /* Stagger children */

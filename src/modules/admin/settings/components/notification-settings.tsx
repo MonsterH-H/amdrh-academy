@@ -15,7 +15,6 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAppStore } from "@/store/app";
 import type { NotificationSettings } from "../types";
 
 interface Props {
@@ -23,7 +22,6 @@ interface Props {
 }
 
 export function NotificationSettingsCard({ initial }: Props) {
-  const user = useAppStore((s) => s.user);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<NotificationSettings>({ ...initial });
   const { toast } = useToast();
@@ -35,20 +33,24 @@ export function NotificationSettingsCard({ initial }: Props) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section: "notifications", data: form }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur de sauvegarde");
+      }
       toast({
         title: "Notifications sauvegardées",
         description: "Les préférences de notification ont été mises à jour.",
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres de notification.",
+        description: err instanceof Error ? err.message : "Impossible de sauvegarder les paramètres de notification.",
         variant: "destructive",
       });
     } finally {

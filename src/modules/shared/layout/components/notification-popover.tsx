@@ -36,6 +36,23 @@ export function NotificationPopover({ unreadCount, setUnreadCount, onNavigate }:
   const [notifMarkingAll, setNotifMarkingAll] = useState(false);
   const [recentNotifs, setRecentNotifs] = useState<RecentNotif[]>([]);
 
+  // +1 animation state
+  const [bumpKey, setBumpKey] = useState(0);
+  const [showPlusOne, setShowPlusOne] = useState(false);
+  const prevUnreadRef = useRef(unreadCount);
+
+  // Detect when unread count increases (new notifications) → trigger +1 animation
+  useEffect(() => {
+    if (unreadCount > prevUnreadRef.current && prevUnreadRef.current >= 0) {
+      // New notification(s) arrived!
+      setBumpKey((k) => k + 1); // re-trigger bump animation
+      setShowPlusOne(true);
+      const timer = setTimeout(() => setShowPlusOne(false), 800);
+      return () => clearTimeout(timer);
+    }
+    prevUnreadRef.current = unreadCount;
+  }, [unreadCount]);
+
   const fetchRecentNotifications = useCallback(async () => {
     if (!user) return;
     setNotifLoading(true);
@@ -62,12 +79,15 @@ export function NotificationPopover({ unreadCount, setUnreadCount, onNavigate }:
       const data = args[0] as Record<string, unknown> | undefined;
       if (data) {
         toast.info(data.title as string || "Nouvelle notification", { description: data.message as string, duration: 5000 });
+        // Increment unread count for realtime notifications
+        const currentCount = useAppStore.getState().unreadCount;
+        setUnreadCount(currentCount + 1);
         if (notifOpenRef.current) fetchRecentNotifications();
       }
     });
     const unsubPresence = on("presence:change", () => { /* future presence-based features */ });
     return () => { unsubNewNotif(); unsubPresence(); };
-  }, [on, fetchRecentNotifications]);
+  }, [on, fetchRecentNotifications, setUnreadCount]);
 
   const handleOpenChange = (open: boolean) => { setNotifOpen(open); notifOpenRef.current = open; if (open) fetchRecentNotifications(); };
 
@@ -88,13 +108,33 @@ export function NotificationPopover({ unreadCount, setUnreadCount, onNavigate }:
     <Popover open={notifOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative rounded-lg hover:bg-muted/50 transition-all duration-200">
-          <Bell className={cn("w-5 h-5 text-muted-foreground transition-colors duration-200", unreadCount > 0 && "text-foreground")} />
+          <Bell className={cn(
+            "w-5 h-5 transition-colors duration-200",
+            unreadCount > 0 ? "text-foreground" : "text-muted-foreground"
+          )} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center px-1 animate-scaleIn">{unreadCount}</span>
+            <>
+              <span
+                key={`bump-${bumpKey}`}
+                className={cn(
+                  "absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full",
+                  "min-w-[20px] min-h-[20px] flex items-center justify-center px-1",
+                  "leading-none shadow-sm shadow-red-500/30",
+                  "animate-badge-bump animate-badge-pulse",
+                )}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+              {showPlusOne && (
+                <span className="absolute -top-3 -right-2 text-red-500 text-[10px] font-bold animate-plus-one-float pointer-events-none">
+                  +1
+                </span>
+              )}
+            </>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] sm:w-96 p-0 rounded-lg shadow-lg border-border/60">
+      <PopoverContent align="end" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] sm:w-96 p-0 rounded-xl shadow-xl border-border/60">
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <div>
             <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
@@ -136,7 +176,7 @@ export function NotificationPopover({ unreadCount, setUnreadCount, onNavigate }:
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-foreground truncate">{notif.title}</p>
-                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{notif.message}</p>
                       <p className="text-[10px] text-muted-foreground/70 mt-1">{formatTimeAgo(notif.createdAt)}</p>

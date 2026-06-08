@@ -18,10 +18,8 @@ import {
   HardDrive,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAppStore } from "@/store/app";
 
 export function DataManagementCard() {
-  const user = useAppStore((s) => s.user);
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const { toast } = useToast();
@@ -29,12 +27,16 @@ export function DataManagementCard() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "export-data" }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur d'export");
+      }
       const data = await res.json();
 
       // Create a downloadable JSON file
@@ -54,10 +56,10 @@ export function DataManagementCard() {
         title: "Export réussi",
         description: "Les données ont été téléchargées.",
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible d'exporter les données.",
+        description: err instanceof Error ? err.message : "Impossible d'exporter les données.",
         variant: "destructive",
       });
     } finally {
@@ -68,20 +70,24 @@ export function DataManagementCard() {
   const handleClearCache = async () => {
     setClearing(true);
     try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
+      // The global fetch interceptor adds x-user-id header automatically
+      const res = await fetch(`/api/admin/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "clear-cache" }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erreur lors du vidage du cache");
+      }
       toast({
         title: "Cache effacé",
         description: "Le cache de l'application a été vidé avec succès.",
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Erreur",
-        description: "Impossible de vider le cache.",
+        description: err instanceof Error ? err.message : "Impossible de vider le cache.",
         variant: "destructive",
       });
     } finally {
