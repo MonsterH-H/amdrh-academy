@@ -8,6 +8,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require authentication to access quiz questions
+    const userInfo = await getUserFromRequest(req);
+    if (!userInfo) return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+
     const { id } = await params;
     const quiz = await db.quiz.findUnique({
       where: { id },

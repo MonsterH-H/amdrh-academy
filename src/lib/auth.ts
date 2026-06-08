@@ -4,9 +4,6 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 
 if (!process.env.NEXTAUTH_SECRET) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("[Auth] NEXTAUTH_SECRET is not set. This is required in production. Sessions will not be secure.");
-  }
   console.warn("[Auth] NEXTAUTH_SECRET is not set. Sessions may not persist across restarts.");
 }
 

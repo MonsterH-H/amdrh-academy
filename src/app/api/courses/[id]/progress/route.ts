@@ -15,6 +15,15 @@ export async function GET(
       return NextResponse.json({ error: "userId requis" }, { status: 400 });
     }
 
+    // Authenticate: only allow viewing own progress (or ADMIN)
+    const userInfo = await getUserFromRequest(req);
+    if (!userInfo) {
+      return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+    }
+    if (userId !== userInfo.userId && userInfo.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
+
     // Get enrollment
     const enrollment = await db.enrollment.findUnique({
       where: { userId_courseId: { userId, courseId: id } },

@@ -79,7 +79,24 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     ...init,
   });
 
-  const data = await res.json();
+  // Handle empty responses (204 No Content, etc.)
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    if (!res.ok) {
+      throw new ApiServiceError("Erreur serveur", res.status);
+    }
+    return undefined as T;
+  }
+
+  // Try to parse JSON — handle non-JSON responses gracefully
+  let data: unknown;
+  try {
+    data = await res.json();
+  } catch {
+    if (!res.ok) {
+      throw new ApiServiceError(`Erreur serveur (${res.status})`, res.status);
+    }
+    return undefined as T;
+  }
 
   if (!res.ok) {
     const err = data as ApiError;

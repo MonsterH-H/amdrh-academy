@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
-    const { userId } = await params;
-    const { searchParams } = new URL(req.url);
-    const requestUserId = searchParams.get("userId");
-    const role = searchParams.get("role");
-
-    if (!requestUserId || !role) {
-      return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 });
+    // Authenticate the requesting user and verify role from DB (not client-supplied)
+    const userInfo = await getUserFromRequest(req);
+    if (!userInfo) {
+      return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
     }
 
     // Only FORMATEUR and ADMIN can access student progress
-    if (role !== "FORMATEUR" && role !== "ADMIN") {
+    if (userInfo.role !== "FORMATEUR" && userInfo.role !== "ADMIN") {
       return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
+
+    const { userId } = await params;
 
     // Fetch student profile
     const student = await db.user.findUnique({

@@ -23,23 +23,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = await db.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        email: true,
-        nom: true,
-        prenom: true,
-        role: true,
-        passwordHash: true,
-        isActive: true,
-        avatar: true,
-      },
-    });
+    // Check DB connectivity first
+    let user;
+    try {
+      user = await db.user.findUnique({
+        where: { email: email.toLowerCase().trim() },
+        select: {
+          id: true,
+          email: true,
+          nom: true,
+          prenom: true,
+          role: true,
+          passwordHash: true,
+          isActive: true,
+          avatar: true,
+        },
+      });
+    } catch (dbError) {
+      console.error("[Login] Database error:", dbError);
+      return NextResponse.json(
+        { error: "Erreur de connexion à la base de données" },
+        { status: 503 }
+      );
+    }
 
-    if (!user || !user.passwordHash) {
+    if (!user) {
+      console.warn(`[Login] User not found: ${email}`);
       return NextResponse.json(
         { error: "Identifiants invalides" },
+        { status: 401 }
+      );
+    }
+
+    if (!user.passwordHash) {
+      console.warn(`[Login] User has no password hash: ${email}`);
+      return NextResponse.json(
+        { error: "Compte non configuré. Contactez l'administrateur." },
         { status: 401 }
       );
     }
@@ -51,8 +70,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const isValid = await bcrypt.compare(password, user.passwordHash);
+    let isValid: boolean;
+    try {
+      isValid = await bcrypt.compare(password, user.passwordHash);
+    } catch (bcryptError) {
+      console.error("[Login] bcrypt error:", bcryptError);
+      return NextResponse.json(
+        { error: "Erreur de vérification du mot de passe" },
+        { status: 500 }
+      );
+    }
+
     if (!isValid) {
+      console.warn(`[Login] Invalid password for: ${email}`);
       return NextResponse.json(
         { error: "Identifiants invalides" },
         { status: 401 }
@@ -68,7 +98,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ user: userWithoutPassword });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("[Login] Unexpected error:", error);
     return NextResponse.json(
       { error: "Erreur de connexion" },
       { status: 500 }

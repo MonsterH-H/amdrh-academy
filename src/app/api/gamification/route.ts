@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth-helpers";
 
 // ─── Level definitions ────────────────────────────────────────────────────────
 
@@ -50,6 +51,15 @@ export async function GET(req: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: "Paramètre userId manquant" }, { status: 400 });
+    }
+
+    // Authenticate: only allow viewing own gamification data (or ADMIN)
+    const userInfo = await getUserFromRequest(req);
+    if (!userInfo) {
+      return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+    }
+    if (userId !== userInfo.userId && userInfo.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
     // Fetch all relevant data in parallel

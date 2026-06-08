@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { getUserFromRequest } from "@/lib/auth-helpers"
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Authenticate: only allow viewing own quiz results (or ADMIN)
+    const userInfo = await getUserFromRequest(request)
+    if (!userInfo) {
+      return NextResponse.json({ error: "Authentification requise" }, { status: 401 })
+    }
+
     const { id } = await params
     const { searchParams } = new URL(request.url)
     const attemptId = searchParams.get("attemptId")
@@ -16,6 +23,11 @@ export async function GET(
         { error: "Identifiant utilisateur requis" },
         { status: 400 }
       )
+    }
+
+    // Enforce ownership: users can only see their own results (ADMIN can see all)
+    if (userId !== userInfo.userId && userInfo.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 })
     }
 
     function safeJsonParse(str: string, fallback: unknown = []): unknown {
