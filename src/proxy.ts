@@ -61,7 +61,7 @@ function getSecurityHeaders(): HeadersInit {
       "font-src 'self' https://fonts.gstatic.com",
       // connect-src: MUST include *.ingest.uploadthing.com for file uploads (presigned URLs)
       "connect-src 'self' https://*.neon.tech https://uploadthing.com https://utfs.io https://*.ingest.uploadthing.com wss://* https://cdn.jsdelivr.net https://vercel.live",
-      "frame-src 'none'",
+      "frame-src https://vercel.live",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
