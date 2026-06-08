@@ -6,7 +6,7 @@ import { FolderOpen, HardDrive, Upload } from "lucide-react";
 import { RESOURCE_TYPE_LABELS, RESOURCE_TYPE_COLORS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import type { ResourceStats } from "../types";
-import { formatFileSize, formatRelativeTime } from "../types";
+import { formatFileSize } from "../types";
 
 // ────────────────────────────────────────────
 // Stats Row Props
@@ -31,7 +31,7 @@ export function ResourceStatsRow({ stats, total }: ResourceStatsRowProps) {
             <FolderOpen className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xl font-bold leading-none">{stats?.total ?? total}</p>
+            <p className="text-xl font-bold leading-none">{total}</p>
             <p className="text-[11px] text-muted-foreground mt-1">Ressources</p>
           </div>
         </CardContent>
@@ -88,9 +88,7 @@ export function ResourceStatsRow({ stats, total }: ResourceStatsRowProps) {
             <Upload className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold leading-none truncate">
-              {stats?.lastUpload ? formatRelativeTime(stats.lastUpload) : "—"}
-            </p>
+            <p className="text-sm font-bold leading-none truncate">—</p>
             <p className="text-[11px] text-muted-foreground mt-1">Dernier ajout</p>
           </div>
         </CardContent>

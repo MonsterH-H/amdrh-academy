@@ -87,7 +87,7 @@ export function ResourceEditDialog({
             {/* File info */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/40">
               <ResourceTypeIcon
-                type={resource.type}
+                type={resource.fileType}
                 className="w-5 h-5 text-muted-foreground"
               />
               <div className="min-w-0 flex-1">
@@ -96,7 +96,7 @@ export function ResourceEditDialog({
                 </p>
                 <p className="text-[10px] text-muted-foreground">
                   {formatFileSize(resource.fileSize)} ·{" "}
-                  {RESOURCE_TYPE_LABELS[resource.type] || resource.type}
+                  {RESOURCE_TYPE_LABELS[resource.fileType] || resource.fileType}
                 </p>
               </div>
             </div>

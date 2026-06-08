@@ -54,7 +54,7 @@ export function ResourceDeleteDialog({
             <div className="p-3 rounded-lg bg-red-50 border border-red-200">
               <div className="flex items-center gap-2">
                 <ResourceTypeIcon
-                  type={resource.type}
+                  type={resource.fileType}
                   className="w-4 h-4 text-muted-foreground flex-shrink-0"
                 />
                 <p className="text-sm font-medium text-foreground truncate">

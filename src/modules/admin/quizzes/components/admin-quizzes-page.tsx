@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowLeft, Plus, HelpCircle, GraduationCap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { CATEGORY_LABELS } from "@/lib/constants";
+import { Search, ArrowLeft, Plus, HelpCircle, GraduationCap } from "lucide-react";
 import { QuizCard, QuizPagination, AdminQuizzesSkeleton } from "./quiz-list";
 import { CreateQuizDialog, EditSettingsDialog } from "./quiz-form-dialog";
 import { AddQuestionDialog, EditQuestionDialog } from "./question-editor";
@@ -165,21 +165,30 @@ function AdminQuizDetailPage({
   const [addQuestionOpen, setAddQuestionOpen] = useState(false);
   const [editQuestionId, setEditQuestionId] = useState<string | null>(null);
 
-  const fetchQuiz = async () => {
+  const refreshQuiz = useCallback(async () => {
+    if (!quizId || !user) return;
     try {
-      const res = await fetch(`/api/admin/quizzes/${quizId}?userId=${user?.id}`);
+      const res = await fetch(`/api/admin/quizzes/${quizId}?userId=${user.id}`);
       const data = await res.json();
+      if (!res.ok || !data.quiz) {
+        toast({ title: "Erreur", description: "Impossible de charger le quiz.", variant: "destructive" });
+        setQuiz(null);
+        return;
+      }
       setQuiz(data.quiz);
       setQuestions((data.quiz.questions as QuestionItem[]) || []);
-      setLoading(false);
-    } catch { setLoading(false); }
-  };
+    } catch {
+      toast({ title: "Erreur", description: "Erreur réseau.", variant: "destructive" });
+      setQuiz(null);
+    }
+  }, [quizId, user]);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
+      if (!quizId || !user) return;
       try {
-        const res = await fetch(`/api/admin/quizzes/${quizId}?userId=${user?.id}`);
+        const res = await fetch(`/api/admin/quizzes/${quizId}?userId=${user.id}`);
         const data = await res.json();
         if (!res.ok || !data.quiz) {
           toast({ title: "Erreur", description: "Impossible de charger le quiz.", variant: "destructive" });
@@ -200,7 +209,7 @@ function AdminQuizDetailPage({
     };
     load();
     return () => { cancelled = true; };
-  }, [quizId]);
+  }, [quizId, user]);
 
   if (loading) return <AdminQuizzesSkeleton />;
   if (!quiz) {
@@ -239,7 +248,7 @@ function AdminQuizDetailPage({
           <EditSettingsDialog
             quiz={quiz as unknown as QuizItem}
             open={editSettingsOpen} onOpenChange={setEditSettingsOpen}
-            onUpdated={fetchQuiz}
+            onUpdated={refreshQuiz}
           />
           <Button onClick={() => setAddQuestionOpen(true)}
             className="bg-primary hover:bg-primary/90 rounded-lg text-sm"
@@ -265,7 +274,7 @@ function AdminQuizDetailPage({
       <QuestionBankView
         questions={questions} quizId={quizId}
         onEdit={(qId) => setEditQuestionId(qId)}
-        onReorder={fetchQuiz}
+        onReorder={refreshQuiz}
         onAddClick={() => setAddQuestionOpen(true)}
       />
 
@@ -273,13 +282,13 @@ function AdminQuizDetailPage({
       <AddQuestionDialog
         quizId={quizId}
         open={addQuestionOpen} onOpenChange={setAddQuestionOpen}
-        onCreated={() => { setAddQuestionOpen(false); fetchQuiz(); }}
+        onCreated={() => { setAddQuestionOpen(false); refreshQuiz(); }}
       />
       <EditQuestionDialog
         quizId={quizId}
         questionId={editQuestionId} onOpenChange={setEditQuestionId}
         questions={questions}
-        onUpdated={() => { setEditQuestionId(null); fetchQuiz(); }}
+        onUpdated={() => { setEditQuestionId(null); refreshQuiz(); }}
       />
     </div>
   );

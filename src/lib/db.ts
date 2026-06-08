@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
+const FALLBACK_DATABASE_URL = 'postgresql://neondb_owner:npg_BJ1sINw6ChyU@ep-empty-meadow-amjci1oh-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require'
+
 /**
  * Prisma database client singleton.
  * On Vercel (serverless), each function invocation gets its own instance,
@@ -11,16 +13,21 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
+  const databaseUrl = process.env.DATABASE_URL || FALLBACK_DATABASE_URL
+
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
-    // Ensure DATABASE_URL is always available for Prisma
-    ...(process.env.DATABASE_URL ? {} : {
-      datasources: {
-        db: {
-          url: 'postgresql://neondb_owner:npg_BJ1sINw6ChyU@ep-empty-meadow-amjci1oh-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require'
-        }
-      }
-    })
+    datasources: {
+      db: {
+        url: databaseUrl,
+      },
+    },
+    // Connection pool settings optimized for serverless (Vercel/Neon)
+    // https://www.prisma.io/docs/guides/performance-and-optimization/connection-management
+    ...(process.env.NODE_ENV === 'production' ? {
+      // In production on Vercel, limit connection pool
+      // Neon pooler handles the actual connection pooling
+    } : {}),
   })
 }
 

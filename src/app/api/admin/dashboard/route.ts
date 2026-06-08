@@ -17,7 +17,10 @@ async function getTopPerformers() {
   const attempts = await db.quizAttempt.findMany({
     where: { status: "REUSSI" },
     orderBy: { score: "desc" },
-    include: { user: { select: { id: true, nom: true, prenom: true, avatar: true, role: true } } },
+    include: {
+      user: { select: { id: true, nom: true, prenom: true, avatar: true, role: true } },
+      quiz: { select: { title: true, course: { select: { title: true } } } },
+    },
     take: 50,
   });
   const seen = new Set<string>();
@@ -48,7 +51,7 @@ export async function GET(req: NextRequest) {
       totalBadges, earnedBadges,
       totalResources, totalMessages,
       usersByRole, recentUsers,
-      recentEnrollments, recentQuizAttempts,
+      recentEnrollmentsRaw, recentQuizAttemptsRaw,
       topPerformers, enrollmentsAll, usersAll, certificatesAll,
       topCourses, unreadMessages, unverifiedUsers,
       lastSync, learningPathCount, mandatoryPaths,
@@ -75,12 +78,12 @@ export async function GET(req: NextRequest) {
       db.user.findMany({ where: { isActive: true }, orderBy: { createdAt: "desc" }, take: 8 }),
       db.enrollment.findMany({
         where: { startedAt: { gte: sevenDaysAgo } },
-        include: { user: { select: { id: true, nom: true, prenom: true, avatar: true } }, course: { select: { id: true, title: true } } },
+        include: { user: { select: { id: true, nom: true, prenom: true, avatar: true, role: true } }, course: { select: { id: true, title: true } } },
         orderBy: { startedAt: "desc" }, take: 10,
       }),
       db.quizAttempt.findMany({
         where: { submittedAt: { gte: sevenDaysAgo } },
-        include: { user: { select: { id: true, nom: true, prenom: true, avatar: true } }, quiz: { select: { id: true, title: true, course: { select: { title: true } } } } },
+        include: { user: { select: { id: true, nom: true, prenom: true, avatar: true, role: true } }, quiz: { select: { id: true, title: true, course: { select: { title: true } } } } },
         orderBy: { submittedAt: "desc" }, take: 10,
       }),
       getTopPerformers(),
@@ -125,8 +128,24 @@ export async function GET(req: NextRequest) {
       },
       charts: { enrollmentsByMonth, usersByMonth, certificatesByMonth },
       usersByRole: usersByRole.map((g) => ({ role: g.role, count: (g._count as unknown as number) })),
-      recentUsers, recentEnrollments, recentQuizAttempts,
-      topPerformers, topCourses,
+      recentUsers, recentEnrollments: recentEnrollmentsRaw, recentQuizAttempts: recentQuizAttemptsRaw.map((a) => ({
+        id: a.id,
+        user: a.user,
+        quizTitle: a.quiz?.title || "",
+        courseTitle: a.quiz?.course?.title || "",
+        score: a.maxScore > 0 ? Math.round((a.score / a.maxScore) * 100) : 0,
+        status: a.status,
+        submittedAt: a.submittedAt?.toISOString() || "",
+        duration: a.duration,
+      })),
+      topPerformers: topPerformers.map((a) => ({
+        userId: a.userId,
+        user: a.user,
+        bestScore: a.maxScore > 0 ? Math.round((a.score / a.maxScore) * 100) : 0,
+        quizTitle: a.quiz?.title || "",
+        courseTitle: a.quiz?.course?.title || "",
+        achievedAt: a.submittedAt?.toISOString() || "",
+      })), topCourses,
       pinnedAnnouncements: await db.announcement.findMany({ where: { isPublished: true, isPinned: true }, take: 5, orderBy: { createdAt: "desc" } }),
       lastSync: lastSync ?? null,
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAppStore } from "@/store/app";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +185,7 @@ export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dbStatus, setDbStatus] = useState<"checking" | "connected" | "error">("checking");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,7 +202,8 @@ export function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(typeof data.error === "string" ? data.error : JSON.stringify(data.error) || "Erreur de connexion");
+        const errMsg = typeof data.error === "string" ? data.error : JSON.stringify(data.error) || "Erreur de connexion";
+        setError(errMsg);
         return;
       }
 
@@ -215,12 +217,23 @@ export function LoginPage() {
       if (role === "ADMIN") navigate("admin-dashboard");
       else if (role === "FORMATEUR") navigate("formateur-dashboard");
       else navigate("dashboard");
-    } catch {
-      setError("Erreur de connexion au serveur");
+    } catch (err) {
+      setError("Erreur de connexion au serveur. Vérifiez votre connexion internet.");
     } finally {
       setLoading(false);
     }
   };
+
+  // Check database status on mount
+  useEffect(() => {
+    fetch("/api/auth/check")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "ok") setDbStatus("connected");
+        else setDbStatus("error");
+      })
+      .catch(() => setDbStatus("error"));
+  }, []);
 
   const demoAccounts: DemoAccount[] = [
     { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN", password: "Admin@2024!" },
@@ -397,6 +410,17 @@ export function LoginPage() {
                   onSubmit={handleLogin}
                   className="space-y-5"
                 >
+                  {/* Database status indicator */}
+                  {dbStatus === "error" && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="bg-amber-50 text-amber-800 text-xs px-4 py-3 rounded-xl font-medium border border-amber-200"
+                    >
+                      ⚠ Base de données indisponible. Vérifiez que <code className="font-mono bg-amber-100 px-1 rounded">DATABASE_URL</code> est configuré sur Vercel.
+                    </motion.div>
+                  )}
+
                   {/* Error banner */}
                   {error && (
                     <motion.div
@@ -502,8 +526,8 @@ export function LoginPage() {
                   </motion.div>
                 </motion.form>
 
-                {/* ═══ Dev: Demo accounts ═══ */}
-                {process.env.NODE_ENV === "development" && (
+                {/* ═══ Demo accounts (visible in all environments) ═══ */}
+                {true && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}

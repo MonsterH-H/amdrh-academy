@@ -49,12 +49,12 @@ export function ResourceCard({
             onClick={onView}
             className={cn(
               "p-2.5 rounded-lg hover:opacity-80 transition-opacity cursor-pointer",
-              RESOURCE_TYPE_COLORS[resource.type]
+              RESOURCE_TYPE_COLORS[resource.fileType]
             )}
             title="Ouvrir le fichier"
           >
             <ResourceTypeIcon
-              type={resource.type}
+              type={resource.fileType}
               className="w-5 h-5"
             />
           </button>
@@ -122,9 +122,9 @@ export function ResourceCard({
         <div className="flex items-center gap-1.5 mt-3 flex-wrap">
           <Badge
             variant="secondary"
-            className={cn("text-[10px]", RESOURCE_TYPE_COLORS[resource.type])}
+            className={cn("text-[10px]", RESOURCE_TYPE_COLORS[resource.fileType])}
           >
-            {RESOURCE_TYPE_LABELS[resource.type] || resource.type}
+            {RESOURCE_TYPE_LABELS[resource.fileType] || resource.fileType}
           </Badge>
           <Badge
             variant="secondary"
@@ -192,12 +192,12 @@ export function ResourceRow({
             onClick={onView}
             className={cn(
               "p-2 rounded-lg flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer",
-              RESOURCE_TYPE_COLORS[resource.type]
+              RESOURCE_TYPE_COLORS[resource.fileType]
             )}
             title="Ouvrir le fichier"
           >
             <ResourceTypeIcon
-              type={resource.type}
+              type={resource.fileType}
               className="w-4 h-4"
             />
           </button>
@@ -217,8 +217,8 @@ export function ResourceRow({
               </p>
             )}
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              {resource.uploader
-                ? `${resource.uploader.prenom} ${resource.uploader.nom}`
+              {resource.uploadedBy
+                ? `${resource.uploadedBy.prenom} ${resource.uploadedBy.nom}`
                 : "Inconnu"}
             </p>
           </div>

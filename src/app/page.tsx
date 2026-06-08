@@ -206,6 +206,20 @@ function AppContent() {
     }
   }, [currentView, navigate]);
 
+  // Handle URL-based reset-password link (from email)
+  // When a user clicks the email link /reset-password?token=xxx,
+  // parse the token from the URL and navigate within the SPA.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token && currentView !== "reset-password") {
+      // Clean the URL to remove the token param
+      window.history.replaceState({}, "", window.location.pathname);
+      navigate("reset-password", { token });
+    }
+  }, [currentView, navigate]);
+
   const renderView = () => {
     if (viewError) return (
       <motion.div

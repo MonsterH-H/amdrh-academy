@@ -73,8 +73,12 @@ export async function POST(req: NextRequest) {
     const fullName = [user.prenom, user.nom].filter(Boolean).join(" ");
     await sendPasswordResetEmail(normalizedEmail, fullName, resetUrl);
 
+    // In development, include the token in the response so the dev UI can navigate directly
+    const isDev = process.env.NODE_ENV === "development";
+
     return NextResponse.json({
       message: "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
+      ...(isDev ? { devToken: token } : {}),
     });
   } catch (error) {
     console.error("Forgot password error:", error);

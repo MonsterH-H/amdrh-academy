@@ -58,7 +58,6 @@ export function AdminResourcesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // UploadThing state
-  const [uploadedResults, setUploadedResults] = useState<{ url: string; key: string; name: string; size: number }[]>([]);
 
   const { startUpload, isUploading } = useUploadThing("courseResource", {
     onClientUploadComplete: async (res) => {

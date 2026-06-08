@@ -11,20 +11,20 @@ export interface ResourceItem {
   id: string;
   title: string;
   description: string | null;
-  type: string;
+  fileType: string;
   category: string;
   fileName: string;
   fileSize: number;
-  mimeType: string;
+  mimeType: string | null;
   filePath: string;
   fileKey: string | null;
-  fileUrl: string | null;
   isDownloadable: boolean;
   downloadCount: number;
+  order: number;
   courseId: string | null;
   course: { id: string; title: string } | null;
-  uploaderId: string;
-  uploader: { id: string; nom: string; prenom: string } | null;
+  uploadedById: string;
+  uploadedBy: { id: string; nom: string; prenom: string; role: string } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,10 +35,9 @@ export interface CourseOption {
 }
 
 export interface ResourceStats {
-  total: number;
   totalSize: number;
   byType: Record<string, number>;
-  lastUpload: string | null;
+  byCategory: Record<string, number>;
 }
 
 // ────────────────────────────────────────────

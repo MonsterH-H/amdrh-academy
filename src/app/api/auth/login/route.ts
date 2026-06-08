@@ -42,7 +42,10 @@ export async function POST(req: NextRequest) {
     } catch (dbError) {
       console.error("[Login] Database error:", dbError);
       return NextResponse.json(
-        { error: "Erreur de connexion à la base de données" },
+        { 
+          error: "Erreur de connexion à la base de données",
+          hint: "Vérifiez que DATABASE_URL est configuré dans les variables d'environnement Vercel"
+        },
         { status: 503 }
       );
     }
@@ -50,7 +53,10 @@ export async function POST(req: NextRequest) {
     if (!user) {
       console.warn(`[Login] User not found: ${email}`);
       return NextResponse.json(
-        { error: "Identifiants invalides" },
+        { 
+          error: "Identifiants invalides",
+          hint: "Vérifiez votre email et mot de passe. Si vous n'avez pas de compte, appelez /api/auth/seed pour créer les comptes de test."
+        },
         { status: 401 }
       );
     }
@@ -65,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     if (!user.isActive) {
       return NextResponse.json(
-        { error: "Compte désactivé" },
+        { error: "Compte désactivé. Contactez l'administrateur." },
         { status: 403 }
       );
     }

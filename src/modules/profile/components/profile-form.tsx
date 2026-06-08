@@ -10,6 +10,10 @@ import { Label } from "@/components/ui/label";
 import { REGIONS_MAROC } from "@/lib/constants";
 import { Shield, CreditCard, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProfileFormProps {
   emailVerified: boolean;
@@ -217,17 +221,19 @@ export function ProfileForm({ emailVerified, isLearnerRole, onSaved }: ProfileFo
                 )}
               </span>
             </Label>
-            <select
+            <Select
               id="profile-region"
               value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="w-full h-10 rounded-lg border border-input bg-transparent px-3 text-sm"
+              onValueChange={(v) => setRegion(v)}
             >
-              <option value="">Sélectionner</option>
-              {REGIONS_MAROC.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+              <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sélectionner</SelectItem>
+                {REGIONS_MAROC.map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="profile-bio" className="text-sm">
@@ -238,11 +244,11 @@ export function ProfileForm({ emailVerified, isLearnerRole, onSaved }: ProfileFo
                 )}
               </span>
             </Label>
-            <textarea
+            <Textarea
               id="profile-bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full min-h-[100px] rounded-lg border border-input bg-transparent px-3 py-2 text-sm resize-none"
+              className="w-full min-h-[100px] rounded-lg resize-none"
               placeholder="Parlez-nous de votre expérience dans le handball..."
             />
           </div>
