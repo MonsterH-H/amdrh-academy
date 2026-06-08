@@ -528,3 +528,13 @@ model RolePermission {
 
   @@unique([role, permissionId])
 }
+
+// ============================================
+// PARAMÈTRES DE LA PLATEFORME
+// ============================================
+
+model Setting {
+  key       String   @id @unique
+  value     String   // JSON string for complex values, plain string for simple ones
+  updatedAt DateTime @updatedAt
+}

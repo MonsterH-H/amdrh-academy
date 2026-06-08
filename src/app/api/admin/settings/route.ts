@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile, writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth-helpers";
-
-const SETTINGS_FILE = join(process.cwd(), "db", "admin-settings.json");
 
 const DEFAULT_SETTINGS = {
   platform: {
@@ -50,23 +47,35 @@ const DEFAULT_SETTINGS = {
   },
 };
 
-async function ensureSettingsFile(): Promise<void> {
+const SETTINGS_KEY = "platform_settings";
+
+async function loadSettings(): Promise<typeof DEFAULT_SETTINGS> {
   try {
-    await readFile(SETTINGS_FILE, "utf-8");
-  } catch {
-    await mkdir(join(process.cwd(), "db"), { recursive: true });
-    await writeFile(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2), "utf-8");
+    const row = await db.setting.findUnique({ where: { key: SETTINGS_KEY } });
+    if (row) {
+      return JSON.parse(row.value);
+    }
+  } catch (error) {
+    console.error("[Settings] Error loading from DB:", error);
   }
+  return { ...DEFAULT_SETTINGS };
 }
 
+async function saveSettings(settings: Record<string, unknown>): Promise<void> {
+  await db.setting.upsert({
+    where: { key: SETTINGS_KEY },
+    update: { value: JSON.stringify(settings) },
+    create: { key: SETTINGS_KEY, value: JSON.stringify(settings) },
+  });
+}
+
+// GET /api/admin/settings — Load all settings
 export async function GET(req: NextRequest) {
   try {
     const auth = await requireRole(req, ["ADMIN"]);
     if (!auth.authorized) return auth.response;
 
-    await ensureSettingsFile();
-    const raw = await readFile(SETTINGS_FILE, "utf-8");
-    const settings = JSON.parse(raw);
+    const settings = await loadSettings();
     return NextResponse.json({ success: true, settings });
   } catch (error) {
     console.error("[Settings GET]", error);
@@ -77,12 +86,12 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// PUT /api/admin/settings — Save a specific section
 export async function PUT(request: NextRequest) {
   try {
     const auth = await requireRole(request, ["ADMIN"]);
     if (!auth.authorized) return auth.response;
 
-    await ensureSettingsFile();
     const body = await request.json();
     const { section, data } = body;
 
@@ -109,11 +118,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const raw = await readFile(SETTINGS_FILE, "utf-8");
-    const settings = JSON.parse(raw);
+    const settings = await loadSettings();
     settings[section] = { ...settings[section], ...data };
 
-    await writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2), "utf-8");
+    await saveSettings(settings);
 
     return NextResponse.json({
       success: true,
@@ -129,6 +137,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// POST /api/admin/settings — Actions (test-email, clear-cache, export-data)
 export async function POST(request: NextRequest) {
   try {
     const auth = await requireRole(request, ["ADMIN"]);
@@ -138,9 +147,18 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     if (action === "test-email") {
+      // Import the email service
+      const { sendEmail } = await import("@/lib/email");
+      const testResult = await sendEmail({
+        to: body.email || "test@example.com",
+        subject: "Test — Académie AMDRH",
+        text: "Ceci est un e-mail de test depuis l'Académie AMDRH.\nSi vous recevez cet e-mail, la configuration est correcte.",
+      });
       return NextResponse.json({
-        success: true,
-        message: "E-mail de test envoyé avec succès",
+        success: testResult.success,
+        message: testResult.success
+          ? "E-mail de test envoyé avec succès"
+          : `Échec de l'envoi: ${testResult.error}`,
       });
     }
 
@@ -152,22 +170,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "export-data") {
-      const raw = await readFile(SETTINGS_FILE, "utf-8").catch(() => "");
-      const settings = raw ? JSON.parse(raw) : DEFAULT_SETTINGS;
+      const settings = await loadSettings();
       return NextResponse.json({
         success: true,
         message: "Données exportées avec succès",
         data: settings,
-      });
-    }
-
-    if (action === "backup") {
-      const raw = await readFile(SETTINGS_FILE, "utf-8");
-      const backupFile = join(process.cwd(), "db", `admin-settings-backup-${Date.now()}.json`);
-      await writeFile(backupFile, raw, "utf-8");
-      return NextResponse.json({
-        success: true,
-        message: `Sauvegarde créée : admin-settings-backup-${Date.now()}.json`,
       });
     }
 

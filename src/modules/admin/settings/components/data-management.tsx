@@ -16,7 +16,6 @@ import {
   Download,
   Trash2,
   HardDrive,
-  ShieldCheck,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppStore } from "@/store/app";
@@ -25,7 +24,6 @@ export function DataManagementCard() {
   const user = useAppStore((s) => s.user);
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState(false);
-  const [backingUp, setBackingUp] = useState(false);
   const { toast } = useToast();
 
   const handleExport = async () => {
@@ -59,7 +57,7 @@ export function DataManagementCard() {
     } catch {
       toast({
         title: "Erreur",
-        description: "Impossible d&apos;exporter les données.",
+        description: "Impossible d'exporter les données.",
         variant: "destructive",
       });
     } finally {
@@ -78,7 +76,7 @@ export function DataManagementCard() {
       if (!res.ok) throw new Error();
       toast({
         title: "Cache effacé",
-        description: "Le cache de l&apos;application a été vidé avec succès.",
+        description: "Le cache de l'application a été vidé avec succès.",
       });
     } catch {
       toast({
@@ -88,31 +86,6 @@ export function DataManagementCard() {
       });
     } finally {
       setClearing(false);
-    }
-  };
-
-  const handleBackup = async () => {
-    setBackingUp(true);
-    try {
-      const res = await fetch(`/api/admin/settings?userId=${user?.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "backup" }),
-      });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      toast({
-        title: "Sauvegarde créée",
-        description: data.message,
-      });
-    } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de créer la sauvegarde.",
-        variant: "destructive",
-      });
-    } finally {
-      setBackingUp(false);
     }
   };
 
@@ -126,32 +99,32 @@ export function DataManagementCard() {
           <div>
             <CardTitle className="text-base">Gestion des données</CardTitle>
             <CardDescription>
-              Export, cache, taille de la base et sauvegarde
+              Export et cache de la plateforme
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <Separator />
       <CardContent className="space-y-6 pt-6">
-        {/* Database size info */}
+        {/* Database info */}
         <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 border border-border">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100">
             <HardDrive className="h-5 w-5 text-sky-700" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold">Taille de la base de données</p>
+            <p className="text-sm font-semibold">Base de données</p>
             <p className="text-xs text-muted-foreground">
-              Base SQLite principale — Stockage local
+              PostgreSQL — Neon Serverless
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm font-semibold font-mono">~2.4 MB</p>
-            <p className="text-xs text-muted-foreground">Taille estimée</p>
+          <div className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            Connecté
           </div>
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button
             variant="outline"
             onClick={handleExport}
@@ -164,7 +137,7 @@ export function DataManagementCard() {
               <Download className="h-5 w-5" />
             )}
             <div className="text-center">
-              <span className="text-sm font-semibold">Exporter les données</span>
+              <span className="text-sm font-semibold">Exporter les paramètres</span>
               <p className="text-[11px] text-muted-foreground font-normal">
                 Télécharger en JSON
               </p>
@@ -186,25 +159,6 @@ export function DataManagementCard() {
               <span className="text-sm font-semibold">Vider le cache</span>
               <p className="text-[11px] text-muted-foreground font-normal">
                 Réinitialiser le cache
-              </p>
-            </div>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={handleBackup}
-            disabled={backingUp}
-            className="h-auto py-4 flex-col gap-2 cursor-pointer"
-          >
-            {backingUp ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <ShieldCheck className="h-5 w-5" />
-            )}
-            <div className="text-center">
-              <span className="text-sm font-semibold">Sauvegarder</span>
-              <p className="text-[11px] text-muted-foreground font-normal">
-                Créer une copie
               </p>
             </div>
           </Button>
