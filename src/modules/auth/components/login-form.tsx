@@ -12,15 +12,12 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  Shield,
-  Users,
   Lock,
   Mail,
   ChevronRight,
   Trophy,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import type { DemoAccount } from "../types";
 
 /* ─── Password strength helper ─── */
 function getPasswordStrength(pw: string) {
@@ -234,14 +231,6 @@ export function LoginPage() {
       })
       .catch(() => setDbStatus("error"));
   }, []);
-
-  const demoAccounts: DemoAccount[] = [
-    { label: "Admin", email: "admin@amdrh.ma", role: "ADMIN", password: "Admin@2024!" },
-    { label: "Formateur", email: "formateur@amdrh.ma", role: "FORMATEUR", password: "Formateur@2024!" },
-    { label: "Arbitre", email: "arbitre@amdrh.ma", role: "ARBITRE", password: "Arbitre@2024!" },
-    { label: "Entraîneur", email: "entraineur@amdrh.ma", role: "ENTRAINEUR", password: "Entraineur@2024!" },
-    { label: "Joueur", email: "joueur@amdrh.ma", role: "JOUEUR", password: "Joueur@2024!" },
-  ];
 
   return (
     <div className="min-h-screen flex bg-white">
@@ -526,69 +515,6 @@ export function LoginPage() {
                   </motion.div>
                 </motion.form>
 
-                {/* ═══ Demo accounts (visible in all environments) ═══ */}
-                {true && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.55, duration: 0.35 }}
-                  >
-                    {/* Divider */}
-                    <div className="relative my-6">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-border/40" />
-                      </div>
-                      <div className="relative flex justify-center text-xs">
-                        <span className="bg-card px-3.5 text-muted-foreground/70 font-medium">
-                          Comptes de test
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Accounts list */}
-                    <div className="bg-muted/30 rounded-xl p-3.5 border border-border/40 space-y-1">
-                      <div className="flex items-center gap-2 mb-2.5 px-1">
-                        <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center">
-                          <Shield className="w-3.5 h-3.5 text-amber-600" />
-                        </div>
-                        <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-                          Accès rapide démonstration
-                        </p>
-                      </div>
-                      <div className="max-h-[260px] overflow-y-auto space-y-0.5 custom-scrollbar-thin">
-                        {demoAccounts.map((account) => (
-                          <button
-                            key={account.email}
-                            onClick={() => {
-                              setEmail(account.email);
-                              setPassword(account.password || "Password123!");
-                            }}
-                            className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs hover:bg-white/80 hover:shadow-sm transition-all duration-150 group border border-transparent hover:border-border/40"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
-                                <Users className="w-3.5 h-3.5 text-primary/70" />
-                              </div>
-                              <div className="text-left">
-                                <span className="font-semibold text-foreground group-hover:text-primary transition-colors block">
-                                  {account.label}
-                                </span>
-                                <span className="text-muted-foreground/60 text-[10px]">{account.role}</span>
-                              </div>
-                            </div>
-                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
-                          </button>
-                        ))}
-                      </div>
-                      <p className="text-[10px] text-muted-foreground/60 mt-3 text-center">
-                        Mot de passe :{" "}
-                        <code className="font-mono font-semibold bg-muted/60 px-1.5 py-0.5 rounded text-foreground/80">
-                          Rôle@2024!
-                        </code>
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
               </CardContent>
             </Card>
           </motion.div>

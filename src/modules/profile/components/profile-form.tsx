@@ -223,12 +223,11 @@ export function ProfileForm({ emailVerified, isLearnerRole, onSaved }: ProfileFo
             </Label>
             <Select
               id="profile-region"
-              value={region}
+              value={region || undefined}
               onValueChange={(v) => setRegion(v)}
             >
               <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sélectionner</SelectItem>
                 {REGIONS_MAROC.map((r) => (
                   <SelectItem key={r} value={r}>{r}</SelectItem>
                 ))}

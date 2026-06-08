@@ -55,12 +55,12 @@ function getSecurityHeaders(): HeadersInit {
     "Content-Security-Policy": [
       "default-src 'self'",
       // Next.js Turbopack & runtime need inline scripts + eval for HMR, chunk loading, and __webpack_chunk_loading__
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://vercel.live",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.vercel-storage.dev https://*.neon.tech https://avatars.githubusercontent.com https://uploadthing.com https://utfs.io",
       "font-src 'self' https://fonts.gstatic.com",
       // connect-src: MUST include *.ingest.uploadthing.com for file uploads (presigned URLs)
-      "connect-src 'self' https://*.neon.tech https://uploadthing.com https://utfs.io https://*.ingest.uploadthing.com wss://* https://cdn.jsdelivr.net",
+      "connect-src 'self' https://*.neon.tech https://uploadthing.com https://utfs.io https://*.ingest.uploadthing.com wss://* https://cdn.jsdelivr.net https://vercel.live",
       "frame-src 'none'",
       "frame-ancestors 'none'",
       "object-src 'none'",
