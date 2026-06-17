@@ -4,7 +4,6 @@ import { useAppStore } from "@/store/app";
 import { LandingHeader, HeroSection } from "./hero-section";
 import { FeaturesSection } from "./features-section";
 import { RolesSection } from "./roles-section";
-import { FooterSection } from "./footer-section";
 
 export function LandingPage() {
   const { navigate } = useAppStore();
@@ -16,7 +15,6 @@ export function LandingPage() {
       <HeroSection onLogin={handleLogin} />
       <FeaturesSection />
       <RolesSection />
-      <FooterSection />
     </div>
   );
 }

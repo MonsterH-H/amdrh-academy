@@ -294,7 +294,6 @@ function AppContent() {
           </div>
         </div>
       </main>
-      <AppFooter />
       <MobileBottomNav />
     </div>
   );
