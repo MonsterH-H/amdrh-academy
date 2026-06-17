@@ -111,7 +111,7 @@ export function ConversationPage() {
         }
         scrollToBottom();
       } catch {
-        // silently fail
+        setMessages([]);
       } finally {
         setLoading(false);
       }

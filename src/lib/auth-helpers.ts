@@ -108,13 +108,28 @@ export async function requireRole(
   req: NextRequest,
   allowedRoles: string[] = ["ADMIN"]
 ): Promise<{ authorized: true; role: string; userId: string; user: AuthUser } | { authorized: false; response: NextResponse }> {
-  const result = await checkRole(req, allowedRoles);
-  if (!result.authorized) {
+  const userId = extractUserId(req);
+
+  // No user ID at all → 401 (not authenticated)
+  if (!userId) {
     return {
       authorized: false,
       response: NextResponse.json(
-        { error: "Accès non autorisé", details: "Vous n'avez pas les permissions nécessaires" },
-        { status: 403 }
+        { error: "Authentification requise" },
+        { status: 401 }
+      ),
+    };
+  }
+
+  const result = await checkRole(req, allowedRoles);
+  if (!result.authorized) {
+    // User exists but wrong role → 403 (forbidden)
+    const isInactive = !result.user?.isActive;
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { error: isInactive ? "Utilisateur inactif" : "Accès non autorisé", details: isInactive ? "Votre compte a été désactivé" : "Vous n'avez pas les permissions nécessaires" },
+        { status: isInactive ? 403 : 403 }
       ),
     };
   }

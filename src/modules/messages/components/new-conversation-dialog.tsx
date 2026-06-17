@@ -47,7 +47,7 @@ export function NewConversationDialog({
       setLoading(true);
       try {
         const params = new URLSearchParams({ search: query, limit: "15" });
-        const res = await fetch(`/api/users?${params}`);
+        const res = await fetch(`/api/messages/users?${params}`);
         const data = await res.json();
         const filtered = (data.users || []).filter(
           (u: UserOption) =>
