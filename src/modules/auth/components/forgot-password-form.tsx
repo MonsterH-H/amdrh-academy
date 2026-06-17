@@ -245,7 +245,7 @@ export function ForgotPasswordPage() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="hidden lg:block mb-8"
           >
-            <h2 className="text-[28px] font-bold text-foreground tracking-tight">Mot de passe oublié</h2>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">Mot de passe oublié</h2>
             <p className="text-sm text-muted-foreground mt-2">
               Entrez votre email pour recevoir un lien de réinitialisation
             </p>

@@ -365,7 +365,7 @@ export function LoginPage() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="hidden lg:block mb-8"
           >
-            <h2 className="text-[28px] font-bold text-foreground tracking-tight">Bon retour parmi nous</h2>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">Bon retour parmi nous</h2>
             <p className="text-sm text-muted-foreground mt-2">
               Connectez-vous pour accéder à votre espace de formation
             </p>

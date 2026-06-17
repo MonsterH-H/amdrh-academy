@@ -35,20 +35,20 @@ export function Sidebar() {
   const navContent = (collapsed: boolean) => (
     <div className="flex flex-col h-full">
       {/* Logo + Role badge — cleaner branding */}
-      <div className="flex items-center gap-2.5 px-3 py-3.5 border-b border-border/40 flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
-          <CircleDot className="w-4 h-4 text-white" />
+      <div className="flex items-center gap-2 px-2.5 py-2.5 border-b border-border/40 flex-shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
+          <CircleDot className="w-3.5 h-3.5 text-white" />
         </div>
         {!collapsed && (
           <div className="animate-fadeIn flex items-center gap-1.5 min-w-0">
             <div className="min-w-0">
-              <h1 className="font-bold text-xs text-foreground leading-tight tracking-tight">Académie</h1>
-              <p className="text-[9px] text-primary/70 font-semibold tracking-[0.12em] uppercase">AMDRH</p>
+              <h1 className="font-bold text-[11px] text-foreground leading-tight tracking-tight">Académie</h1>
+              <p className="text-[8px] text-primary/70 font-semibold tracking-[0.12em] uppercase">AMDRH</p>
             </div>
             <Badge
               variant="secondary"
               className={cn(
-                "text-[8px] px-1 py-0 h-3.5 font-semibold flex-shrink-0",
+                "text-[7px] px-1 py-0 h-3 font-semibold flex-shrink-0",
                 ROLE_COLORS[userRole] || ""
               )}
             >
@@ -60,7 +60,7 @@ export function Sidebar() {
 
       {/* Scrollable Navigation */}
       <ScrollArea className="flex-1 min-h-0 scroll-smooth">
-        <div className="px-2 py-2.5 space-y-0.5">
+        <div className="px-1.5 py-1.5 space-y-0.5">
           {navItems.map((item, i) => {
             const showSectionHeader =
               item.section &&
@@ -105,8 +105,8 @@ export function Sidebar() {
           )}
         >
           <div className="relative flex-shrink-0">
-            <Avatar className="w-7 h-7">
-              <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+            <Avatar className="w-6 h-6">
+              <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-bold">
                 {getInitials(user.nom, user.prenom)}
               </AvatarFallback>
             </Avatar>
@@ -115,8 +115,8 @@ export function Sidebar() {
           </div>
           {!collapsed && (
             <div className="flex-1 text-left min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate leading-tight">{user.prenom} {user.nom}</p>
-              <Badge variant="secondary" className={cn("text-[9px] px-1 py-0 h-3.5 mt-0.5", ROLE_COLORS[user.role] || "")}>
+              <p className="text-[11px] font-semibold text-foreground truncate leading-tight">{user.prenom} {user.nom}</p>
+              <Badge variant="secondary" className={cn("text-[8px] px-1 py-0 h-3 mt-0.5", ROLE_COLORS[user.role] || "")}>
                 {ROLE_LABELS[user.role] || user.role}
               </Badge>
             </div>
@@ -130,8 +130,8 @@ export function Sidebar() {
             collapsed && "justify-center"
           )}
         >
-          <LogOut className="w-3.5 h-3.5 flex-shrink-0 group-hover:rotate-12 transition-transform duration-200" />
-          {!collapsed && <span className="text-[11px] font-medium">Déconnexion</span>}
+          <LogOut className="w-3 h-3 flex-shrink-0 group-hover:rotate-12 transition-transform duration-200" />
+          {!collapsed && <span className="text-[10px] font-medium">Déconnexion</span>}
         </button>
       </div>
 
@@ -144,7 +144,7 @@ export function Sidebar() {
           className="w-full flex items-center justify-center rounded-lg hover:bg-muted/50 transition-all duration-200"
         >
           <div className={cn("transition-transform duration-300 ease-out", sidebarCollapsed && "rotate-180")}>
-            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {sidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </div>
         </Button>
       </div>
@@ -159,7 +159,7 @@ export function Sidebar() {
           "hidden lg:flex flex-col fixed left-0 top-0 bottom-0 z-40 transition-all duration-300 ease-out",
           "bg-card/70 backdrop-blur-xl border-r border-border/40",
           "shadow-[0_0_40px_rgba(0,0,0,0.04)]",
-          sidebarCollapsed ? "w-[60px]" : "w-[240px]"
+          sidebarCollapsed ? "w-[52px]" : "w-[200px]"
         )}
       >
         {navContent(sidebarCollapsed)}
@@ -176,7 +176,7 @@ export function Sidebar() {
             <Menu className="w-5 h-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-[240px] bg-card/95 backdrop-blur-xl border-border/40">
+        <SheetContent side="left" className="p-0 w-[200px] bg-card/95 backdrop-blur-xl border-border/40">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           {navContent(false)}
         </SheetContent>

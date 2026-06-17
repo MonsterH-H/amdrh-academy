@@ -287,9 +287,9 @@ function AppContent() {
     <div className="min-h-screen bg-[#FAFAFA] overflow-x-hidden flex flex-col">
       <SidebarWrapper />
       <TopBar />
-      <main className={`transition-all duration-300 min-w-0 flex-1 ${sidebarCollapsed ? "lg:ml-[60px]" : "lg:ml-[240px]"}`}>
-        <div className="pt-11 sm:pt-12 pb-20 lg:pb-3">
-          <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-4">
+      <main className={`transition-all duration-300 min-w-0 flex-1 ${sidebarCollapsed ? "lg:ml-[52px]" : "lg:ml-[200px]"}`}>
+        <div className="pt-10 sm:pt-[42px] pb-20 lg:pb-3">
+          <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-3">
             {renderView()}
           </div>
         </div>

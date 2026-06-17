@@ -317,7 +317,7 @@ export function ResetPasswordPage() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="hidden lg:block mb-8"
           >
-            <h2 className="text-[28px] font-bold text-foreground tracking-tight">Réinitialiser le mot de passe</h2>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">Réinitialiser le mot de passe</h2>
             <p className="text-sm text-muted-foreground mt-2">
               Créez un nouveau mot de passe sécurisé pour votre compte
             </p>

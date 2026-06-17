@@ -21,14 +21,14 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 lg:left-auto h-11 sm:h-12 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-3 transition-all duration-300",
+        "fixed top-0 right-0 left-0 lg:left-auto h-10 sm:h-[42px] z-30 flex items-center px-2.5 sm:px-3 gap-2 sm:gap-2.5 transition-all duration-300",
         "bg-card/60 backdrop-blur-xl border-b border-border/30",
         "shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
-        sidebarCollapsed ? "lg:left-[60px]" : "lg:left-[240px]"
+        sidebarCollapsed ? "lg:left-[52px]" : "lg:left-[200px]"
       )}
     >
       <div className="flex-1 min-w-0">
-        <h2 className="text-sm sm:text-[15px] font-semibold text-foreground truncate pl-10 lg:pl-0">
+        <h2 className="text-xs sm:text-[13px] font-semibold text-foreground truncate pl-10 lg:pl-0">
           {getViewTitle(currentView)}
         </h2>
       </div>
@@ -43,8 +43,8 @@ export function TopBar() {
 
         {/* Quick profile with realtime status indicator */}
         <div className="relative">
-          <Avatar className="w-8 h-8 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300" onClick={() => navigate("profile")}>
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+          <Avatar className="w-7 h-7 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300" onClick={() => navigate("profile")}>
+            <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
               {getInitials(user.nom, user.prenom)}
             </AvatarFallback>
           </Avatar>
