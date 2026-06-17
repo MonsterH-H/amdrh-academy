@@ -33,7 +33,7 @@ export function SidebarNavItem({
     <button
       onClick={onClick}
       className={cn(
-        "relative w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+        "relative w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-all duration-200",
         item.view === "course-create"
           ? isActive
             ? "bg-primary text-primary-foreground shadow-sm"
@@ -41,17 +41,17 @@ export function SidebarNavItem({
           : isActive
             ? "bg-primary/10 text-primary shadow-sm"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-        collapsed && "justify-center px-2"
+        collapsed && "justify-center px-2 py-1.5"
       )}
     >
       {/* Blue accent line on active item */}
       {isActive && item.view !== "course-create" && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-primary" />
       )}
-      <Icon className={cn("w-[18px] h-[18px] flex-shrink-0", isActive && item.view !== "course-create" && "drop-shadow-[0_0_6px_rgba(37,99,235,0.4)]")} />
+      <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && item.view !== "course-create" && "drop-shadow-[0_0_6px_rgba(37,99,235,0.4)]")} />
       {!collapsed && <span>{item.label}</span>}
       {badge !== undefined && badge > 0 && !collapsed && (
-        <span className="ml-auto bg-destructive text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+        <span className="ml-auto bg-destructive text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
           {badge > 9 ? "9+" : badge}
         </span>
       )}

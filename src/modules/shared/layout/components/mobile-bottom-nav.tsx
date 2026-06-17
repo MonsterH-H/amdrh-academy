@@ -17,7 +17,7 @@ export function MobileBottomNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border/30 z-50 pb-safe shadow-[0_-1px_8px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center justify-around px-1 py-1">
+      <div className="flex items-center justify-around px-0.5 py-0.5">
         {bottomItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.view;
@@ -25,12 +25,12 @@ export function MobileBottomNav() {
             <button
               key={item.view}
               onClick={() => navigate(item.view)}
-              className="relative flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] px-2 rounded-xl transition-all duration-200 active:scale-90"
+              className="relative flex flex-col items-center justify-center gap-0 min-h-[40px] min-w-[40px] px-1.5 rounded-xl transition-all duration-200 active:scale-90"
             >
               <div className="relative">
                 <Icon
                   className={cn(
-                    "w-5 h-5 transition-all duration-200",
+                    "w-[18px] h-[18px] transition-all duration-200",
                     isActive
                       ? "text-primary drop-shadow-[0_0_6px_rgba(37,99,235,0.4)]"
                       : "text-muted-foreground"
@@ -43,7 +43,7 @@ export function MobileBottomNav() {
                 )}
               </div>
               <span className={cn(
-                "text-[10px] font-medium transition-all duration-200",
+                "text-[9px] font-medium transition-all duration-200",
                 isActive ? "text-primary font-semibold" : "text-muted-foreground"
               )}>
                 {item.label}

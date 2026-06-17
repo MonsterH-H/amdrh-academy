@@ -100,8 +100,8 @@ function PageLoader() {
 function AppFooter() {
   const { user } = useAppStore();
   return (
-    <footer className="hidden lg:block border-t-2 border-t-primary/20 border-b border-b-border/40 bg-card/60 backdrop-blur-md mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <footer className="hidden lg:block border-t border-t-primary/15 border-b border-b-border/30 bg-card/60 backdrop-blur-md mt-auto">
+      <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-2.5">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center">
@@ -287,9 +287,9 @@ function AppContent() {
     <div className="min-h-screen bg-[#FAFAFA] overflow-x-hidden flex flex-col">
       <SidebarWrapper />
       <TopBar />
-      <main className={`transition-all duration-300 min-w-0 flex-1 ${sidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[280px]"}`}>
-        <div className="pt-14 sm:pt-16 pb-20 lg:pb-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className={`transition-all duration-300 min-w-0 flex-1 ${sidebarCollapsed ? "lg:ml-[60px]" : "lg:ml-[240px]"}`}>
+        <div className="pt-11 sm:pt-12 pb-20 lg:pb-3">
+          <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-4">
             {renderView()}
           </div>
         </div>

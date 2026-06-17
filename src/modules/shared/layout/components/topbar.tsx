@@ -21,14 +21,14 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 lg:left-auto h-14 sm:h-16 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-4 transition-all duration-300",
+        "fixed top-0 right-0 left-0 lg:left-auto h-11 sm:h-12 z-30 flex items-center px-3 sm:px-4 gap-2 sm:gap-3 transition-all duration-300",
         "bg-card/60 backdrop-blur-xl border-b border-border/30",
         "shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
-        sidebarCollapsed ? "lg:left-[72px]" : "lg:left-[280px]"
+        sidebarCollapsed ? "lg:left-[60px]" : "lg:left-[240px]"
       )}
     >
       <div className="flex-1 min-w-0">
-        <h2 className="text-base sm:text-lg font-semibold text-foreground truncate pl-10 lg:pl-0">
+        <h2 className="text-sm sm:text-[15px] font-semibold text-foreground truncate pl-10 lg:pl-0">
           {getViewTitle(currentView)}
         </h2>
       </div>
