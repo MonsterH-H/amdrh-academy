@@ -113,7 +113,7 @@ export function AdminCoursesPage() {
       const res = await fetch(`/api/courses/${detailCourse.id}?userId=${user?.id}`);
       const data = await res.json();
       setDetailCourse(data.course);
-    } catch { /* silent */ }
+    } catch { toast({ title: "Erreur", description: "Impossible de rafraîchir les détails.", variant: "destructive" }); }
   }, [detailCourse?.id]);
 
   const openEdit = (course: CourseItem) => {

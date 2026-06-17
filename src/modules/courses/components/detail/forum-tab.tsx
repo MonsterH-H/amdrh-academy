@@ -69,7 +69,7 @@ export function ForumTab({ courseId }: { courseId: string }) {
       );
       setDiscussions(data.discussions || []);
     } catch {
-      // silently fail
+      toast({ title: "Erreur", description: "Impossible de charger les discussions.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -288,7 +288,7 @@ function DiscussionDetail({
         );
         setReplies(data.replies || []);
       } catch {
-        // silently fail
+        toast({ title: "Erreur", description: "Impossible de charger les réponses.", variant: "destructive" });
       } finally {
         setLoadingReplies(false);
       }

@@ -127,6 +127,19 @@ export async function apiFetch<T = unknown>(
         ? (data as Record<string, unknown>).error as string
         : `Erreur serveur (${res.status}). Veuillez réessayer.`;
 
+    // Auto-logout on 401 Unauthorized
+    if (res.status === 401) {
+      const store = useAppStore.getState();
+      if (store.isAuthenticated) {
+        store.logout();
+        store.navigate("landing");
+        // Dynamic import to avoid circular dependency
+        import("sonner").then(({ toast }) => {
+          toast.error("Session expirée", { description: "Votre session a expiré. Veuillez vous reconnecter." });
+        });
+      }
+    }
+
     throw new FetchError(res.status, message, data);
   }
 

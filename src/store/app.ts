@@ -84,6 +84,10 @@ export const useAppStore = create<AppState>()(
         if (lastActivityAt && Date.now() - lastActivityAt > SESSION_TIMEOUT_MS) {
           get().logout();
           console.warn("[Session] Session expired (24h inactivity), logged out");
+          // Dynamic import to avoid circular dependency
+          import("sonner").then(({ toast }) => {
+            toast.error("Session expirée", { description: "Votre session a expiré après 24h d'inactivité." });
+          });
           return false;
         }
         return true;
@@ -149,6 +153,9 @@ export const useAppStore = create<AppState>()(
               state.user = null;
               state.currentView = "landing";
               state.lastActivityAt = 0;
+              import("sonner").then(({ toast }) => {
+                toast.error("Session expirée", { description: "Votre session a expiré. Veuillez vous reconnecter." });
+              });
             }
           }
           state.isAuthenticated = !!state.user;

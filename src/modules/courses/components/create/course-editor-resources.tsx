@@ -13,8 +13,11 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   FolderOpen, Plus, Trash2, FileText, Video, Image, Music, Archive, FileQuestion,
-  Download, Loader2,
+  Download, Loader2, AlertTriangle,
 } from "lucide-react";
 import {
   RESOURCE_TYPE_LABELS, RESOURCE_CATEGORY_LABELS,
@@ -64,6 +67,8 @@ export function CourseEditorResources({ courseId }: CourseEditorResourcesProps) 
   const [loading, setLoading] = useState(!!courseId);
   const [addOpen, setAddOpen] = useState(false);
   const [addForm, setAddForm] = useState({ title: "", fileType: "PDF", category: "SUPPORT_COURS", fileUrl: "" });
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchResources = useCallback(() => {
     if (!courseId) return;
@@ -102,14 +107,21 @@ export function CourseEditorResources({ courseId }: CourseEditorResourcesProps) 
 
   const handleDelete = async (resId: string) => {
     if (!courseId) return;
+    setDeleteLoading(true);
     try {
       const res = await fetch(`/api/courses/${courseId}/resources?resourceId=${resId}`, { method: "DELETE" });
       if (res.ok) {
         setResources((prev) => prev.filter((r) => r.id !== resId));
         toast({ title: "Ressource supprimée" });
+        setDeleteTarget(null);
+      } else {
+        const d = await res.json();
+        toast({ title: "Erreur", description: d.error || "Impossible de supprimer", variant: "destructive" });
       }
     } catch {
       toast({ title: "Erreur serveur", variant: "destructive" });
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -174,7 +186,7 @@ export function CourseEditorResources({ courseId }: CourseEditorResourcesProps) 
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDelete(res.id)}
+                  onClick={() => setDeleteTarget(res.id)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -233,6 +245,31 @@ export function CourseEditorResources({ courseId }: CourseEditorResourcesProps) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Supprimer cette ressource ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. La ressource sera définitivement supprimée du cours.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoading}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
+              disabled={deleteLoading}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { NOTIFICATION_TYPE_LABELS } from "@/lib/constants";
 import { NotificationItem } from "./notification-item";
+import { BulkActionsToolbar } from "./bulk-actions-toolbar";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // ──────────────────────────────────────────────────────────
 // Time ago helper imported from @/utils/format
@@ -81,6 +83,8 @@ export function NotificationsPage() {
   >([]);
   const [activeType, setActiveType] = useState("ALL");
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const fetchNotifications = async (type?: string) => {
     if (!user) return;
@@ -98,8 +102,62 @@ export function NotificationsPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === notifications.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(notifications.map((n) => n.id as string)));
+    }
+  };
+
+  const markSelectedRead = async () => {
+    if (!user || selectedIds.size === 0) return;
+    setBulkLoading(true);
+    try {
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds: Array.from(selectedIds) }),
+      });
+      fetchNotifications(activeType);
+      setSelectedIds(new Set());
+    } catch {
+      toast.error("Erreur", { description: "Impossible de marquer les notifications comme lues." });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const deleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkLoading(true);
+    try {
+      await fetch("/api/notifications", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds: Array.from(selectedIds) }),
+      });
+      fetchNotifications(activeType);
+      setSelectedIds(new Set());
+    } catch {
+      toast.error("Erreur", { description: "Impossible de supprimer les notifications." });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
+    setSelectedIds(new Set());
     fetchNotifications(activeType);
   }, [user, activeType]);
 
@@ -178,6 +236,19 @@ export function NotificationsPage() {
         )}
       </div>
 
+      {selectedIds.size > 0 && (
+        <BulkActionsToolbar
+          selectedCount={selectedIds.size}
+          totalCount={notifications.length}
+          allSelected={selectedIds.size === notifications.length && notifications.length > 0}
+          loading={bulkLoading}
+          onToggleSelectAll={toggleSelectAll}
+          onMarkSelectedRead={markSelectedRead}
+          onDeleteSelected={deleteSelected}
+          onCancelSelection={() => setSelectedIds(new Set())}
+        />
+      )}
+
       <Tabs value={activeType} onValueChange={setActiveType}>
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
           <TabsList className="bg-card border border-border/60 rounded-lg inline-flex min-w-max">
@@ -233,13 +304,21 @@ export function NotificationsPage() {
           ) : (
             <div className="space-y-2">
               {notifications.map((notif, idx) => (
-                <NotificationItem
-                  key={notif.id as string}
-                  notif={notif}
-                  index={idx}
-                  onMarkAsRead={markAsRead}
-                  onClick={handleNotificationClick}
-                />
+                <div key={notif.id as string} className="flex items-start gap-3">
+                  <Checkbox
+                    checked={selectedIds.has(notif.id as string)}
+                    onCheckedChange={() => toggleSelect(notif.id as string)}
+                    className="mt-4"
+                  />
+                  <div className="flex-1">
+                    <NotificationItem
+                      notif={notif}
+                      index={idx}
+                      onMarkAsRead={markAsRead}
+                      onClick={handleNotificationClick}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           )}

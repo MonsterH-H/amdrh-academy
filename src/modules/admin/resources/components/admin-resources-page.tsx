@@ -147,7 +147,7 @@ export function AdminResourcesPage() {
       const res = await fetch("/api/courses?admin=true");
       const data = await res.json();
       setCourses((data.courses || []).map((c: CourseOption) => ({ id: c.id, title: c.title })));
-    } catch { /* silently fail */ } finally { setCoursesLoading(false); }
+    } catch { toast({ title: "Erreur", description: "Impossible de charger les cours.", variant: "destructive" }); } finally { setCoursesLoading(false); }
   }, []);
 
   // Fetch resources
