@@ -1,0 +1,660 @@
+    42→  console.log("✅ Super Admin créé:", superAdmin.email);
+    43→
+    44→  // ─────────────────────────────────────────────────────────────────
+    45→  // 2. FORMATEUR
+    46→  // ─────────────────────────────────────────────────────────────────
+    47→  const formateurPassword = await hashPassword("Formateur@2024!");
+    48→  const formateur = await db.user.upsert({
+    49→    where: { email: "formateur@amdrh.ma" },
+    50→    update: {},
+    51→    create: {
+    52→      email: "formateur@amdrh.ma",
+    53→      passwordHash: formateurPassword,
+    54→      nom: "BENALI",
+    55→      prenom: "Ahmed",
+    56→      role: "FORMATEUR",
+    57→      telephone: "+212600000002",
+    58→      club: "WAC Casablanca",
+    59→      region: "Casablanca-Settat",
+    60→      bio: "Formateur certifié en arbitrage handball",
+    61→      licenceNumber: "FRM-001",
+    62→      isActive: true,
+    63→      emailVerified: true,
+    64→    },
+    65→  });
+    66→  console.log("✅ Formateur créé:", formateur.email);
+    67→
+    68→  // ─────────────────────────────────────────────────────────────────
+    69→  // 3. ARBITRE (test accounts)
+    70→  // ─────────────────────────────────────────────────────────────────
+    71→  const arbitrePassword = await hashPassword("Arbitre@2024!");
+    72→  const arbitre1 = await db.user.upsert({
+    73→    where: { email: "arbitre@amdrh.ma" },
+    74→    update: {},
+    75→    create: {
+    76→      email: "arbitre@amdrh.ma",
+    77→      passwordHash: arbitrePassword,
+    78→      nom: "TAZI",
+    79→      prenom: "Mohamed",
+    80→      role: "ARBITRE",
+    81→      telephone: "+212600000003",
+    82→      club: "FAR Rabat",
+    83→      region: "Rabat-Salé-Kénitra",
+    84→      bio: "Arbitre national niveau 2",
+    85→      licenceNumber: "ARB-001",
+    86→      isActive: true,
+    87→      emailVerified: true,
+    88→    },
+    89→  });
+    90→  console.log("✅ Arbitre créé:", arbitre1.email);
+    91→
+    92→  // ─────────────────────────────────────────────────────────────────
+    93→  // 4. ENTRAINEUR
+    94→  // ─────────────────────────────────────────────────────────────────
+    95→  const entraineurPassword = await hashPassword("Entraineur@2024!");
+    96→  const entraineur = await db.user.upsert({
+    97→    where: { email: "entraineur@amdrh.ma" },
+    98→    update: {},
+    99→    create: {
+   100→      email: "entraineur@amdrh.ma",
+   101→      passwordHash: entraineurPassword,
+   102→      nom: "ELMANSOURI",
+   103→      prenom: "Karim",
+   104→      role: "ENTRAINEUR",
+   105→      telephone: "+212600000004",
+   106→      club: "AS FAR",
+   107→      region: "Rabat-Salé-Kénitra",
+   108→      bio: "Entraîneur principal catégorie senior",
+   109→      licenceNumber: "ENT-001",
+   110→      isActive: true,
+   111→      emailVerified: true,
+   112→    },
+   113→  });
+   114→  console.log("✅ Entraîneur créé:", entraineur.email);
+   115→
+   116→  // ─────────────────────────────────────────────────────────────────
+   117→  // 5. JOUEUR
+   118→  // ─────────────────────────────────────────────────────────────────
+   119→  const joueurPassword = await hashPassword("Joueur@2024!");
+   120→  const joueur = await db.user.upsert({
+   121→    where: { email: "joueur@amdrh.ma" },
+   122→    update: {},
+   123→    create: {
+   124→      email: "joueur@amdrh.ma",
+   125→      passwordHash: joueurPassword,
+   126→      nom: "ALAOUI",
+   127→      prenom: "Youssef",
+   128→      role: "JOUEUR",
+   129→      telephone: "+212600000005",
+   130→      club: "CODM Marrakech",
+   131→      region: "Marrakech-Safi",
+   132→      bio: "Joueur espoir catégorie junior",
+   133→      licenceNumber: "JOU-001",
+   134→      isActive: true,
+   135→      emailVerified: true,
+   136→    },
+   137→  });
+   138→  console.log("✅ Joueur créé:", joueur.email);
+   139→
+   140→  // ─────────────────────────────────────────────────────────────────
+   141→  // 6. PERMISSIONS
+   142→  // ─────────────────────────────────────────────────────────────────
+   143→  const permissionsData = [
+   144→    // Courses
+   145→    { name: "courses.view", description: "Voir les cours", module: "courses", action: "view" },
+   146→    { name: "courses.create", description: "Créer des cours", module: "courses", action: "create" },
+   147→    { name: "courses.edit", description: "Modifier les cours", module: "courses", action: "edit" },
+   148→    { name: "courses.delete", description: "Supprimer les cours", module: "courses", action: "delete" },
+   149→    { name: "courses.manage", description: "Gérer les cours", module: "courses", action: "manage" },
+   150→    { name: "courses.publish", description: "Publier les cours", module: "courses", action: "publish" },
+   151→    // Users
+   152→    { name: "users.view", description: "Voir les utilisateurs", module: "users", action: "view" },
+   153→    { name: "users.create", description: "Créer des utilisateurs", module: "users", action: "create" },
+   154→    { name: "users.edit", description: "Modifier les utilisateurs", module: "users", action: "edit" },
+   155→    { name: "users.delete", description: "Supprimer des utilisateurs", module: "users", action: "delete" },
+   156→    { name: "users.manage", description: "Gérer les utilisateurs", module: "users", action: "manage" },
+   157→    // Quiz
+   158→    { name: "quizzes.view", description: "Voir les quiz", module: "quizzes", action: "view" },
+   159→    { name: "quizzes.create", description: "Créer des quiz", module: "quizzes", action: "create" },
+   160→    { name: "quizzes.edit", description: "Modifier les quiz", module: "quizzes", action: "edit" },
+   161→    { name: "quizzes.delete", description: "Supprimer les quiz", module: "quizzes", action: "delete" },
+   162→    { name: "quizzes.manage", description: "Gérer les quiz", module: "quizzes", action: "manage" },
+   163→    // Certificates
+   164→    { name: "certificates.view", description: "Voir les certificats", module: "certificates", action: "view" },
+   165→    { name: "certificates.create", description: "Créer des certificats", module: "certificates", action: "create" },
+   166→    { name: "certificates.revoke", description: "Révoquer des certificats", module: "certificates", action: "delete" },
+   167→    { name: "certificates.manage", description: "Gérer les certificats", module: "certificates", action: "manage" },
+   168→    // Learning Paths
+   169→    { name: "learning-paths.view", description: "Voir les parcours", module: "learning-paths", action: "view" },
+   170→    { name: "learning-paths.create", description: "Créer des parcours", module: "learning-paths", action: "create" },
+   171→    { name: "learning-paths.edit", description: "Modifier les parcours", module: "learning-paths", action: "edit" },
+   172→    { name: "learning-paths.delete", description: "Supprimer les parcours", module: "learning-paths", action: "delete" },
+   173→    { name: "learning-paths.manage", description: "Gérer les parcours", module: "learning-paths", action: "manage" },
+   174→    // Admin
+   175→    { name: "admin.dashboard", description: "Accéder au dashboard admin", module: "admin", action: "view" },
+   176→    { name: "admin.settings", description: "Modifier les paramètres", module: "admin", action: "edit" },
+   177→    { name: "admin.analytics", description: "Voir les analytics", module: "admin", action: "view" },
+   178→    { name: "admin.sync", description: "Synchroniser avec la fédération", module: "admin", action: "manage" },
+   179→    { name: "admin.permissions", description: "Gérer les permissions", module: "admin", action: "manage" },
+   180→    { name: "admin.announcements", description: "Gérer les annonces", module: "admin", action: "manage" },
+   181→    // Messages
+   182→    { name: "messages.view", description: "Voir les messages", module: "messages", action: "view" },
+   183→    { name: "messages.send", description: "Envoyer des messages", module: "messages", action: "create" },
+   184→    // Resources
+   185→    { name: "resources.view", description: "Voir les ressources", module: "resources", action: "view" },
+   186→    { name: "resources.upload", description: "Téléverser des ressources", module: "resources", action: "create" },
+   187→    { name: "resources.delete", description: "Supprimer des ressources", module: "resources", action: "delete" },
+   188→    // Notifications
+   189→    { name: "notifications.view", description: "Voir les notifications", module: "notifications", action: "view" },
+   190→    { name: "notifications.manage", description: "Gérer les notifications", module: "notifications", action: "manage" },
+   191→    // Traceability
+   192→    { name: "traceability.view", description: "Voir la traçabilité", module: "traceability", action: "view" },
+   193→    { name: "traceability.export", description: "Exporter la traçabilité", module: "traceability", action: "manage" },
+   194→  ];
+   195→
+   196→  const createdPermissions: Record<string, string> = {};
+   197→  for (const p of permissionsData) {
+   198→    const perm = await db.permission.upsert({
+   199→      where: { name: p.name },
+   200→      update: {},
+   201→      create: p,
+   202→    });
+   203→    createdPermissions[p.name] = perm.id;
+   204→  }
+   205→  console.log(`✅ ${Object.keys(createdPermissions).length} permissions créées`);
+   206→
+   207→  // ─────────────────────────────────────────────────────────────────
+   208→  // 7. ROLE PERMISSIONS
+   209→  // ─────────────────────────────────────────────────────────────────
+   210→  const rolePermissionMap: Record<string, string[]> = {
+   211→    ADMIN: Object.keys(createdPermissions), // All permissions
+   212→    FORMATEUR: [
+   213→      "courses.view", "courses.create", "courses.edit",
+   214→      "quizzes.view", "quizzes.create", "quizzes.edit",
+   215→      "certificates.view",
+   216→      "learning-paths.view",
+   217→      "messages.view", "messages.send",
+   218→      "resources.view", "resources.upload",
+   219→      "notifications.view",
+   220→    ],
+   221→    ARBITRE: [
+   222→      "courses.view",
+   223→      "quizzes.view",
+   224→      "certificates.view",
+   225→      "learning-paths.view",
+   226→      "messages.view", "messages.send",
+   227→      "resources.view",
+   228→      "notifications.view",
+   229→    ],
+   230→    ENTRAINEUR: [
+   231→      "courses.view",
+   232→      "quizzes.view",
+   233→      "certificates.view",
+   234→      "learning-paths.view",
+   235→      "messages.view", "messages.send",
+   236→      "resources.view",
+   237→      "notifications.view",
+   238→    ],
+   239→    JOUEUR: [
+   240→      "courses.view",
+   241→      "quizzes.view",
+   242→      "certificates.view",
+   243→      "learning-paths.view",
+   244→      "messages.view", "messages.send",
+   245→      "resources.view",
+   246→      "notifications.view",
+   247→    ],
+   248→  };
+   249→
+   250→  for (const [role, permissionNames] of Object.entries(rolePermissionMap)) {
+   251→    for (const permName of permissionNames) {
+   252→      const permId = createdPermissions[permName];
+   253→      if (!permId) continue;
+   254→      await db.rolePermission.upsert({
+   255→        where: {
+   256→          role_permissionId: { role, permissionId: permId },
+   257→        },
+   258→        update: {},
+   259→        create: { role, permissionId: permId },
+   260→      });
+   261→    }
+   262→    console.log(`✅ ${permissionNames.length} permissions pour ${role}`);
+   263→  }
+   264→
+   265→  // ─────────────────────────────────────────────────────────────────
+   266→  // 8. SAMPLE COURSES
+   267→  // ─────────────────────────────────────────────────────────────────
+   268→  const coursesData = [
+   269→    {
+   270→      title: "Introduction à l'Arbitrage Handball",
+   271→      slug: "intro-arbitrage",
+   272→      description: "Formation fondamentale pour les débutants en arbitrage handball. Découvrez les règles de base, le positionnement et la gestion du match.",
+   273→      category: "ARBITRAGE",
+   274→      difficulty: "DEBUTANT",
+   275→      status: "PUBLIE",
+   276→      duration: 120,
+   277→      isCertifying: true,
+   278→      passingScore: 70,
+   279→      maxAttempts: 3,
+   280→      instructorId: formateur.id,
+   281→      order: 1,
+   282→    },
+   283→    {
+   284→      title: "Règles Officielles IHF - Niveau 1",
+   285→      slug: "regles-ihf-niveau1",
+   286→      description: "Maîtrisez les règles officielles de l'IHF. Passages en force, fautes progressives, exclusions et jet de 7 mètres.",
+   287→      category: "ARBITRAGE",
+   288→      difficulty: "INTERMEDIAIRE",
+   289→      status: "PUBLIE",
+   290→      duration: 240,
+   291→      isCertifying: true,
+   292→      passingScore: 80,
+   293→      maxAttempts: 3,
+   294→      instructorId: formateur.id,
+   295→      order: 2,
+   296→    },
+   297→    {
+   298→      title: "Techniques de Communication en Match",
+   299→      slug: "techniques-communication-match",
+   300→      description: "Apprenez à communiquer efficacement avec les joueurs, entraîneurs et officiels pendant un match de handball.",
+   301→      category: "ARBITRAGE",
+   302→      difficulty: "INTERMEDIAIRE",
+   303→      status: "PUBLIE",
+   304→      duration: 90,
+   305→      isCertifying: false,
+   306→      instructorId: formateur.id,
+   307→      order: 3,
+   308→    },
+   309→    {
+   310→      title: "Arbitrage Avancé - Gestion de Conflits",
+   311→      slug: "arbitrage-avance-gestion-conflits",
+   312→      description: "Formation avancée pour gérer les situations complexes et les conflits lors de matchs de haut niveau.",
+   313→      category: "ARBITRAGE",
+   314→      difficulty: "AVANCE",
+   315→      status: "PUBLIE",
+   316→      duration: 180,
+   317→      isCertifying: true,
+   318→      passingScore: 85,
+   319→      maxAttempts: 2,
+   320→      instructorId: superAdmin.id,
+   321→      order: 4,
+   322→    },
+   323→    {
+   324→      title: "Préparation Physique pour Entraîneurs",
+   325→      slug: "preparation-physique-entraineurs",
+   326→      description: "Programme complet de préparation physique adapté au handball pour les entraîneurs.",
+   327→      category: "ENTRAINEMENT",
+   328→      difficulty: "DEBUTANT",
+   329→      status: "PUBLIE",
+   330→      duration: 150,
+   331→      isCertifying: false,
+   332→      instructorId: formateur.id,
+   333→      order: 5,
+   334→    },
+   335→    {
+   336→      title: "Tactiques Défensives Handball",
+   337→      slug: "tactiques-defensives",
+   338→      description: "Analysez et implémentez les systèmes défensifs modernes en handball : 6-0, 5-1, 3-2-1.",
+   339→      category: "ENTRAINEMENT",
+   340→      difficulty: "AVANCE",
+   341→      status: "PUBLIE",
+   342→      duration: 200,
+   343→      isCertifying: true,
+   344→      passingScore: 75,
+   345→      maxAttempts: 3,
+   346→      instructorId: formateur.id,
+   347→      order: 6,
+   348→    },
+   349→  ];
+   350→
+   351→  const createdCourses: Record<string, string> = {};
+   352→  for (const c of coursesData) {
+   353→    const course = await db.course.upsert({
+   354→      where: { slug: c.slug },
+   355→      update: {},
+   356→      create: c,
+   357→    });
+   358→    createdCourses[c.slug] = course.id;
+   359→  }
+   360→  console.log(`✅ ${coursesData.length} cours créés`);
+   361→
+   362→  // ─────────────────────────────────────────────────────────────────
+   363→  // 9. SECTIONS & LESSONS (for first 2 courses)
+   364→  // ─────────────────────────────────────────────────────────────────
+   365→  const introCourseId = createdCourses["intro-arbitrage"];
+   366→  const ihfCourseId = createdCourses["regles-ihf-niveau1"];
+   367→
+   368→  if (introCourseId) {
+   369→    const sections = [
+   370→      { title: "Présentation du Module", order: 0 },
+   371→      { title: "Règles Fondamentales", order: 1 },
+   372→      { title: "Positionnement sur le Terrain", order: 2 },
+   373→      { title: "Gestion du Match", order: 3 },
+   374→    ];
+   375→    for (const s of sections) {
+   376→      const section = await db.section.create({
+   377→        data: { ...s, courseId: introCourseId },
+   378→      });
+   379→      const lessonTypes = ["TEXTE", "VIDEO", "TEXTE"];
+   380→      for (let i = 0; i < 3; i++) {
+   381→        await db.lesson.create({
+   382→          data: {
+   383→            title: `${s.title} - Leçon ${i + 1}`,
+   384→            type: lessonTypes[i],
+   385→            content: `Contenu détaillé de la leçon ${i + 1} pour ${s.title}.`,
+   386→            duration: 15 + i * 5,
+   387→            order: i,
+   388→            sectionId: section.id,
+   389→          },
+   390→        });
+   391→      }
+   392→    }
+   393→  }
+   394→
+   395→  if (ihfCourseId) {
+   396→    const sections = [
+   397→      { title: "Fautes et Sanctions", order: 0 },
+   398→      { title: "Passages en Force", order: 1 },
+   399→      { title: "Jet de 7 Mètres", order: 2 },
+   400→    ];
+   401→    for (const s of sections) {
+   402→      const section = await db.section.create({
+   403→        data: { ...s, courseId: ihfCourseId },
+   404→      });
+   405→      for (let i = 0; i < 2; i++) {
+   406→        await db.lesson.create({
+   407→          data: {
+   408→            title: `${s.title} - Leçon ${i + 1}`,
+   409→            type: "TEXTE",
+   410→            content: `Contenu détaillé pour ${s.title} - Leçon ${i + 1}.`,
+   411→            duration: 20,
+   412→            order: i,
+   413→            sectionId: section.id,
+   414→          },
+   415→        });
+   416→      }
+   417→    }
+   418→  }
+   419→  console.log("✅ Sections et leçons créées");
+   420→
+   421→  // ─────────────────────────────────────────────────────────────────
+   422→  // 10. BADGES
+   423→  // ─────────────────────────────────────────────────────────────────
+   424→  const badgesData = [
+   425→    { name: "Premier Pas", description: "Première inscription à un cours", icon: "footprints", level: "BRONZE", criteria: "S'inscrire à un cours" },
+   426→    { name: "Étudiant Assidu", description: "Compléter 5 cours", icon: "book-open", level: "ARGENT", criteria: "Compléter 5 cours" },
+   427→    { name: "Expert en Arbitrage", description: "Obtenir la certification arbitrage", icon: "award", level: "OR", criteria: "Obtenir le certificat d'arbitrage" },
+   428→    { name: "Champion Quiz", description: "Score parfait à 3 quiz", icon: "trophy", level: "OR", criteria: "Score 100% à 3 quiz" },
+   429→    { name: "Formateur Certifié", description: "Créer et publier 10 cours", icon: "graduation-cap", level: "PLATINE", criteria: "Publier 10 cours" },
+   430→  ];
+   431→  const createdBadges: Record<string, string> = {};
+   432→  for (const b of badgesData) {
+   433→    const badge = await db.badge.upsert({
+   434→      where: { name: b.name },
+   435→      update: {},
+   436→      create: b,
+   437→    });
+   438→    createdBadges[b.name] = badge.id;
+   439→  }
+   440→  console.log(`✅ ${badgesData.length} badges créés`);
+   441→
+   442→  // ─────────────────────────────────────────────────────────────────
+   443→  // 11. ENROLLMENTS
+   444→  // ─────────────────────────────────────────────────────────────────
+   445→  const enrollments = [
+   446→    { userId: arbitre1.id, courseId: introCourseId, status: "en_cours", progress: 35 },
+   447→    { userId: arbitre1.id, courseId: ihfCourseId, status: "en_cours", progress: 10 },
+   448→    { userId: entraineur.id, courseId: introCourseId, status: "en_cours", progress: 60 },
+   449→    { userId: joueur.id, courseId: introCourseId, status: "en_cours", progress: 15 },
+   450→  ];
+   451→  for (const e of enrollments) {
+   452→    if (!e.courseId) continue;
+   453→    await db.enrollment.upsert({
+   454→      where: { userId_courseId: { userId: e.userId, courseId: e.courseId } },
+   455→      update: { progress: e.progress },
+   456→      create: e,
+   457→    });
+   458→  }
+   459→  console.log(`✅ ${enrollments.length} inscriptions créées`);
+   460→
+   461→  // ─────────────────────────────────────────────────────────────────
+   462→  // 12. QUIZ (for intro course)
+   463→  // ─────────────────────────────────────────────────────────────────
+   464→  if (introCourseId) {
+   465→    const quiz = await db.quiz.upsert({
+   466→      where: { courseId: introCourseId },
+   467→      update: {},
+   468→      create: {
+   469→        title: "Quiz - Introduction à l'Arbitrage",
+   470→        description: "Évaluez vos connaissances fondamentales en arbitrage handball.",
+   471→        courseId: introCourseId,
+   472→        duration: 20,
+   473→        passingScore: 70,
+   474→        shuffleQuestions: true,
+   475→        showAnswers: true,
+   476→        maxAttempts: 3,
+   477→      },
+   478→    });
+   479→
+   480→    const questions = [
+   481→      {
+   482→        text: "Combien de joueurs composent une équipe de handball sur le terrain ?",
+   483→        type: "QCM_SIMPLE",
+   484→        options: JSON.stringify(["5", "6", "7", "8"]),
+   485→        correctAnswer: JSON.stringify(["6"]),
+   486→        explanation: "Une équipe de handball est composée de 6 joueurs de champ plus 1 gardien, soit 7 au total sur le terrain.",
+   487→        points: 1,
+   488→        order: 0,
+   489→      },
+   490→      {
+   491→        text: "Quelle est la durée d'une mi-temps en handball senior ?",
+   492→        type: "QCM_SIMPLE",
+   493→        options: JSON.stringify(["20 min", "25 min", "30 min", "35 min"]),
+   494→        correctAnswer: JSON.stringify(["30 min"]),
+   495→        explanation: "En handball senior, chaque mi-temps dure 30 minutes, pour un temps total de 60 minutes.",
+   496→        points: 1,
+   497→        order: 1,
+   498→      },
+   499→      {
+   500→        text: "Quel est le type de sanction pour une faute progressive ?",
+   501→        type: "QCM_MULTIPLE",
+   502→        options: JSON.stringify(["Avertissement (carton jaune)", "Exclusion (2 min)", "Disqualification (carton rouge)", "Jet franc"]),
+   503→        correctAnswer: JSON.stringify(["Avertissement (carton jaune)", "Exclusion (2 min)"]),
+   504→        explanation: "Les fautes progressives entraînent d'abord un avertissement, puis une exclusion temporaire de 2 minutes.",
+   505→        points: 2,
+   506→        order: 2,
+   507→      },
+   508→      {
+   509→        text: "La zone des 6 mètres est réservée exclusivement au gardien.",
+   510→        type: "VRAI_FAUX",
+   511→        options: JSON.stringify(["Vrai", "Faux"]),
+   512→        correctAnswer: JSON.stringify(["Faux"]),
+   513→        explanation: "Les joueurs de champ peuvent pénétrer dans la zone des 6 mètres à condition de lancer le ballon avant de toucher le sol.",
+   514→        points: 1,
+   515→        order: 3,
+   516→      },
+   517→      {
+   518→        text: "Quelles sont les responsabilités principales de l'arbitre ?",
+   519→        type: "QCM_MULTIPLE",
+   520→        options: JSON.stringify([
+   521→          "Faire respecter les règles",
+   522→          "Gérer le chronomètre",
+   523→          "Assurer la sécurité des joueurs",
+   524→          "Composer les équipes"
+   525→        ]),
+   526→        correctAnswer: JSON.stringify(["Faire respecter les règles", "Assurer la sécurité des joueurs"]),
+   527→        explanation: "L'arbitre est responsable du respect des règles et de la sécurité. Le chronomètre est géré par le chronométreur et la composition par l'entraîneur.",
+   528→        points: 2,
+   529→        order: 4,
+   530→      },
+   531→    ];
+   532→
+   533→    for (const q of questions) {
+   534→      const question = await db.question.create({
+   535→        data: { ...q, quizId: quiz.id },
+   536→      });
+   537→    }
+   538→    console.log(`✅ Quiz créé avec ${questions.length} questions`);
+   539→  }
+   540→
+   541→  // ─────────────────────────────────────────────────────────────────
+   542→  // 13. LEARNING PATHS
+   543→  // ─────────────────────────────────────────────────────────────────
+   544→  const learningPathsData = [
+   545→    {
+   546→      title: "Parcours Arbitrage - Niveau 1",
+   547→      slug: "parcours-arbitrage-n1",
+   548→      description: "Formation complète pour devenir arbitre de handball niveau 1. De la découverte du jeu à la certification.",
+   549→      targetRole: "ARBITRE",
+   550→      mode: "sequentiel",
+   551→      isMandatory: true,
+   552→      order: 1,
+   553→    },
+   554→    {
+   555→      title: "Parcours Entraînement - Initiation",
+   556→      slug: "parcours-entrainement-init",
+   557→      description: "Formation de base pour les entraîneurs débutants. Techniques, tactiques et gestion d'équipe.",
+   558→      targetRole: "ENTRAINEUR",
+   559→      mode: "sequentiel",
+   560→      isMandatory: true,
+   561→      order: 2,
+   562→    },
+   563→    {
+   564→      title: "Parcours Jeune Arbitre",
+   565→      slug: "parcours-jeune-arbitre",
+   566→      description: "Formation adaptée pour les jeunes arbitres de moins de 18 ans.",
+   567→      targetRole: "JOUEUR",
+   568→      mode: "flexible",
+   569→      isMandatory: false,
+   570→      order: 3,
+   571→    },
+   572→  ];
+   573→
+   574→  for (const lp of learningPathsData) {
+   575→    const path = await db.learningPath.upsert({
+   576→      where: { slug: lp.slug },
+   577→      update: {},
+   578→      create: lp,
+   579→    });
+   580→
+   581→    // Add courses to learning paths
+   582→    if (lp.slug === "parcours-arbitrage-n1" && introCourseId) {
+   583→      await db.learningPathCourse.upsert({
+   584→        where: { learningPathId_courseId: { learningPathId: path.id, courseId: introCourseId } },
+   585→        update: {},
+   586→        create: { learningPathId: path.id, courseId: introCourseId, order: 1, isRequired: true, minScore: 70 },
+   587→      });
+   588→    }
+   589→    if (lp.slug === "parcours-arbitrage-n1" && ihfCourseId) {
+   590→      await db.learningPathCourse.upsert({
+   591→        where: { learningPathId_courseId: { learningPathId: path.id, courseId: ihfCourseId } },
+   592→        update: {},
+   593→        create: { learningPathId: path.id, courseId: ihfCourseId, order: 2, isRequired: true, minScore: 80 },
+   594→      });
+   595→    }
+   596→    if (lp.slug === "parcours-entrainement-init" && introCourseId) {
+   597→      await db.learningPathCourse.upsert({
+   598→        where: { learningPathId_courseId: { learningPathId: path.id, courseId: introCourseId } },
+   599→        update: {},
+   600→        create: { learningPathId: path.id, courseId: introCourseId, order: 1, isRequired: true, minScore: 60 },
+   601→      });
+   602→    }
+   603→  }
+   604→  console.log(`✅ ${learningPathsData.length} parcours créés`);
+   605→
+   606→  // ─────────────────────────────────────────────────────────────────
+   607→  // 14. ANNOUNCEMENTS
+   608→  // ─────────────────────────────────────────────────────────────────
+   609→  const announcementsData = [
+   610→    {
+   611→      title: "Bienvenue sur l'Académie AMDRH",
+   612→      content: "Bienvenue sur la plateforme de formation de l'Académie AMDRH, partenaire académique officiel de la Fédération Royale Marocaine de Handball. Explorez nos cours et formations en arbitrage, entraînement et jeu.",
+   613→      type: "INFO",
+   614→      targetRoles: JSON.stringify(["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"]),
+   615→      isPinned: true,
+   616→      isPublished: true,
+   617→      authorId: superAdmin.id,
+   618→    },
+   619→    {
+   620→      title: "Nouveau parcours certification arbitrage",
+   621→      content: "Le parcours de certification en arbitrage niveau 1 est maintenant disponible. Inscrivez-vous dès maintenant pour préparer votre certification officielle.",
+   622→      type: "FORMATION",
+   623→      targetRoles: JSON.stringify(["ARBITRE", "JOUEUR"]),
+   624→      isPinned: true,
+   625→      isPublished: true,
+   626→      authorId: formateur.id,
+   627→    },
+   628→    {
+   629→      title: "Calendrier des formations Q1 2025",
+   630→      content: "Les sessions de formation en présentiel pour le premier trimestre 2025 sont programmées. Consultez les dates et lieux sur le portail de la FRMHB.",
+   631→      type: "EVENEMENT",
+   632→      targetRoles: JSON.stringify(["ADMIN", "FORMATEUR", "ARBITRE", "ENTRAINEUR", "JOUEUR"]),
+   633→      isPinned: false,
+   634→      isPublished: true,
+   635→      authorId: superAdmin.id,
+   636→    },
+   637→    {
+   638→      title: "Mise à jour des règles IHF 2024",
+   639→      content: "Les nouvelles règles IHF pour la saison 2024-2025 sont en vigueur. Un module de mise à jour est disponible pour tous les arbitres certifiés.",
+   640→      type: "URGENT",
+   641→      targetRoles: JSON.stringify(["ARBITRE", "FORMATEUR"]),
+   642→      isPinned: true,
+   643→      isPublished: true,
+   644→      authorId: superAdmin.id,
+   645→    },
+   646→  ];
+   647→
+   648→  for (const a of announcementsData) {
+   649→    await db.announcement.create({ data: a });
+   650→  }
+   651→  console.log(`✅ ${announcementsData.length} annonces créées`);
+   652→
+   653→  // ─────────────────────────────────────────────────────────────────
+   654→  // 15. NOTIFICATIONS
+   655→  // ─────────────────────────────────────────────────────────────────
+   656→  const notificationsData = [
+   657→    { userId: superAdmin.id, type: "SYSTEME", title: "Plateforme déployée", message: "L'Académie AMDRH est maintenant en production.", link: null },
+   658→    { userId: formateur.id, type: "SYSTEME", title: "Bienvenue", message: "Bienvenue sur la plateforme de formation. Vous pouvez créer et gérer vos cours.", link: null },
+   659→    { userId: arbitre1.id, type: "COURS", title: "Nouveau cours disponible", message: "Introduction à l'Arbitrage Handball est maintenant disponible.", link: null },
+   660→  ];
+   661→  for (const n of notificationsData) {
+   662→    await db.notification.create({ data: n });
+   663→  }
+   664→  console.log(`✅ ${notificationsData.length} notifications créées`);
+   665→
+   666→  console.log("\n🎉 Seed terminé avec succès !");
+   667→  console.log("\n═══════════════════════════════════════════════════════");
+   668→  console.log("  COMPTES DE CONNEXION");
+   669→  console.log("═══════════════════════════════════════════════════════");
+   670→  console.log("");
+   671→  console.log("  🔑 SUPER ADMIN");
+   672→  console.log("     Email:    admin@amdrh.ma");
+   673→  console.log("     Password: Admin@2024!");
+   674→  console.log("");
+   675→  console.log("  👨‍🏫 FORMATEUR");
+   676→  console.log("     Email:    formateur@amdrh.ma");
+   677→  console.log("     Password: Formateur@2024!");
+   678→  console.log("");
+   679→  console.log("  📋 ARBITRE");
+   680→  console.log("     Email:    arbitre@amdrh.ma");
+   681→  console.log("     Password: Arbitre@2024!");
+   682→  console.log("");
+   683→  console.log("  🏋️ ENTRAINEUR");
+   684→  console.log("     Email:    entraineur@amdrh.ma");
+   685→  console.log("     Password: Entraineur@2024!");
+   686→  console.log("");
+   687→  console.log("  🤾 JOUEUR");
+   688→  console.log("     Email:    joueur@amdrh.ma");
+   689→  console.log("     Password: Joueur@2024!");
+   690→  console.log("═══════════════════════════════════════════════════════");
+   691→}
+   692→
+   693→main()
+   694→  .catch((e) => {
+   695→    console.error("❌ Seed error:", e);
+   696→    process.exit(1);
+   697→  })
+   698→  .finally(async () => {
+   699→    await db.$disconnect();
+   700→  });
+   701→

@@ -60,20 +60,45 @@ export function MessagesPage() {
 
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
+
     const fetchConversations = async () => {
       try {
-        const res = await fetch(`/api/messages?userId=${user.id}`);
+        const res = await fetch(`/api/messages?userId=${user.id}`, {
+          headers: { "x-user-id": user.id },
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (!cancelled) {
+            toast.error("Erreur de chargement", {
+              description: (data as Record<string, string>)?.error || "Impossible de charger les conversations.",
+            });
+          }
+          return;
+        }
+
         const data = await res.json();
-        setConversations(data.conversations || []);
+        if (!cancelled) {
+          setConversations(data.conversations || []);
+        }
       } catch {
-        toast.error("Erreur de chargement", { description: "Impossible de charger les conversations." });
+        if (!cancelled) {
+          toast.error("Erreur de connexion", {
+            description: "Impossible de charger les conversations.",
+          });
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     fetchConversations();
     const interval = setInterval(fetchConversations, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [user]);
 
   if (loading) return <MessagesSkeleton />;

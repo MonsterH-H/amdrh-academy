@@ -6,6 +6,7 @@ import { useRealtime } from "@/hooks/use-realtime";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Wifi, WifiOff } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { type TypingUser } from "../types";
 import { ConversationView } from "./conversation-view";
@@ -56,6 +57,19 @@ function ConversationSkeleton() {
 // Conversation Page (with real-time features)
 // ──────────────────────────────────────────────────────────
 
+interface OtherParticipantInfo {
+  userId: string;
+  user: {
+    id: string;
+    nom: string;
+    prenom: string;
+    avatar?: string | null;
+    role: string;
+    club?: string | null;
+    isActive: boolean;
+  };
+}
+
 export function ConversationPage() {
   const { user, viewParams, navigate } = useAppStore();
   const conversationId = viewParams?.id;
@@ -70,9 +84,11 @@ export function ConversationPage() {
   const [messages, setMessages] = useState<Array<Record<string, unknown>>>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [otherUserOnline, setOtherUserOnline] = useState(false);
   const [otherUserId, setOtherUserId] = useState<string | null>(null);
+  const [otherUser, setOtherUser] = useState<OtherParticipantInfo["user"] | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -96,21 +112,45 @@ export function ConversationPage() {
   // Fetch messages on mount
   useEffect(() => {
     if (!conversationId || !user) return;
+    setLoading(true);
     const fetchMessages = async () => {
       try {
         const res = await fetch(
-          `/api/messages/${conversationId}?userId=${user.id}`
+          `/api/messages/${conversationId}?userId=${user.id}`,
+          {
+            headers: {
+              "x-user-id": user.id,
+            },
+          }
         );
         const data = await res.json();
-        setMessages(data.messages || []);
-        // Derive other user ID from messages
-        if (data.messages && data.messages.length > 0) {
-          const firstMsg = data.messages[0];
-          const otherId = firstMsg.senderId === user.id ? firstMsg.recipientId : firstMsg.senderId;
-          if (otherId) setOtherUserId(otherId);
+
+        if (!res.ok) {
+          toast.error("Erreur", { description: data.error || "Impossible de charger la conversation." });
+          setMessages([]);
+          setLoading(false);
+          return;
         }
+
+        setMessages(data.messages || []);
+
+        // Derive other user from participant info returned by API
+        if (data.otherParticipant) {
+          setOtherUserId(data.otherParticipant.userId);
+          setOtherUser(data.otherParticipant.user);
+        } else {
+          // Fallback: try to derive from first message sender
+          if (data.messages && data.messages.length > 0) {
+            const otherMsg = data.messages.find((m: Record<string, unknown>) => m.senderId !== user.id);
+            if (otherMsg) {
+              setOtherUserId(otherMsg.senderId as string);
+            }
+          }
+        }
+
         scrollToBottom();
       } catch {
+        toast.error("Erreur de connexion", { description: "Impossible de charger les messages." });
         setMessages([]);
       } finally {
         setLoading(false);
@@ -175,7 +215,6 @@ export function ConversationPage() {
     const unsubUnread = on("messages:unread", (...args: unknown[]) => {
       const data = args[0] as Record<string, unknown> | undefined;
       if (!data) return;
-      // Could update conversation unread count in parent
     });
 
     return () => {
@@ -184,7 +223,7 @@ export function ConversationPage() {
       unsubPresence();
       unsubUnread();
     };
-  }, [conversationId, user?.id, on, scrollToBottom]);
+  }, [conversationId, user?.id, on, scrollToBottom, otherUserId]);
 
   // Handle typing input — emit events to socket
   const handleInputChange = useCallback(
@@ -214,7 +253,7 @@ export function ConversationPage() {
   }, []);
 
   const handleSend = async () => {
-    if (!newMessage.trim() || !user || !conversationId) return;
+    if (!newMessage.trim() || !user || !conversationId || sending) return;
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -223,19 +262,30 @@ export function ConversationPage() {
 
     const msg = newMessage;
     setNewMessage("");
+    setSending(true);
     try {
       const res = await fetch(`/api/messages/${conversationId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user.id,
+        },
         body: JSON.stringify({ senderId: user.id, content: msg }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.message) setMessages((prev) => [...prev, data.message]);
+      const data = await res.json();
+
+      if (res.ok && data.message) {
+        setMessages((prev) => [...prev, data.message]);
         scrollToBottom();
+      } else {
+        toast.error("Erreur d'envoi", { description: data.error || "Impossible d'envoyer le message." });
+        setNewMessage(msg);
       }
     } catch {
+      toast.error("Erreur de connexion", { description: "Impossible d'envoyer le message." });
       setNewMessage(msg);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -245,6 +295,10 @@ export function ConversationPage() {
       handleSend();
     }
   };
+
+  const otherUserName = otherUser
+    ? `${otherUser.prenom} ${otherUser.nom}`
+    : "Conversation";
 
   if (loading) return <ConversationSkeleton />;
 
@@ -260,8 +314,9 @@ export function ConversationPage() {
           Retour
         </button>
         <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">{otherUserName}</span>
           {otherUserOnline && (
-            <span className="text-[10px] text-blue-600 font-medium px-2 py-0.5 bg-blue-50 rounded-full border border-blue-200/60">
+            <span className="text-[10px] text-emerald-600 font-medium px-2 py-0.5 bg-emerald-50 rounded-full border border-emerald-200/60">
               En ligne
             </span>
           )}
@@ -299,6 +354,7 @@ export function ConversationPage() {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onSubmit={handleSend}
+          disabled={sending}
         />
       </Card>
     </div>

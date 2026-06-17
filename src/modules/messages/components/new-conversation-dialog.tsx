@@ -21,6 +21,7 @@ import {
   X,
   User,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/constants";
 import { type UserOption } from "../types";
@@ -47,14 +48,28 @@ export function NewConversationDialog({
       setLoading(true);
       try {
         const params = new URLSearchParams({ search: query, limit: "15" });
-        const res = await fetch(`/api/messages/users?${params}`);
+        const res = await fetch(`/api/messages/users?${params}`, {
+          headers: { "x-user-id": user.id },
+        });
         const data = await res.json();
+
+        if (!res.ok) {
+          toast.error("Erreur", {
+            description: (data as Record<string, string>)?.error || "Impossible de rechercher des utilisateurs.",
+          });
+          setUsers([]);
+          return;
+        }
+
         const filtered = (data.users || []).filter(
           (u: UserOption) =>
             u.id !== user.id && !existingConversationUserIds.has(u.id)
         );
         setUsers(filtered);
       } catch {
+        toast.error("Erreur de connexion", {
+          description: "Impossible de rechercher des utilisateurs.",
+        });
         setUsers([]);
       } finally {
         setLoading(false);
@@ -86,16 +101,26 @@ export function NewConversationDialog({
     try {
       const res = await fetch("/api/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user.id,
+        },
         body: JSON.stringify({ userId1: user.id, userId2: selectedUser.id }),
       });
       const data = await res.json();
+
       if (res.ok && data.conversationId) {
         onOpenChange(false);
         navigate("conversation", { id: data.conversationId });
+      } else {
+        toast.error("Erreur", {
+          description: data.error || "Impossible de créer la conversation.",
+        });
       }
     } catch {
-      // silent fail
+      toast.error("Erreur de connexion", {
+        description: "Impossible de créer la conversation.",
+      });
     } finally {
       setCreating(false);
     }

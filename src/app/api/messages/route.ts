@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Utilisateur requis" }, { status: 400 });
     }
 
+    // Fetch all conversations for this user with participants and last message
     const conversations = await db.conversationParticipant.findMany({
       where: { userId },
       include: {
@@ -21,22 +22,21 @@ export async function GET(req: NextRequest) {
           include: {
             participants: {
               include: {
-                user: { select: { id: true, nom: true, prenom: true, avatar: true } },
+                user: { select: { id: true, nom: true, prenom: true, avatar: true, role: true, club: true, isActive: true } },
               },
             },
             messages: {
               orderBy: { createdAt: "desc" },
               take: 1,
-              select: { content: true, createdAt: true, senderId: true },
+              select: { content: true, createdAt: true, senderId: true, id: true },
             },
             _count: { select: { messages: true } },
           },
         },
       },
-      orderBy: { lastReadAt: "desc" },
     });
 
-    // Count unread per conversation
+    // Count unread per conversation and build response
     const conversationsWithUnread = await Promise.all(
       conversations.map(async (cp) => {
         const unread = await db.message.count({
@@ -51,16 +51,33 @@ export async function GET(req: NextRequest) {
           (p) => p.userId !== userId
         );
 
+        const lastMessageTime = cp.conversation.messages[0]?.createdAt
+          ? new Date(cp.conversation.messages[0].createdAt).getTime()
+          : new Date(cp.conversation.createdAt).getTime();
+
         return {
           id: cp.conversationId,
-          otherUser: otherParticipant?.user,
-          lastMessage: cp.conversation.messages[0],
+          otherUser: otherParticipant?.user || null,
+          otherUserId: otherParticipant?.userId || null,
+          lastMessage: cp.conversation.messages[0]
+            ? {
+                id: cp.conversation.messages[0].id,
+                content: cp.conversation.messages[0].content,
+                createdAt: cp.conversation.messages[0].createdAt.toISOString(),
+                senderId: cp.conversation.messages[0].senderId,
+              }
+            : null,
           unreadCount: unread,
           totalMessages: cp.conversation._count.messages,
-          lastReadAt: cp.lastReadAt,
+          lastReadAt: cp.lastReadAt?.toISOString() || null,
+          // Use for sorting on client: most recent message timestamp
+          lastActivityAt: lastMessageTime,
         };
       })
     );
+
+    // Sort by most recent message (conversations with newest activity first)
+    conversationsWithUnread.sort((a, b) => b.lastActivityAt - a.lastActivityAt);
 
     return NextResponse.json({ conversations: conversationsWithUnread });
   } catch (error) {
@@ -84,7 +101,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
-    // Check if conversation already exists
+    // Check if conversation already exists between these two users
     const existing = await db.conversationParticipant.findMany({
       where: { userId: userId1 },
       include: {

@@ -31,6 +31,10 @@ type ApiFetchOptions = Omit<RequestInit, "body"> & {
   params?: Record<string, string>;
 };
 
+// Debounce guard: prevent multiple 401-triggered logouts within 5 seconds
+let lastLogoutTime = 0;
+const LOGOUT_DEBOUNCE_MS = 5000;
+
 /**
  * Fetch wrapper principal avec gestion automatique des erreurs.
  * Doit être appelé côté client uniquement (utilise useAppStore.getState()).
@@ -127,16 +131,20 @@ export async function apiFetch<T = unknown>(
         ? (data as Record<string, unknown>).error as string
         : `Erreur serveur (${res.status}). Veuillez réessayer.`;
 
-    // Auto-logout on 401 Unauthorized
+    // Auto-logout on 401 Unauthorized (with debounce to prevent multiple triggers)
     if (res.status === 401) {
-      const store = useAppStore.getState();
-      if (store.isAuthenticated) {
-        store.logout();
-        store.navigate("landing");
-        // Dynamic import to avoid circular dependency
-        import("sonner").then(({ toast }) => {
-          toast.error("Session expirée", { description: "Votre session a expiré. Veuillez vous reconnecter." });
-        });
+      const now = Date.now();
+      if (now - lastLogoutTime > LOGOUT_DEBOUNCE_MS) {
+        lastLogoutTime = now;
+        const store = useAppStore.getState();
+        if (store.isAuthenticated) {
+          store.logout();
+          store.navigate("landing");
+          // Dynamic import to avoid circular dependency
+          import("sonner").then(({ toast }) => {
+            toast.error("Session expirée", { description: "Votre session a expiré. Veuillez vous reconnecter." });
+          });
+        }
       }
     }
 

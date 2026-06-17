@@ -24,6 +24,16 @@ export async function GET(
     });
     if (!participant) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
 
+    // Get other participant info for the frontend
+    const otherParticipant = await db.conversationParticipant.findFirst({
+      where: { conversationId: id, userId: { not: userInfo.userId } },
+      include: {
+        user: {
+          select: { id: true, nom: true, prenom: true, avatar: true, role: true, club: true, isActive: true },
+        },
+      },
+    });
+
     const messages = await db.message.findMany({
       where: { conversationId: id },
       orderBy: { createdAt: "asc" },
@@ -31,6 +41,7 @@ export async function GET(
         id: true,
         content: true,
         senderId: true,
+        receiverId: true,
         sender: { select: { nom: true, prenom: true, avatar: true } },
         createdAt: true,
         isRead: true,
@@ -38,8 +49,8 @@ export async function GET(
       take: 50,
     });
 
-    // Mark messages as read
-    await db.message.updateMany({
+    // Mark messages from other users as read
+    const { count: markedRead } = await db.message.updateMany({
       where: {
         conversationId: id,
         senderId: { not: userId },
@@ -48,7 +59,21 @@ export async function GET(
       data: { isRead: true },
     });
 
-    return NextResponse.json({ messages });
+    // Update the participant's lastReadAt
+    await db.conversationParticipant.update({
+      where: { id: participant.id },
+      data: { lastReadAt: new Date() },
+    });
+
+    return NextResponse.json({
+      messages,
+      otherParticipant: otherParticipant
+        ? {
+            userId: otherParticipant.userId,
+            user: otherParticipant.user,
+          }
+        : null,
+    });
   } catch (error) {
     console.error("Messages fetch error:", error);
     return NextResponse.json({ error: "Erreur" }, { status: 500 });
@@ -80,19 +105,30 @@ export async function POST(
     });
     if (!participant) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
 
-    const message = await db.message.create({
-      data: {
-        content,
-        senderId,
-        conversationId: id,
-      },
-    });
-
-    // Create notification for receiver
+    // Find the other participant to set as receiver
     const receiver = await db.conversationParticipant.findFirst({
       where: { conversationId: id, userId: { not: senderId } },
     });
 
+    const message = await db.message.create({
+      data: {
+        content,
+        senderId,
+        receiverId: receiver?.userId || null,
+        conversationId: id,
+      },
+      include: {
+        sender: { select: { nom: true, prenom: true, avatar: true } },
+      },
+    });
+
+    // Update the conversation's updatedAt timestamp
+    await db.conversation.update({
+      where: { id },
+      data: { updatedAt: new Date() },
+    });
+
+    // Create notification for receiver
     if (receiver) {
       await db.notification.create({
         data: {
