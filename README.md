@@ -1,102 +1,111 @@
 <div align="center">
 
-# 🏐 Académie AMDRH
+<img src="docs/banner.svg" alt="Académie AMDRH — plateforme e-learning pour la formation des arbitres de handball — 72 routes API, 30 modèles Prisma, 40+ permissions" width="100%"/>
 
-**Plateforme e-learning pour la formation des arbitres de handball au Maroc**
-
-Partenaire académique officiel de la **FRMHB** — Fédération Royale Marocaine de Handball
+<br/>
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-PostgreSQL-2D3748)](https://prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4)](https://tailwindcss.com/)
+[![Socket.IO](https://img.shields.io/badge/Temps_r%C3%A9el-Socket.IO_4-2DD4BF)](https://socket.io/)
 [![License](https://img.shields.io/badge/License-Private-red)]()
 
 </div>
 
 ---
 
-## 📋 Table des matières
+## Table des matières
 
-- [À propos](#-à-propos)
-- [Fonctionnalités](#-fonctionnalités)
-- [Architecture technique](#-architecture-technique)
-- [Stack technologique](#-stack-technologique)
-- [Structure du projet](#-structure-du-projet)
-- [Base de données](#-base-de-données)
-- [Installation](#-installation)
-- [Configuration environnement](#-configuration-environnement)
-- [Déploiement sur Vercel](#-déploiement-sur-vercel)
-- [Rôles et permissions](#-rôles-et-permissions)
-- [Modules détaillés](#-modules-détaillés)
-- [API Routes](#-api-routes)
-- [Scripts disponibles](#-scripts-disponibles)
-- [Sécurité](#-sécurité)
-- [Contribuer](#-contribuer)
+- [À propos](#à-propos)
+- [Captures d'écran réelles](#captures-décran-réelles)
+- [Diagrammes UML](#diagrammes-uml)
+- [Architecture technique](#architecture-technique)
+- [Fonctionnalités](#fonctionnalités)
+- [Stack technologique](#stack-technologique)
+- [Structure du projet](#structure-du-projet)
+- [Base de données](#base-de-données)
+- [Installation](#installation)
+- [Configuration environnement](#configuration-environnement)
+- [Déploiement sur Vercel](#déploiement-sur-vercel)
+- [Rôles et permissions](#rôles-et-permissions)
+- [Modules détaillés](#modules-détaillés)
+- [API Routes](#api-routes)
+- [Scripts disponibles](#scripts-disponibles)
+- [Sécurité](#sécurité)
+- [Contribuer](#contribuer)
 
 ---
 
-## 📖 À propos
+## À propos
 
 L'**Académie AMDRH** est une plateforme e-learning complète conçue pour la formation continue des arbitres, entraîneurs et joueurs de handball au Maroc. Développée pour l'Association Marocaine Des arbitres de Handball (AMDRH), elle sert de centre de formation virtuel pour les membres de la FRMHB.
 
 La plateforme permet la gestion de cours, quiz, certifications, parcours d'apprentissage, messagerie interne, forum de discussion, et un système complet de gamification avec badges et certificats.
 
----
+**Fiche technique rapide :**
 
-## ✨ Fonctionnalités
-
-### 🎓 Formation
-- **Catalogue de cours** avec filtrage par catégorie, difficulté, statut
-- **Création de cours** par formateurs : sections, leçons (vidéo, PDF, texte, interactif)
-- **Suivi de progression** détaillé par leçon (pourcentage de visionnage, scroll, temps)
-- **Quiz et évaluations** : QCM simple/multiple, Vrai/Faux, shuffle, limite de temps
-- **Parcours d'apprentissage** : séquentiel, flexible, hybride
-- **Certificats** générés automatiquement avec QR code et vérification en ligne
-
-### 👥 Gestion des utilisateurs
-- **5 rôles** : ADMIN, FORMATEUR, ARBITRE, ENTRAINEUR, JOUEUR
-- **Inscription en 2 étapes** avec validation Zod
-- **Authentification** : email/password avec bcrypt + NextAuth JWT
-- **Récupération de mot de passe** avec tokens sécurisés
-- **Profils utilisateur** : avatar, bio, licence, club, région
-- **Import en masse** des utilisateurs (CSV)
-
-### 📊 Administration
-- **Dashboard admin** : KPIs, graphiques, métriques temps réel
-- **Gestion des cours** : CRUD, statuts, actions en masse
-- **Gestion des quiz** : constructeur de quiz, banque de questions
-- **Gestion des certificats** : émission unitaire/en masse, révocation
-- **Gestion des badges** : création, attribution automatique/manuelle
-- **Gestion des annonces** : ciblage par rôle, épinglage, expiration
-- **Gestion des permissions** : 40+ permissions granulaires
-- **Logs d'audit** : traçabilité complète des actions
-- **Synchronisation fédération** : licences et certifications
-
-### 💬 Communication
-- **Messagerie interne** : conversations, liste, indicateurs de frappe
-- **Forum de discussion** par cours : sujets, réponses, résolution
-- **Notifications** : système, cours, certificats, quiz, badges
-- **Annonces** : info, urgent, événement, formation, résultats
-
-### 🏆 Gamification
-- **Badges** : Bronze, Argent, Or, Platine
-- **Tableau de progression** avec streaks
-- **Score d'engagement** et recommandations
-- **Alimentation temps réel** des activités
-
-### 🔧 Technique
-- **Mode sombre/clair** avec persistance
-- **Interface responsive** : desktop, tablette, mobile
-- **Navigation mobile** : barre latérale + bottom nav
-- **Chargement lazy** des modules (code splitting)
-- **Gestion d'erreurs** avec Error Boundaries
-- **Rate limiting** sur les routes sensibles
-- **Headers de sécurité** (X-Frame-Options, CSP, HSTS)
+| Élément | Valeur |
+|---|---|
+| Routes API | **72 endpoints** documentés |
+| Modèles de données | **30 modèles Prisma** (PostgreSQL Neon) |
+| Rôles | **5** (ADMIN, FORMATEUR, ARBITRE, ENTRAINEUR, JOUEUR) |
+| Permissions | **40+ granulaires**, vérifiées côté serveur |
+| Temps réel | Socket.IO 4 (messagerie, forum, activité) |
+| Certificats | PDF générés + **vérification QR** en ligne |
 
 ---
 
-## 🏗️ Architecture technique
+## Captures d'écran réelles
+
+Captures intégrées dans le dépôt (`screenshots/` et racine) — aucune image externe ou simulée.
+
+<table>
+<tr>
+<td width="50%" align="center"><b>Landing page publique</b></td>
+<td width="50%" align="center"><b>Page de connexion</b></td>
+</tr>
+<tr>
+<td width="50%"><img src="screenshots/01-landing-page.png" alt="Landing page de l'Académie AMDRH" width="100%"/></td>
+<td width="50%"><img src="screenshots/02-page-connexion.png" alt="Page de connexion de l'Académie AMDRH" width="100%"/></td>
+</tr>
+<tr>
+<td width="50%" align="center"><b>Dashboard administrateur</b></td>
+<td width="50%" align="center"><b>Médiathèque</b></td>
+</tr>
+<tr>
+<td width="50%"><img src="screenshot-dashboard.png" alt="Dashboard admin — KPIs temps réel" width="100%"/></td>
+<td width="50%"><img src="screenshot-mediatheque.png" alt="Médiathèque de ressources" width="100%"/></td>
+</tr>
+</table>
+
+---
+
+## Diagrammes UML
+
+Six diagrammes UML générés pour ce projet sont disponibles dans `screenshots/` :
+
+| Diagramme | Fichier |
+|---|---|
+| Architecture système | [`diag-architecture.png`](screenshots/diag-architecture.png) |
+| Modèle de base de données | [`diag-bdd.png`](screenshots/diag-bdd.png) |
+| Cas d'utilisation | [`diag-cas-utilisation.png`](screenshots/diag-cas-utilisation.png) |
+| Diagramme de classes | [`diag-classes.png`](screenshots/diag-classes.png) |
+| Diagramme de Gantt | [`diag-gantt.png`](screenshots/diag-gantt.png) |
+| Séquence — connexion | [`diag-sequence-connexion.png`](screenshots/diag-sequence-connexion.png) |
+| Séquence — quiz | [`diag-sequence-quiz.png`](screenshots/diag-sequence-quiz.png) |
+
+**Architecture système :**
+
+![Diagramme d'architecture](screenshots/diag-architecture.png)
+
+**Modèle de base de données :**
+
+![Diagramme de base de données](screenshots/diag-bdd.png)
+
+---
+
+## Architecture technique
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -121,7 +130,59 @@ La plateforme permet la gestion de cours, quiz, certifications, parcours d'appre
 
 ---
 
-## 💻 Stack technologique
+## Fonctionnalités
+
+### Formation
+- **Catalogue de cours** avec filtrage par catégorie, difficulté, statut
+- **Création de cours** par formateurs : sections, leçons (vidéo, PDF, texte, interactif)
+- **Suivi de progression** détaillé par leçon (pourcentage de visionnage, scroll, temps)
+- **Quiz et évaluations** : QCM simple/multiple, Vrai/Faux, shuffle, limite de temps
+- **Parcours d'apprentissage** : séquentiel, flexible, hybride
+- **Certificats** générés automatiquement avec QR code et vérification en ligne
+
+### Gestion des utilisateurs
+- **5 rôles** : ADMIN, FORMATEUR, ARBITRE, ENTRAINEUR, JOUEUR
+- **Inscription en 2 étapes** avec validation Zod
+- **Authentification** : email/password avec bcrypt + NextAuth JWT
+- **Récupération de mot de passe** avec tokens sécurisés
+- **Profils utilisateur** : avatar, bio, licence, club, région
+- **Import en masse** des utilisateurs (CSV)
+
+### Administration
+- **Dashboard admin** : KPIs, graphiques, métriques temps réel
+- **Gestion des cours** : CRUD, statuts, actions en masse
+- **Gestion des quiz** : constructeur de quiz, banque de questions
+- **Gestion des certificats** : émission unitaire/en masse, révocation
+- **Gestion des badges** : création, attribution automatique/manuelle
+- **Gestion des annonces** : ciblage par rôle, épinglage, expiration
+- **Gestion des permissions** : 40+ permissions granulaires
+- **Logs d'audit** : traçabilité complète des actions
+- **Synchronisation fédération** : licences et certifications
+
+### Communication
+- **Messagerie interne** : conversations, liste, indicateurs de frappe
+- **Forum de discussion** par cours : sujets, réponses, résolution
+- **Notifications** : système, cours, certificats, quiz, badges
+- **Annonces** : info, urgent, événement, formation, résultats
+
+### Gamification
+- **Badges** : Bronze, Argent, Or, Platine
+- **Tableau de progression** avec streaks
+- **Score d'engagement** et recommandations
+- **Alimentation temps réel** des activités
+
+### Technique
+- **Mode sombre/clair** avec persistance
+- **Interface responsive** : desktop, tablette, mobile
+- **Navigation mobile** : barre latérale + bottom nav
+- **Chargement lazy** des modules (code splitting)
+- **Gestion d'erreurs** avec Error Boundaries
+- **Rate limiting** sur les routes sensibles
+- **Headers de sécurité** (X-Frame-Options, CSP, HSTS)
+
+---
+
+## Stack technologique
 
 | Catégorie | Technologie |
 |-----------|------------|
@@ -146,7 +207,7 @@ La plateforme permet la gestion de cours, quiz, certifications, parcours d'appre
 
 ---
 
-## 📁 Structure du projet
+## Structure du projet
 
 ```
 amdrh-academy/
@@ -156,6 +217,8 @@ amdrh-academy/
 ├── public/
 │   ├── logo.svg               # Logo AMDRH
 │   └── robots.txt
+├── screenshots/                # Captures réelles + 7 diagrammes UML
+├── docs/                       # Documentation portfolio (bannière)
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx         # Layout racine (fonts, ThemeProvider, Toasters)
@@ -235,7 +298,7 @@ amdrh-academy/
 
 ---
 
-## 🗄️ Base de données
+## Base de données
 
 ### 30 Modèles Prisma (PostgreSQL)
 
@@ -266,7 +329,7 @@ DIRECT_URL  → Direct (migrations)  → PostgreSQL
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Prérequis
 
@@ -321,9 +384,9 @@ L'application est disponible sur **http://localhost:3000**.
 
 ---
 
-## ⚙️ Configuration environnement
+## Configuration environnement
 
-> ⚠️ **Sécurité** : aucune variable d'environnement réelle ne doit être commitée.
+> **Sécurité** : aucune variable d'environnement réelle ne doit être commitée.
 > Les valeurs ci-dessous sont des **placeholders**. En cas d'exposition antérieure
 > de credentials dans ce dépôt (historique Git inclus), les secrets concernés
 > (mot de passe de base de données, `NEXTAUTH_SECRET`) doivent être **révoqués
@@ -344,7 +407,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ---
 
-## 🌐 Déploiement sur Vercel
+## Déploiement sur Vercel
 
 ### Étape 1 — Connecter le repo
 
@@ -363,7 +426,7 @@ Dans **Settings → Environment Variables**, ajouter :
 | `NEXTAUTH_URL` | `https://votre-domaine.vercel.app` |
 | `NEXTAUTH_SECRET` | Secret 32+ caractères généré localement (voir ci-dessus) |
 
-> ⚠️ Ne jamais coller d'URL de base de données contenant un mot de passe réel
+> Ne jamais coller d'URL de base de données contenant un mot de passe réel
 > dans un fichier versionné (README, doc, issue). Les valeurs proviennent
 > exclusivement du tableau de bord Neon et des variables d'environnement Vercel.
 
@@ -392,7 +455,7 @@ Ou via le dashboard Neon (SQL Editor) en copiant le contenu de `prisma/schema.pr
 
 ---
 
-## 👥 Rôles et permissions
+## Rôles et permissions
 
 ### 5 Rôles utilisateur
 
@@ -427,9 +490,9 @@ audit.view          permissions.manage
 
 ---
 
-## 📦 Modules détaillés
+## Modules détaillés
 
-### `admin/` — Administration (13 sous-modules)
+### `admin/` — Administration (14 sous-modules)
 - **Dashboard** : KPIs temps réel, graphiques Recharts, métriques plateforme
 - **Users** : CRUD, import CSV, activité, activation/désactivation
 - **Courses** : Gestion complète, actions en masse, statistiques inscriptions
@@ -488,7 +551,7 @@ audit.view          permissions.manage
 
 ---
 
-## 🔌 API Routes (72 endpoints)
+## API Routes (72 endpoints)
 
 ### Authentification (5)
 | Méthode | Route | Description |
@@ -528,14 +591,20 @@ audit.view          permissions.manage
 | POST | `/api/courses/[id]/duplicate` | Dupliquer cours |
 
 ### Quiz (2)
+| Méthode | Route | Description |
+|---------|-------|-------------|
 | POST | `/api/quiz/[id]` | Démarrer tentative |
 | POST | `/api/quiz/[id]/result` | Soumettre réponses |
 
 ### Messages (2)
+| Méthode | Route | Description |
+|---------|-------|-------------|
 | GET | `/api/messages` | Conversations |
 | GET/POST/DELETE | `/api/messages/[id]` | Messages |
 
 ### Forum (2)
+| Méthode | Route | Description |
+|---------|-------|-------------|
 | GET/POST | `/api/forum/[courseId]` | Discussions cours |
 | GET/POST/PUT/DELETE | `/api/forum/[courseId]/[id]` | Discussion CRUD |
 
@@ -544,7 +613,7 @@ Profile, Certificates, Notifications, Resources, Learning Paths, Dashboard, Stat
 
 ---
 
-## 🛠️ Scripts disponibles
+## Scripts disponibles
 
 ```bash
 # Développement
@@ -566,7 +635,7 @@ bun run start         # Lancer le serveur de production
 
 ---
 
-## 🔒 Sécurité
+## Sécurité
 
 - **Hashage des mots de passe** : bcrypt (12 rounds)
 - **JWT sessions** : 30 jours max, token dans cookie HttpOnly
@@ -580,7 +649,7 @@ bun run start         # Lancer le serveur de production
 
 ---
 
-## 🤝 Contribuer
+## Contribuer
 
 1. Fork le projet
 2. Créer une branche feature (`git checkout -b feature/nom-feature`)
