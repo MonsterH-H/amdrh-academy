@@ -217,7 +217,7 @@ amdrh-academy/
 │   │   ├── notifications/      # Centre de notifications
 │   │   ├── announcements/       # Annonces
 │   │   ├── profile/            # Profil utilisateur
-│   │   ├── formateur/          # Dashboard formateur
+│   │   ├── formateur/          # Espace formateur
 │   │   ├── landing/            # Page d'accueil publique
 │   │   └── shared/
 │   │       └── layout/         # Sidebar, TopBar, MobileBottomNav
@@ -269,6 +269,7 @@ DIRECT_URL  → Direct (migrations)  → PostgreSQL
 ## 🚀 Installation
 
 ### Prérequis
+
 - **Node.js** 18+ ou **Bun** 1.0+
 - **Compte Neon** (PostgreSQL serverless)
 
@@ -322,12 +323,18 @@ L'application est disponible sur **http://localhost:3000**.
 
 ## ⚙️ Configuration environnement
 
+> ⚠️ **Sécurité** : aucune variable d'environnement réelle ne doit être commitée.
+> Les valeurs ci-dessous sont des **placeholders**. En cas d'exposition antérieure
+> de credentials dans ce dépôt (historique Git inclus), les secrets concernés
+> (mot de passe de base de données, `NEXTAUTH_SECRET`) doivent être **révoqués
+> puis régénérés** côté Neon / side générateur avant tout usage.
+
 | Variable | Description | Exemple |
 |----------|-------------|---------|
-| `DATABASE_URL` | Neon Pooler URL (production) | `postgresql://user:pass@ep-xxx-pooler.neon.tech/db?sslmode=require` |
-| `DIRECT_URL` | Neon Direct URL (migrations) | `postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require` |
+| `DATABASE_URL` | Neon Pooler URL (production) | `postgresql://<utilisateur>:<mot_de_passe_neon>@<host-pooler>.neon.tech/<database>?sslmode=require` |
+| `DIRECT_URL` | Neon Direct URL (migrations) | `postgresql://<utilisateur>:<mot_de_passe_neon>@<host-direct>.neon.tech/<database>?sslmode=require` |
 | `NEXTAUTH_URL` | URL de l'application | `https://amdrh-academy.vercel.app` |
-| `NEXTAUTH_SECRET` | Secret NextAuth (32+ chars) | `77cadc0af581ebe11076d79c2370e...` |
+| `NEXTAUTH_SECRET` | Secret NextAuth (32+ chars) | `<générer via: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">` |
 
 ### Générer un NEXTAUTH_SECRET
 
@@ -350,11 +357,15 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 Dans **Settings → Environment Variables**, ajouter :
 
 | Nom | Valeur |
-|-----|--------|
-| `DATABASE_URL` | `postgresql://neondb_owner:npg_BJ1sINw6ChyU@ep-empty-meadow-amjci1oh-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require` |
-| `DIRECT_URL` | `postgresql://neondb_owner:npg_BJ1sINw6ChyU@ep-empty-meadow-amjci1oh.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require` |
+|-----|-------|
+| `DATABASE_URL` | URL Neon **Pooler** — récupérée depuis votre console Neon (`?sslmode=require&channel_binding=require`) |
+| `DIRECT_URL` | URL Neon **Direct** (migrations) — même source, host sans `-pooler` |
 | `NEXTAUTH_URL` | `https://votre-domaine.vercel.app` |
-| `NEXTAUTH_SECRET` | `77cadc0af581ebe11076d79c2370e4ce1da5ad7eb504576e862cabd6edf7a063` |
+| `NEXTAUTH_SECRET` | Secret 32+ caractères généré localement (voir ci-dessus) |
+
+> ⚠️ Ne jamais coller d'URL de base de données contenant un mot de passe réel
+> dans un fichier versionné (README, doc, issue). Les valeurs proviennent
+> exclusivement du tableau de bord Neon et des variables d'environnement Vercel.
 
 ### Étape 3 — Build
 
@@ -565,6 +576,7 @@ bun run start         # Lancer le serveur de production
 - **RBAC** : 40+ permissions vérifiées côté serveur
 - **Audit logs** : Traçabilité de toutes les actions sensibles
 - **Validation** : Schémas Zod côté serveur et client
+- **Secrets** : aucune variable d'environnement réelle versionnée (voir note sécurité de la section Configuration environnement)
 
 ---
 
@@ -572,9 +584,9 @@ bun run start         # Lancer le serveur de production
 
 1. Fork le projet
 2. Créer une branche feature (`git checkout -b feature/nom-feature`)
-3. Committer les changements (`git commit -m 'feat: description'`)
+3. Committer vos changements (`git commit -m 'feat: description'`)
 4. Push vers la branche (`git push origin feature/nom-feature`)
-5. Ouvrir une Pull Request
+5. Ouvrir une **Pull Request**
 
 ---
 
